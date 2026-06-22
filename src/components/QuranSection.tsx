@@ -85,20 +85,28 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
   return (
     <div className="space-y-6">
       
-      {/* Decorative Quran Header Card */}
-      <div className="bg-gradient-to-br from-indigo-900 via-sky-900 to-emerald-950 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-lg border border-indigo-950">
-        <div className="absolute right-0 top-0 opacity-5 pointer-events-none translate-x-12 translate-y-[-24px]">
-          <BookOpen className="h-96 w-96 text-white" />
+      {/* Decorative Quran Header Card with Islamic theology aesthetics, elegant gold highlights, and emerald shades */}
+      <div className="bg-gradient-to-tr from-emerald-900 via-emerald-800 to-teal-900 rounded-[20px] p-6 sm:p-8 text-white relative overflow-hidden shadow-xl border border-emerald-950/40">
+        
+        {/* Intricate Islamic Geometric Pattern overlay effect using styled SVG overlay */}
+        <div className="absolute right-0 top-0 bottom-0 opacity-15 pointer-events-none translate-x-12 translate-y-[-12px]">
+          <svg width="240" height="240" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-emerald-100">
+            <path d="M50 0 L100 50 L50 100 L0 50 Z" stroke="currentColor" strokeWidth="2" strokeDasharray="1 1" />
+            <circle cx="50" cy="50" r="30" stroke="currentColor" strokeWidth="1" />
+            <circle cx="50" cy="50" r="20" stroke="currentColor" strokeWidth="1" />
+            <path d="M0 0 L100 100" stroke="currentColor" strokeWidth="0.5" />
+            <path d="M100 0 L0 100" stroke="currentColor" strokeWidth="0.5" />
+          </svg>
         </div>
         
-        <div className="relative z-10 space-y-3">
-          <span className="bg-emerald-500/20 text-emerald-300 text-xxs font-extrabold px-3 py-1 rounded-full border border-emerald-500/30 uppercase tracking-widest">
-            Specialized Curriculum
+        <div className="relative z-10 space-y-3 text-left">
+          <span className="bg-[#38B889]/20 text-emerald-300 text-xxs font-extrabold px-3 py-1 rounded-full border border-[#38B889]/35 uppercase tracking-widest font-poppins">
+            Specialized theology Curriculum
           </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-poppins font-black tracking-tight text-white">
             Fehm-ul-Quran (Understanding Quran)
           </h2>
-          <p className="text-slate-200 text-sm max-w-2xl leading-relaxed">
+          <p className="text-emerald-100 text-sm max-w-2xl leading-relaxed">
             A comprehensive curriculum specializing in word-for-word translation, linguistic Tafseer, ethical reasoning, and community leadership rules centered on classical commentaries including Surah Al-Asr.
           </p>
 
@@ -108,7 +116,7 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
               <span className="text-xs font-semibold">5 Complete Modules</span>
             </div>
             <div className="bg-white/10 px-4 py-2 rounded-2xl border border-white/5 flex items-center gap-2">
-              <Award className="h-4 w-4 text-emerald-400" />
+              <Award className="h-4 w-4 text-amber-400" />
               <span className="text-xs font-semibold">Ethical Leadership Certification</span>
             </div>
           </div>
@@ -121,47 +129,47 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
         <div className="lg:col-span-2 space-y-6">
           
           {/* Progress Indicators bar */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-6 rounded-[20px] border border-slate-200/70 shadow-sm space-y-4">
             <div className="flex justify-between items-center">
-              <div>
-                <h4 className="font-bold text-slate-800">My Study Progress</h4>
+              <div className="text-left">
+                <h4 className="font-poppins font-bold text-slate-800">My Study Progress</h4>
                 <p className="text-xs text-slate-500">Completing videos and handouts updates your parameters</p>
               </div>
-              <span className="text-lg font-black text-emerald-600">{completionPercent}% Complete</span>
+              <span className="text-base sm:text-lg font-poppins font-black text-accent-emerald">{completionPercent}% Complete</span>
             </div>
             
             <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+                className="h-full bg-[#38B889] rounded-full transition-all duration-500" 
                 style={{ width: `${completionPercent}%` }}
               />
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center pt-2">
-              <div className="bg-slate-50 p-3 rounded-2xl">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-slate-400 text-xxs font-bold uppercase block">Total Lessons</span>
-                <span className="text-lg font-bold text-slate-700">{quranLessons.length}</span>
+                <span className="text-lg font-bold text-slate-700 font-mono">{quranLessons.length}</span>
               </div>
-              <div className="bg-slate-50 p-3 rounded-2xl">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-slate-400 text-xxs font-bold uppercase block">Completed</span>
-                <span className="text-lg font-bold text-emerald-600">{completedLessons.length}</span>
+                <span className="text-lg font-bold text-accent-emerald font-mono">{completedLessons.length}</span>
               </div>
-              <div className="bg-slate-50 p-3 rounded-2xl">
-                <span className="text-slate-400 text-xxs font-bold uppercase block">Quiz Score</span>
-                <span className="text-lg font-bold text-sky-600">
+              <div className="bg-emerald-50/20 p-3 rounded-xl border border-emerald-100/35">
+                <span className="text-emerald-800/60 text-xxs font-bold uppercase block">Quiz Score</span>
+                <span className="text-lg font-bold text-primary font-mono">
                   {quranAttempts.length > 0 ? `${Math.max(...quranAttempts.map(a => a.score))}%` : 'Pending'}
                 </span>
               </div>
-              <div className="bg-slate-50 p-3 rounded-2xl">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-slate-400 text-xxs font-bold uppercase block">Award Certificate</span>
-                <span className="text-xs font-bold text-slate-700">{earnedCertificate ? 'Earned' : 'Locked'}</span>
+                <span className="text-xs font-bold text-slate-700">{earnedCertificate ? 'Earned ✓' : 'Locked'}</span>
               </div>
             </div>
           </div>
 
           {/* Curriculum Module Map */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <h4 className="font-bold text-slate-800">Course Syllabus Map</h4>
+          <div className="bg-white p-6 rounded-[20px] border border-slate-200/70 shadow-sm space-y-4 text-left">
+            <h4 className="font-poppins font-bold text-slate-800">Course Syllabus Map</h4>
             
             <div className="space-y-4">
               {moduleDescriptions.map((mod) => {

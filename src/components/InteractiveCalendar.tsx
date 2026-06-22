@@ -333,16 +333,16 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden mt-6">
+    <div className="bg-white rounded-[20px] border border-slate-200/70 shadow-sm overflow-hidden mt-6">
       <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2.5 text-white rounded-xl shadow-md shadow-blue-100 shrink-0">
+          <div className="bg-primary p-2.5 text-white rounded-xl shadow-md shrink-0">
             <CalendarIcon className="h-5 w-5" />
           </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-800">Academic Program Schedule</h3>
+          <div className="text-left">
+            <h3 className="text-base sm:text-lg font-poppins font-black text-slate-800">Academic Program Schedule</h3>
             <p className="text-xs text-slate-500 font-semibold flex items-center gap-1">
-              <Sparkles className="h-3.3 w-3.3 text-blue-500 animate-pulse" />
+              <Sparkles className="h-3.3 w-3.3 text-primary animate-pulse" />
               Interactive live lectures, assignments, and study milestones
             </p>
           </div>
@@ -353,19 +353,19 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
           <button 
             type="button" 
             onClick={handlePrevMonth}
-            className="p-2 border border-slate-200 hover:border-blue-300 hover:bg-slate-100/50 rounded-xl transition text-slate-600 bg-white"
+            className="p-2 border border-slate-200 hover:border-primary/50 hover:bg-slate-100/50 rounded-xl transition text-slate-600 bg-white"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           
-          <span className="font-extrabold text-xs sm:text-sm text-slate-800 tracking-wide min-w-[120px] text-center uppercase font-mono">
+          <span className="font-poppins font-bold text-xs sm:text-sm text-slate-800 tracking-wider min-w-[120px] text-center uppercase">
             {MONTHS[currentMonth]} {currentYear}
           </span>
 
           <button 
             type="button" 
             onClick={handleNextMonth}
-            className="p-2 border border-slate-200 hover:border-blue-300 hover:bg-slate-100/50 rounded-xl transition text-slate-600 bg-white"
+            className="p-2 border border-slate-200 hover:border-primary/50 hover:bg-slate-100/50 rounded-xl transition text-slate-600 bg-white"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -405,19 +405,19 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                   className={`aspect-square sm:aspect-video rounded-xl p-1.5 flex flex-col justify-between items-start border relative transition-all group ${
                     !cell.isCurrentMonth 
                       ? 'bg-slate-50/50 text-slate-300 border-slate-100' 
-                      : 'bg-white text-slate-700 border-slate-200/80 hover:border-blue-400 hover:shadow-xs'
+                      : 'bg-white text-slate-700 border-slate-200/80 hover:border-primary/60 hover:shadow-xs'
                   } ${
                     isSelected 
-                      ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/20' 
+                      ? 'ring-2 ring-primary border-primary bg-primary/5' 
                       : ''
                   }`}
                 >
                   {/* Day Date number Label */}
                   <span className={`text-[11px] font-bold h-5 w-5 flex items-center justify-center rounded-lg ${
                     isToday 
-                      ? 'bg-blue-600 text-white font-black shadow-sm' 
+                      ? 'bg-primary text-white font-black shadow-sm' 
                       : isSelected 
-                        ? 'text-blue-700 font-extrabold' 
+                        ? 'text-primary font-extrabold' 
                         : 'text-slate-700'
                   }`}>
                     {cell.day}
@@ -427,7 +427,7 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                   <div className="w-full flex flex-wrap gap-0.5 mt-auto">
                     {/* Live indicator */}
                     {hasLive && (
-                      <span className="hidden md:inline-flex items-center gap-0.5 text-[8px] font-bold bg-blue-50 text-blue-700 border border-blue-100 rounded px-1 py-0.2 w-full truncate">
+                      <span className="hidden md:inline-flex items-center gap-0.5 text-[8px] font-bold bg-blue-50 text-primary border border-blue-100 rounded px-1 py-0.2 w-full truncate">
                         🎙️ Live Session
                       </span>
                     )}
@@ -446,7 +446,7 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
 
                     {/* Compact mobile dot displays */}
                     <div className="flex md:hidden gap-1 justify-center w-full mt-1">
-                      {hasLive && <span className="h-1.5 w-1.5 bg-blue-500 rounded-full shrink-0" />}
+                      {hasLive && <span className="h-1.5 w-1.5 bg-primary rounded-full shrink-0" />}
                       {hasQuiz && <span className="h-1.5 w-1.5 bg-rose-500 rounded-full shrink-0" />}
                       {hasCustom && <span className="h-1.5 w-1.5 bg-amber-500 rounded-full shrink-0" />}
                     </div>
@@ -459,7 +459,7 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
           {/* Quick instructions bar */}
           <div className="mt-4 flex flex-wrap gap-4 items-center justify-start text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-blue-500 block" /> Live Lecture
+              <span className="h-2 w-2 rounded-full bg-primary block" /> Live Lecture
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-rose-500 block" /> Quiz Deadline

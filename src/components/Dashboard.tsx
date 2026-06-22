@@ -90,19 +90,19 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
   return (
     <div className="space-y-6">
-      {/* Dynamic Header Greeting banner */}
-      <div className="bg-gradient-to-tr from-blue-700 via-blue-600 to-indigo-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-500/10 border border-blue-500/20 relative overflow-hidden">
+      {/* Dynamic Header Greeting banner with Poppins/Inter and Light Blue Theme */}
+      <div className="bg-gradient-to-tr from-primary via-[#4F8CFF] to-secondary rounded-[20px] p-6 sm:p-8 text-white shadow-xl shadow-primary/10 border border-white/10 relative overflow-hidden">
         <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
           <GraduationCap className="h-64 w-6 map-icon transform rotate-12 translate-y-20 translate-x-10" />
         </div>
-        <div className="relative z-10 space-y-2">
-          <span className="bg-white/20 backdrop-blur-md text-white border border-white/10 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+        <div className="relative z-10 space-y-2 text-left">
+          <span className="bg-white/20 backdrop-blur-md text-white border border-white/10 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider font-poppins">
             {user.role} workspace
           </span>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-poppins font-black tracking-tight">
             Welcome back, {user.name}!
           </h1>
-          <p className="text-blue-50 text-sm max-w-2xl">
+          <p className="text-blue-50 text-sm max-w-2xl font-medium leading-relaxed">
             {user.role === 'student' 
               ? `You are enrolled in the ${user.semester} within the Department of ${user.department}. Continue learning where you left off!` 
               : `Access clinical lectures, student grades, attendance rules, and automated course reporting engines.`}
@@ -110,34 +110,34 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
         </div>
       </div>
 
-      {/* KPI Stats widgets */}
+      {/* KPI Stats widgets with 20px rounded cards */}
       {user.role === 'admin' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Total Students</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.totalStudents}</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Students</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{stats.totalStudents}</h3>
             </div>
-            <div className="bg-blue-50 p-3 rounded-xl text-blue-600 border border-blue-100/50"><Users className="h-6 w-6" /></div>
+            <div className="bg-blue-50 p-3 rounded-xl text-primary border border-blue-100/50"><Users className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Academic Faculty</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.totalProfessors}</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Academic Faculty</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{stats.totalProfessors}</h3>
             </div>
-            <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600 border border-emerald-100/50"><BookOpen className="h-6 w-6" /></div>
+            <div className="bg-emerald-50 p-3 rounded-xl text-accent-emerald border border-emerald-100/50"><BookOpen className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Storage Usage</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.storageUsageMB} MB</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Storage Usage</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{stats.storageUsageMB} MB</h3>
             </div>
             <div className="bg-amber-50 p-3 rounded-xl text-amber-600 border border-amber-100/50"><Database className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Active Latency Sessions</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.activeSessions} online</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Latency Sessions</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{stats.activeSessions} online</h3>
             </div>
             <div className="bg-indigo-50 p-3 rounded-xl text-indigo-600 border border-indigo-100/50"><Activity className="h-6 w-6" /></div>
           </div>
@@ -146,31 +146,31 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
       {user.role === 'professor' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Active Courses</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{courses.length}</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Courses</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{courses.length}</h3>
             </div>
-            <div className="bg-blue-50 p-3 rounded-xl text-blue-600 border border-blue-100/50"><BookOpen className="h-6 w-6" /></div>
+            <div className="bg-blue-50 p-3 rounded-xl text-primary border border-blue-100/50"><BookOpen className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Student Rosters</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.totalStudents} enrolled</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student Rosters</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{stats.totalStudents} enrolled</h3>
             </div>
-            <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600 border border-emerald-100/50"><Users className="h-6 w-6" /></div>
+            <div className="bg-emerald-50 p-3 rounded-xl text-accent-emerald border border-emerald-100/50"><Users className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">LMS Average Attendance</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{stats.attendanceRate}%</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LMS Average Attendance</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{stats.attendanceRate}%</h3>
             </div>
             <div className="bg-amber-50 p-3 rounded-xl text-amber-600 border border-amber-100/50"><Calendar className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Active Online Nodes</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">Live</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Online Nodes</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">Live</h3>
             </div>
             <div className="bg-indigo-50 p-3 rounded-xl text-indigo-600 border border-indigo-100/50"><Activity className="h-6 w-6" /></div>
           </div>
@@ -179,31 +179,31 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
       {user.role === 'student' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">My Enrolled Courses</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{courses.length}</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">My Enrolled Courses</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{courses.length}</h3>
             </div>
-            <div className="bg-blue-50 p-3 rounded-xl text-blue-600 border border-blue-100/50 transition-all"><BookOpen className="h-6 w-6" /></div>
+            <div className="bg-blue-50 p-3 rounded-xl text-primary border border-blue-100/50 transition-all"><BookOpen className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">My Attendance Rate</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{userAttendancePercent || 0}%</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">My Attendance Rate</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{userAttendancePercent || 0}%</h3>
             </div>
-            <div className="bg-emerald-50 p-3 rounded-xl text-emerald-600 border border-emerald-100/50 transition-all"><Calendar className="h-6 w-6" /></div>
+            <div className="bg-emerald-50 p-3 rounded-xl text-accent-emerald border border-emerald-100/50 transition-all"><Calendar className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Quizzes Passed</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{attempts.filter(a => a.passed).length}</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quizzes Passed</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{attempts.filter(a => a.passed).length}</h3>
             </div>
             <div className="bg-indigo-50 p-3 rounded-xl text-indigo-600 border border-indigo-100/50 transition-all"><Zap className="h-6 w-6" /></div>
           </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">Earned Certificates</p>
-              <h3 className="text-2xl font-bold text-slate-900 mt-1">{certs.length}</h3>
+          <div className="bg-white p-5 rounded-[20px] border border-slate-200/65 shadow-sm flex items-center justify-between">
+            <div className="text-left">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Earned Certificates</p>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 mt-1">{certs.length}</h3>
             </div>
             <div className="bg-amber-50 p-3 rounded-xl text-amber-600 border border-amber-100/50 transition-all"><Award className="h-6 w-6" /></div>
           </div>
