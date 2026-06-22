@@ -13,6 +13,7 @@ export interface User {
   phone?: string;
   department?: string;
   semester?: string;
+  password?: string;
 }
 
 export interface Question {
@@ -122,4 +123,5 @@ export interface LmsNotification {
   userId: string;
   sentAt: string;
   recipient: string;
+  isRead?: boolean;
 }

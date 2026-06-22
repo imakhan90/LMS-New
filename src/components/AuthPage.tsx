@@ -9,6 +9,7 @@ interface AuthPageProps {
 export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [department, setDepartment] = useState('Computer Science');
@@ -38,21 +39,34 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
 
   const handleQuickLogin = (demoRole: 'student' | 'professor' | 'admin') => {
     let demoEmail = '';
-    if (demoRole === 'student') demoEmail = 'student@university.edu';
-    else if (demoRole === 'professor') demoEmail = 'professor@university.edu';
-    else demoEmail = 'admin@university.edu';
+    let demoPassword = '';
+    if (demoRole === 'student') {
+      demoEmail = 'student@university.edu';
+      demoPassword = 'student123';
+    } else if (demoRole === 'professor') {
+      demoEmail = 'professor@university.edu';
+      demoPassword = 'professor123';
+    } else {
+      demoEmail = 'admin@university.edu';
+      demoPassword = 'admin123';
+    }
 
+    setEmail(demoEmail);
+    setPassword(demoPassword);
     setLoading(true);
     setError(null);
 
     fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: demoEmail })
+      body: JSON.stringify({ email: demoEmail, password: demoPassword })
     })
-      .then(res => {
-        if (!res.ok) throw new Error('Verification failed.');
-        return res.json();
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Verification failed.');
+        }
+        return data;
       })
       .then(data => {
         onLoginSuccess(data.user, data.token);
@@ -70,8 +84,8 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
     const payload = isLogin
-      ? { email }
-      : { name, email, role, phone, department, semester };
+      ? { email, password }
+      : { name, email, role, phone, department, semester, password };
 
     fetch(endpoint, {
       method: 'POST',
@@ -260,11 +274,23 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               <div className="mt-1 relative rounded-md shadow-sm">
                 <input
                   type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="block w-full rounded-md border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
-                  defaultValue="123456"
                 />
               </div>
+              {isLogin && (
+                <div className="mt-2 bg-slate-50 border border-slate-200/60 rounded-xl p-2.5 text-[11px] text-slate-500 space-y-1">
+                  <p className="font-semibold text-slate-600">Demo User Passwords:</p>
+                  <ul className="list-disc pl-4 space-y-0.5">
+                    <li>Student: <span className="font-mono bg-white px-1 py-0.5 border border-slate-100 rounded text-slate-700 font-semibold select-all">student123</span></li>
+                    <li>Professor: <span className="font-mono bg-white px-1 py-0.5 border border-slate-100 rounded text-slate-700 font-semibold select-all">professor123</span></li>
+                    <li>Admin: <span className="font-mono bg-white px-1 py-0.5 border border-slate-100 rounded text-slate-700 font-semibold select-all">admin123</span></li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between pt-1">

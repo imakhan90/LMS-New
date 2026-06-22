@@ -27,16 +27,18 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import { User, Course, AttendanceRecord, QuizAttempt, Certificate } from '../types';
+import { User, Course, AttendanceRecord, QuizAttempt, Certificate, Quiz } from '../types';
+import InteractiveCalendar from './InteractiveCalendar';
 
 interface DashboardProps {
   user: User;
   courses: Course[];
   setActiveTab: (tab: string) => void;
   onLaunchCourse: (course: Course) => void;
+  onLaunchQuiz?: (quiz: Quiz, courseId: string) => void;
 }
 
-export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse }: DashboardProps) {
+export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse, onLaunchQuiz }: DashboardProps) {
   const [stats, setStats] = useState<any>(null);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
@@ -207,6 +209,14 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse 
           </div>
         </div>
       )}
+
+      {/* Dynamic Academic Calendar mapping upcoming quizzes and live lectures */}
+      <InteractiveCalendar 
+        user={{ id: user.id, name: user.name, role: user.role }} 
+        courses={courses} 
+        onLaunchCourse={onLaunchCourse} 
+        onLaunchQuiz={onLaunchQuiz} 
+      />
 
       {/* Main Section Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

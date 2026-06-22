@@ -120,6 +120,9 @@ export default function App() {
         onLogout={handleLogout}
         notificationsCount={unreadNoticeCount}
         onOpenNotifications={() => setShowNotifications(!showNotifications)}
+        courses={courses}
+        onSelectCourse={handleLaunchCourse}
+        onLaunchQuiz={handleLaunchQuiz}
       >
         <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
           
@@ -129,7 +132,8 @@ export default function App() {
               user={user} 
               courses={courses}
               setActiveTab={setActiveTab}
-              onLaunchCourse={handleLaunchCourse} 
+              onLaunchCourse={handleLaunchCourse}
+              onLaunchQuiz={handleLaunchQuiz} 
             />
           )}
 

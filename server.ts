@@ -40,7 +40,8 @@ const initialUsers: User[] = [
     email: 'admin@university.edu',
     role: 'admin',
     phone: '+1 (555) 0199',
-    department: 'Administration'
+    department: 'Administration',
+    password: 'admin123'
   },
   {
     id: 'user_prof_1',
@@ -48,7 +49,8 @@ const initialUsers: User[] = [
     email: 'professor@university.edu',
     role: 'professor',
     phone: '+1 (555) 0244',
-    department: 'Computer Science'
+    department: 'Computer Science',
+    password: 'professor123'
   },
   {
     id: 'user_student_1',
@@ -58,7 +60,8 @@ const initialUsers: User[] = [
     studentId: 'ST-904123',
     phone: '+1 (555) 0366',
     department: 'Computer Science',
-    semester: '4th Semester'
+    semester: '4th Semester',
+    password: 'student123'
   }
 ];
 
@@ -470,7 +473,29 @@ function readDb(): DatabaseSchema {
       return defaultDb;
     }
     const data = fs.readFileSync(DB_PATH, 'utf-8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    
+    // Auto-migrate database: Ensure our standard demo passwords are set for preloaded users
+    let changed = false;
+    if (parsed.users && Array.isArray(parsed.users)) {
+      parsed.users.forEach((u: any) => {
+        if (u.email === 'student@university.edu' && !u.password) {
+          u.password = 'student123';
+          changed = true;
+        } else if (u.email === 'professor@university.edu' && !u.password) {
+          u.password = 'professor123';
+          changed = true;
+        } else if (u.email === 'admin@university.edu' && !u.password) {
+          u.password = 'admin123';
+          changed = true;
+        }
+      });
+    }
+    if (changed) {
+      fs.writeFileSync(DB_PATH, JSON.stringify(parsed, null, 2));
+    }
+    
+    return parsed;
   } catch (err) {
     console.error('Error reading DB, returning defaultDb', err);
     return defaultDb;
@@ -515,9 +540,14 @@ if (API_KEY && API_KEY !== 'MY_GEMINI_API_KEY') {
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
   const db = readDb();
-  // Simplified secure match (accepts matching emails based on preloaded accounts with fallback)
+  // Find institutional user
   const user = db.users.find(u => u.email.toLowerCase() === (email || '').trim().toLowerCase());
   if (user) {
+    // Determine the expected password (saved value or default fallback)
+    const expectedPassword = user.password || (user.role === 'admin' ? 'admin123' : user.role === 'professor' ? 'professor123' : 'student123');
+    if ((password || '').trim() !== expectedPassword) {
+      return res.status(401).json({ error: `Incorrect password. Hint: Try 'student123' for Student, 'professor123' for Professor, 'admin123' for Admin` });
+    }
     return res.json({
       token: `mock-jwt-token-for-${user.id}`,
       user
@@ -527,7 +557,7 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.post('/api/auth/register', (req, res) => {
-  const { name, email, role, phone, department, semester, studentId } = req.body;
+  const { name, email, role, phone, department, semester, studentId, password } = req.body;
   if (!name || !email || !role) {
     return res.status(400).json({ error: 'Name, email, and role are required fields' });
   }
@@ -546,7 +576,8 @@ app.post('/api/auth/register', (req, res) => {
     phone: phone || '',
     department: department || 'General Education',
     semester: semester || '',
-    studentId: studentId || (role === 'student' ? `ST-${Math.floor(100000 + Math.random() * 900000)}` : undefined)
+    studentId: studentId || (role === 'student' ? `ST-${Math.floor(100000 + Math.random() * 900000)}` : undefined),
+    password: password || (role === 'admin' ? 'admin123' : role === 'professor' ? 'professor123' : 'student123')
   };
 
   db.users.push(newUser);
@@ -954,6 +985,23 @@ app.post('/api/library/:id/download', (req, res) => {
 });
 
 // Notifications REST APIs
+app.get('/api/notifications', (req, res) => {
+  const db = readDb();
+  res.json(db.notifications || []);
+});
+
+app.post('/api/notifications/:id/read', (req, res) => {
+  const { id } = req.params;
+  const db = readDb();
+  const notif = db.notifications.find(n => n.id === id);
+  if (notif) {
+    notif.isRead = true;
+    writeDb(db);
+    return res.json({ success: true, notification: notif });
+  }
+  res.status(404).json({ error: 'Notification not found' });
+});
+
 app.get('/api/notifications/:userId', (req, res) => {
   const { userId } = req.params;
   const db = readDb();
