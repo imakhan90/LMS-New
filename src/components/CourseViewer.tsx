@@ -84,10 +84,23 @@ export default function CourseViewer({
         if (time > 5) {
           setSavedTime(time);
           setResumePrompt(true);
+          return;
         }
-      } else {
-        setResumePrompt(false);
       }
+
+      // Fallback: Fetch from cloud backend database
+      fetch(`/api/courses/progress/${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.progress) {
+            const lessonProgress = data.progress.find((p: any) => p.lessonId === selectedLesson.id);
+            if (lessonProgress && lessonProgress.lastPosition > 5) {
+              setSavedTime(lessonProgress.lastPosition);
+              setResumePrompt(true);
+            }
+          }
+        })
+        .catch(err => console.error('Error fetching backend progress:', err));
     } else {
       setResumePrompt(false);
     }
@@ -103,6 +116,44 @@ export default function CourseViewer({
       setIsPlaying(true);
     }
   };
+
+  // Real-time progress saving hook that fires every 30 seconds while the video is playing
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+
+    if (isPlaying && selectedLesson && selectedLesson.type === 'video' && videoRef.current) {
+      intervalId = setInterval(() => {
+        if (videoRef.current) {
+          const current = videoRef.current.currentTime;
+          const total = videoRef.current.duration || 1;
+          const percent = Math.min(100, Math.round((current / total) * 100));
+
+          fetch('/api/courses/progress', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              courseId: selectedCourse.id,
+              lessonId: selectedLesson.id,
+              watchPercentage: percent,
+              lastPosition: Math.round(current)
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              console.log('[Real-time Progress Tracker] Saved timestamp:', Math.round(current), 's (', percent, '%)');
+            })
+            .catch(err => console.error('[Real-time Progress Tracker] Error saving:', err));
+        }
+      }, 30000);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPlaying, selectedLesson, selectedCourse.id, user.id]);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -502,6 +553,9 @@ export default function CourseViewer({
                       ref={videoRef}
                       src={selectedLesson.videoUrl}
                       onTimeUpdate={handleTimeUpdate}
+                      onPlay={() => setIsPlaying(true)}
+                      onPause={() => setIsPlaying(false)}
+                      onEnded={() => setIsPlaying(false)}
                       className="w-full h-full object-cover relative z-10"
                       onClick={togglePlay}
                     />
