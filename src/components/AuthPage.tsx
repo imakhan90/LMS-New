@@ -113,7 +113,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
 
   const testimonials = [
     {
-      quote: "Al-Majed University LMS completely transformed how we evaluate student logs. The automated attendance matching is flawless and saves us hours.",
+      quote: "LMS System completely transformed how we evaluate student logs. The automated attendance matching is flawless and saves us hours.",
       author: "Prof. Sarah Jenkins",
       role: "Dean of Computer Science",
       imgLetter: "S"
@@ -234,8 +234,8 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               <GraduationCap className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-poppins font-extrabold text-slate-900 tracking-tight text-lg sm:text-xl">AL-MAJED</p>
-              <p className="text-[9px] uppercase tracking-widest text-[#4F8CFF] font-black">Digital University LMS</p>
+              <p className="font-poppins font-extrabold text-slate-900 tracking-tight text-lg sm:text-xl">LMS System</p>
+              <p className="text-[9px] uppercase tracking-widest text-[#4F8CFF] font-black">Digital Cloud LMS</p>
             </div>
           </div>
 
@@ -439,7 +439,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               Premium Educational Capabilities
             </h2>
             <p className="text-slate-500 text-base leading-relaxed">
-              Why settle for standard legacy software? Al-Majed University provides a highly tuned, visually seamless system to upload lectures, track attendance, research materials, and perform theology studies.
+              Why settle for standard legacy software? LMS System provides a highly tuned, visually seamless system to upload lectures, track attendance, research materials, and perform theology studies.
             </p>
           </div>
 
@@ -746,7 +746,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               <GraduationCap className="h-5 w-5" />
             </div>
             <div className="text-left">
-              <p className="font-poppins font-black text-white text-sm">AL-MAJED UNIVERSITY</p>
+              <p className="font-poppins font-black text-white text-sm">LMS SYSTEM</p>
               <p className="text-[10px] text-slate-400">© 2026 Registrar &amp; Theological Academic Office. All rights reserved.</p>
             </div>
           </div>
@@ -782,7 +782,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-primary font-bold">
                   <Play className="h-5 w-5" />
-                  <span className="text-sm font-poppins">Al-Majed University Platform Walkthrough</span>
+                  <span className="text-sm font-poppins">LMS System Platform Walkthrough</span>
                 </div>
                 <button 
                   onClick={() => setDemoVideoOpen(false)}
@@ -852,7 +852,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                   <div className="inline-flex bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-xxs font-extrabold uppercase border border-white/15">
                     Authorized Terminal Gateway
                   </div>
-                  <h3 className="text-2xl font-poppins font-black leading-tight">Al-Majed University Registrar Portal</h3>
+                  <h3 className="text-2xl font-poppins font-black leading-tight">LMS System Registrar Portal</h3>
                   <p className="text-slate-100 text-xs leading-relaxed">
                     Access your courses, check student attendance ledger indices, or start theological modules.
                   </p>

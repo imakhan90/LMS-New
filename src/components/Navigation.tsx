@@ -297,10 +297,10 @@ export default function Navigation({
       <header id="lms_main_header" className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-sm flex items-center justify-between px-6 py-3.5">
         <div className="p-1 flex items-center gap-3 shrink-0">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-100/80 shrink-0">
-            <span className="text-white font-bold text-xl font-serif">M</span>
+            <span className="text-white font-bold text-xl font-serif">L</span>
           </div>
           <div className="leading-tight">
-            <p className="font-bold text-slate-900 tracking-tight text-sm sm:text-base">AL-MAJED UNIVERSITY</p>
+            <p className="font-bold text-slate-900 tracking-tight text-sm sm:text-base">LMS System</p>
             <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">University LMS</p>
           </div>
         </div>
