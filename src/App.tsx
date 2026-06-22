@@ -38,6 +38,10 @@ export default function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
+  // Cross-module integration states
+  const [aiTutorPrompt, setAiTutorPrompt] = useState<string>('');
+  const [librarySearchTerm, setLibrarySearchTerm] = useState<string>('');
+
   // Authenticate session from LocalStorage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem('lms_user');
@@ -144,6 +148,14 @@ export default function App() {
               onRefreshCourses={fetchCourses} 
               onLaunchQuiz={handleLaunchQuiz}
               activeCourseFromDashboard={activeCourseFromDashboard}
+              onAskAITutor={(prompt) => {
+                setAiTutorPrompt(prompt);
+                setActiveTab('ai-tutor');
+              }}
+              onSearchLibrary={(term) => {
+                setLibrarySearchTerm(term);
+                setActiveTab('library');
+              }}
             />
           )}
 
@@ -157,7 +169,11 @@ export default function App() {
           )}
 
           {activeTab === 'library' && (
-            <DigitalLibrary user={user} />
+            <DigitalLibrary 
+              user={user} 
+              initialSearchTerm={librarySearchTerm}
+              onClearInitialSearch={() => setLibrarySearchTerm('')}
+            />
           )}
 
           {activeTab === 'reports' && (
@@ -165,7 +181,12 @@ export default function App() {
           )}
 
           {activeTab === 'ai-tutor' && (
-            <AITutor user={user} courses={courses} />
+            <AITutor 
+              user={user} 
+              courses={courses} 
+              initialPrompt={aiTutorPrompt}
+              onClearInitialPrompt={() => setAiTutorPrompt('')}
+            />
           )}
 
           {activeTab === 'admin-panel' && (

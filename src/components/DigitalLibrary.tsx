@@ -16,9 +16,11 @@ import { LibraryItem, User } from '../types';
 
 interface DigitalLibraryProps {
   user: User;
+  initialSearchTerm?: string;
+  onClearInitialSearch?: () => void;
 }
 
-export default function DigitalLibrary({ user }: DigitalLibraryProps) {
+export default function DigitalLibrary({ user, initialSearchTerm, onClearInitialSearch }: DigitalLibraryProps) {
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +42,18 @@ export default function DigitalLibrary({ user }: DigitalLibraryProps) {
   useEffect(() => {
     fetchLibraryItems();
   }, []);
+
+  // Sync initial unified search triggers
+  useEffect(() => {
+    if (initialSearchTerm) {
+      setSearchTerm(initialSearchTerm);
+      // Select appropriate category as 'All' or auto search
+      setSelectedCategory('All');
+      if (onClearInitialSearch) {
+        onClearInitialSearch();
+      }
+    }
+  }, [initialSearchTerm]);
 
   const fetchLibraryItems = () => {
     fetch('/api/library')
@@ -143,22 +157,31 @@ export default function DigitalLibrary({ user }: DigitalLibraryProps) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       
       {/* Header bar and Add books control */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-xl font-black text-slate-800">Institute Digital Library Catalog</h2>
-          <p className="text-xs text-slate-500">Searchable reference textbooks, research papers, and lecture notes</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-linear-to-r from-slate-50 to-white p-6 rounded-3xl border border-slate-200/60 shadow-xs">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100 shadow-xs shrink-0">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight leading-tight">
+              Institute Digital Library Catalog
+            </h2>
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+              Searchable reference textbooks, research papers, and lecture notes
+            </p>
+          </div>
         </div>
 
         {(user.role === 'professor' || user.role === 'admin') && (
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-4 rounded-xl text-xs flex items-center gap-1.5 transition shadow-xs"
+            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-2xl text-xs flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
           >
-            <Plus className="h-4 w-4 bg-white/20 rounded" />
-            Add Educational Document
+            <Plus className="h-4 w-4 bg-white/20 rounded-md p-0.5" />
+            <span>Add Educational Document</span>
           </button>
         )}
       </div>
@@ -238,41 +261,68 @@ export default function DigitalLibrary({ user }: DigitalLibraryProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left Side: Category selector and book cards items listing */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-6">
           
-          {/* Sub Search filters bar */}
-          <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3">
+          {/* Beautiful Search and Category Filter Deck */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-md shadow-slate-100/40 space-y-5">
             
-            {/* Search Input bar */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            {/* Search Input and active search items pill indicator */}
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                <Search className="h-4.5 w-4.5 text-blue-500" />
+              </div>
               <input
                 type="text"
-                placeholder="Search by title, author names..."
+                placeholder="Search by title, author names, keywords..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-2xl text-xs focus:border-blue-500 focus:outline-none bg-slate-50/50 focus:bg-white transition"
+                className="w-full pl-12 pr-28 py-3.5 bg-slate-50/60 hover:bg-slate-50 focus:bg-white border border-slate-100 focus:border-blue-500 rounded-2xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none transition-all duration-200 shadow-inner"
               />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-16 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-[10px] font-bold bg-slate-200/60 hover:bg-slate-200 px-2 py-1 rounded-md transition"
+                >
+                  Clear
+                </button>
+              )}
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-100/80 border border-slate-200/60 px-2 py-1 rounded-lg">
+                {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'}
+              </div>
             </div>
 
-            {/* Category horizontal tag scroller */}
-            <div className="flex items-center gap-1 overflow-x-auto scroller-none py-1">
-              {categories.map(cat => {
-                const isSelected = selectedCategory === cat;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold border transition ${
-                      isSelected 
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
-                        : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'
-                    }`}
+            {/* Category horizontal tag scroller with subtle gradient masks */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                <span>Filter by Category / Subject</span>
+                {selectedCategory !== 'All' && (
+                  <button 
+                    onClick={() => setSelectedCategory('All')} 
+                    className="text-blue-500 hover:text-blue-600 font-bold transition lowercase normal-case"
                   >
-                    {cat}
+                    Reset filters
                   </button>
-                );
-              })}
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1 -mx-1 px-1">
+                {categories.map(cat => {
+                  const isSelected = selectedCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      id={`cat-btn-${cat.toLowerCase().replace(/\s+/g, '-')}`}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`shrink-0 px-4 py-2 rounded-full text-xs font-semibold border-2 transition-all duration-200 cursor-pointer ${
+                        isSelected 
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-100 scale-102 font-bold' 
+                          : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-transparent hover:border-slate-200'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
           </div>

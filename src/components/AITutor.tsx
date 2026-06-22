@@ -16,6 +16,8 @@ import { User, Course, Question } from '../types';
 interface AITutorProps {
   user: User;
   courses: Course[];
+  initialPrompt?: string;
+  onClearInitialPrompt?: () => void;
 }
 
 interface Message {
@@ -26,7 +28,7 @@ interface Message {
   customQuiz?: Question[];
 }
 
-export default function AITutor({ user, courses }: AITutorProps) {
+export default function AITutor({ user, courses, initialPrompt, onClearInitialPrompt }: AITutorProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -54,6 +56,16 @@ export default function AITutor({ user, courses }: AITutorProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
+
+  // Handle incoming interactive lecture prompt
+  useEffect(() => {
+    if (initialPrompt && initialPrompt.trim()) {
+      handleSendMessage(initialPrompt);
+      if (onClearInitialPrompt) {
+        onClearInitialPrompt();
+      }
+    }
+  }, [initialPrompt]);
 
   const handleSendMessage = (textToSend: string) => {
     if (!textToSend.trim()) return;

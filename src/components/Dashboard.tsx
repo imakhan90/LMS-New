@@ -285,10 +285,10 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
                         <button
                           type="button"
                           onClick={() => onLaunchCourse(course)}
-                          className="w-full mt-2 flex items-center justify-center gap-2 bg-slate-50 hover:bg-sky-600 hover:text-white px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition"
+                          className="w-full mt-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition duration-250 shadow-md shadow-blue-100 hover:shadow-lg hover:shadow-blue-200 active:scale-[0.98] cursor-pointer"
                         >
                           <PlayCircle className="h-4 w-4" />
-                          Launch Lectures
+                          <span>Launch Lectures</span>
                         </button>
                       </div>
                     </div>

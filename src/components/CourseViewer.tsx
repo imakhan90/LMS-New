@@ -16,7 +16,9 @@ import {
   Clock,
   ArrowRight,
   BookOpen,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Bot
 } from 'lucide-react';
 import { Course, Module, Lesson, User, Quiz, Question } from '../types';
 
@@ -26,6 +28,8 @@ interface CourseViewerProps {
   onRefreshCourses: () => void;
   onLaunchQuiz: (quiz: Quiz, courseId: string) => void;
   activeCourseFromDashboard?: Course | null;
+  onAskAITutor?: (prompt: string) => void;
+  onSearchLibrary?: (term: string) => void;
 }
 
 export default function CourseViewer({ 
@@ -33,7 +37,9 @@ export default function CourseViewer({
   courses, 
   onRefreshCourses, 
   onLaunchQuiz,
-  activeCourseFromDashboard 
+  activeCourseFromDashboard,
+  onAskAITutor,
+  onSearchLibrary
 }: CourseViewerProps) {
   const [selectedCourse, setSelectedCourse] = useState<Course>(
     activeCourseFromDashboard || courses[0]
@@ -553,9 +559,19 @@ export default function CourseViewer({
                       ref={videoRef}
                       src={selectedLesson.videoUrl}
                       onTimeUpdate={handleTimeUpdate}
-                      onPlay={() => setIsPlaying(true)}
+                      onPlay={() => {
+                        setIsPlaying(true);
+                        if (videoRef.current) {
+                          videoRef.current.playbackRate = playbackSpeed;
+                        }
+                      }}
                       onPause={() => setIsPlaying(false)}
                       onEnded={() => setIsPlaying(false)}
+                      onLoadedMetadata={() => {
+                        if (videoRef.current) {
+                          videoRef.current.playbackRate = playbackSpeed;
+                        }
+                      }}
                       className="w-full h-full object-cover relative z-10"
                       onClick={togglePlay}
                     />
@@ -630,7 +646,7 @@ export default function CourseViewer({
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1">
                             <span className="text-white text-[10px] font-bold">Speed:</span>
-                            {[0.5, 1, 1.25, 1.5, 2].map(speed => (
+                            {[0.5, 1, 1.5, 2].map(speed => (
                               <button
                                 key={speed}
                                 onClick={() => handleSpeedChange(speed)}
@@ -689,6 +705,55 @@ export default function CourseViewer({
                   <p className="text-sm text-slate-600 leading-relaxed">
                     This session covers key aspects outlined under the {selectedCourse.code} curriculum specifications. Ensure that you have reviewed the study notes inside our digital institutional library resources to help guide critical assignments.
                   </p>
+
+                  {/* Cohesive Cross-Module Navigation & Integrated Hub */}
+                  <div className="mt-6 pt-5 border-t border-slate-100 space-y-4">
+                    <span id="integrated-learning-tag" className="text-[10px] uppercase font-black tracking-widest text-[#4F8CFF] flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                      Integrated Smart Learning Hub
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      
+                      {onAskAITutor && (
+                        <button
+                          id="btn-consult-ai"
+                          onClick={() => {
+                            const promptText = `I am currently studying the lesson "${selectedLesson.title}" inside the course "${selectedCourse.code}: ${selectedCourse.title}". Could you please give me a comprehensive academic summary, highlight the core technical takeaways, and formulate key study questions to test my learning?`;
+                            onAskAITutor(promptText);
+                          }}
+                          className="flex items-center gap-3 p-3.5 bg-blue-50/50 hover:bg-blue-50/90 border border-blue-100/60 rounded-2xl text-left transition-all duration-200 cursor-pointer group active:scale-[0.99]"
+                        >
+                          <div className="bg-blue-100/80 p-2 text-blue-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
+                            <Bot className="h-4.5 w-4.5" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800">Consult Gemini AI Tutor</h4>
+                            <p className="text-[10px] text-slate-500 mt-0.5 font-medium">Generate deep explanations or customized MCQs for this lesson.</p>
+                          </div>
+                        </button>
+                      )}
+
+                      {onSearchLibrary && (
+                        <button
+                          id="btn-search-library"
+                          onClick={() => {
+                            const searchKeyword = selectedCourse.code || selectedCourse.title;
+                            onSearchLibrary(searchKeyword);
+                          }}
+                          className="flex items-center gap-3 p-3.5 bg-indigo-50/40 hover:bg-indigo-50 border border-indigo-100/50 rounded-2xl text-left transition-all duration-200 cursor-pointer group active:scale-[0.99]"
+                        >
+                          <div className="bg-indigo-100/80 p-2 text-indigo-600 rounded-xl group-hover:scale-105 transition-transform shrink-0">
+                            <BookOpen className="h-4.5 w-4.5" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-slate-800">Find Library Textbooks</h4>
+                            <p className="text-[10px] text-slate-500 mt-0.5 font-medium font-poppins">Instantly retrieve references matching {selectedCourse.code}.</p>
+                          </div>
+                        </button>
+                      )}
+
+                    </div>
+                  </div>
                 </div>
 
               </div>
