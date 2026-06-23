@@ -11,7 +11,20 @@ import {
   TrendingUp, 
   PlayCircle, 
   GraduationCap,
-  Bot
+  Bot,
+  Server,
+  Cpu,
+  Layers,
+  Globe,
+  Terminal,
+  ArrowUpRight,
+  CheckCircle2,
+  AlertCircle,
+  MessageSquare,
+  Clock,
+  Sparkles,
+  ShieldAlert,
+  Sparkle
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { 
@@ -27,7 +40,7 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
-import { User, Course, AttendanceRecord, QuizAttempt, Certificate, Quiz } from '../types';
+import { User, Course, AttendanceRecord, QuizAttempt, Certificate, Quiz, OfficeHourSlot } from '../types';
 import InteractiveCalendar from './InteractiveCalendar';
 
 const containerVariants = {
@@ -68,19 +81,117 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
   const [certs, setCerts] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Office Hours states
+  const [officeHours, setOfficeHours] = useState<OfficeHourSlot[]>([]);
+  const [newSlotCourse, setNewSlotCourse] = useState(courses[0]?.id || '');
+  const [newSlotDate, setNewSlotDate] = useState('');
+  const [newSlotStart, setNewSlotStart] = useState('');
+  const [newSlotEnd, setNewSlotEnd] = useState('');
+  const [slotMessage, setSlotMessage] = useState({ type: '', text: '' });
+  const [isSubmittingSlot, setIsSubmittingSlot] = useState(false);
+
+  const fetchOfficeHours = () => {
+    fetch('/api/office-hours')
+      .then(res => res.json())
+      .then(data => setOfficeHours(data))
+      .catch(err => console.error('Error fetching office hours', err));
+  };
+
+  const handleCreateSlot = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSlotCourse || !newSlotDate || !newSlotStart || !newSlotEnd) {
+      setSlotMessage({ type: 'error', text: 'Please fill in all fields.' });
+      return;
+    }
+    
+    setIsSubmittingSlot(true);
+    setSlotMessage({ type: '', text: '' });
+
+    fetch('/api/office-hours', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        courseId: newSlotCourse,
+        professorId: user.id,
+        professorName: user.name,
+        date: newSlotDate,
+        startTime: newSlotStart,
+        endTime: newSlotEnd
+      })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to create slot');
+        return res.json();
+      })
+      .then(() => {
+        setSlotMessage({ type: 'success', text: 'Availability slot created successfully!' });
+        setNewSlotDate('');
+        setNewSlotStart('');
+        setNewSlotEnd('');
+        fetchOfficeHours();
+      })
+      .catch(err => {
+        console.error(err);
+        setSlotMessage({ type: 'error', text: 'Failed to create availability slot.' });
+      })
+      .finally(() => {
+        setIsSubmittingSlot(false);
+      });
+  };
+
+  const handleDeleteSlot = (slotId: string) => {
+    if (!confirm('Are you sure you want to delete this office hour availability slot?')) return;
+    
+    fetch(`/api/office-hours/${slotId}`, {
+      method: 'DELETE'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to delete slot');
+        return res.json();
+      })
+      .then(() => {
+        fetchOfficeHours();
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Failed to delete slot');
+      });
+  };
+
+  const handleCancelBooking = (slotId: string) => {
+    if (!confirm('Are you sure you want to cancel the booking for this slot and make it available again?')) return;
+    
+    fetch(`/api/office-hours/${slotId}/cancel`, {
+      method: 'POST'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to cancel booking');
+        return res.json();
+      })
+      .then(() => {
+        fetchOfficeHours();
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Failed to cancel booking');
+      });
+  };
+
   useEffect(() => {
     // Parallelize loading of analytics and records
     Promise.all([
       fetch('/api/reports').then(res => res.json()),
       fetch('/api/attendance').then(res => res.json()),
       fetch(`/api/quiz-attempts/${user.id}`).then(res => res.json()),
-      fetch(`/api/certificates/${user.id}`).then(res => res.json())
+      fetch(`/api/certificates/${user.id}`).then(res => res.json()),
+      fetch('/api/office-hours').then(res => res.json())
     ])
-      .then(([reportData, attendanceData, attemptsData, certsData]) => {
+      .then(([reportData, attendanceData, attemptsData, certsData, officeHoursData]) => {
         setStats(reportData);
         setAttendance(attendanceData);
         setAttempts(attemptsData);
         setCerts(certsData);
+        setOfficeHours(officeHoursData);
       })
       .catch(err => console.error('Error fetching dashboard indices', err))
       .finally(() => setLoading(false));
@@ -100,9 +211,17 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
   const userPresentsCount = userAttendance.filter(a => a.status === 'Present').length;
   const userAttendancePercent = Math.round((userPresentsCount / totalUserLessonsTracked) * 100);
 
+  // Time-of-day greeting helper
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
   // Pie chart stats
   const attendancePieData = [
-    { name: 'Present (>=80% Video)', value: userAttendancePercent || 85, color: '#0284c7' },
+    { name: 'Present (>=80% Video)', value: userAttendancePercent || 85, color: '#38bdf8' },
     { name: 'Incomplete (<80%)', value: 100 - (userAttendancePercent || 85), color: '#cbd5e1' }
   ];
 
@@ -113,101 +232,292 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
   return (
     <div className="space-y-6">
-      {/* Dynamic Header Greeting banner with Poppins/Inter and Light Blue Theme */}
-      <div className="bg-gradient-to-tr from-primary via-[#4F8CFF] to-secondary rounded-[20px] p-6 sm:p-8 text-white shadow-xl shadow-primary/10 border border-white/10 relative overflow-hidden">
-        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
-          <GraduationCap className="h-64 w-6 map-icon transform rotate-12 translate-y-20 translate-x-10" />
+      {/* Dynamic Header Greeting banner with customized time-of-day greetings and eye-catching academic micro-pills */}
+      <div className="bg-gradient-to-tr from-slate-900 via-sky-950 to-indigo-950 rounded-[24px] p-6 sm:p-8 text-white shadow-xl shadow-slate-900/25 border border-slate-800 relative overflow-hidden">
+        <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none">
+          <GraduationCap className="h-64 w-64 text-sky-500 transform rotate-12 translate-y-20 translate-x-10" />
         </div>
-        <div className="relative z-10 space-y-2 text-left">
-          <span className="bg-white/20 backdrop-blur-md text-white border border-white/10 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider font-poppins">
-            {user.role} workspace
-          </span>
-          <h1 className="text-2xl sm:text-4xl font-poppins font-black tracking-tight">
-            Welcome back, {user.name}!
-          </h1>
-          <p className="text-blue-50 text-sm max-w-2xl font-medium leading-relaxed">
-            {user.role === 'student' 
-              ? `You are enrolled in the ${user.semester} within the Department of ${user.department}. Continue learning where you left off!` 
-              : `Access clinical lectures, student grades, attendance rules, and automated course reporting engines.`}
-          </p>
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full filter blur-3xl" />
+        
+        <div className="relative z-10 space-y-4 text-left">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider font-mono">
+              {user.role} workspace
+            </span>
+            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider font-mono flex items-center gap-1">
+              <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping" />
+              Live Ledger Connected
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-4xl font-poppins font-black tracking-tight flex items-center gap-2">
+              {getGreeting()}, {user.name}! <Sparkle className="h-6 w-6 text-amber-400 animate-pulse shrink-0" />
+            </h1>
+            <p className="text-slate-300 text-xs sm:text-sm max-w-2xl font-medium leading-relaxed">
+              {user.role === 'student' 
+                ? `Welcome to your academic cockpit. You are enrolled in the ${user.semester} within the Department of ${user.department}. Ready to resume your lectures?` 
+                : user.role === 'professor'
+                ? `Academic faculty portal for organizing clinical syllabi, launching live course tracks, managing interactive student registers, and syncing grades.`
+                : `LMS Cloud controller dashboard. You have full global read/write indices to coordinate multi-department courses, storage infrastructure, and user logs.`}
+            </p>
+          </div>
+
+          {/* Mini Quick-stats Pills Bar */}
+          <div className="pt-2 flex flex-wrap gap-2.5">
+            {user.role === 'student' ? (
+              <>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5 text-sky-400" />
+                  <span>My Attendance: <strong className="text-white">{userAttendancePercent || 0}%</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Award className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Passed Quizzes: <strong className="text-white">{attempts.filter(a => a.passed).length}</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Assigned Courses: <strong className="text-white">{courses.length}</strong></span>
+                </div>
+              </>
+            ) : user.role === 'professor' ? (
+              <>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Users className="h-3.5 w-3.5 text-sky-400" />
+                  <span>My Students: <strong className="text-white">{stats.totalStudents} Active</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <MessageSquare className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Direct Queries Sync: <strong className="text-white">Active</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <TrendingUp className="h-3.5 w-3.5 text-purple-400" />
+                  <span>LMS Attendance Avg: <strong className="text-white">{stats.attendanceRate}%</strong></span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Server className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Core Nodes Uptime: <strong className="text-emerald-400">99.99%</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Database className="h-3.5 w-3.5 text-sky-400" />
+                  <span>Local Db File: <strong className="text-white">Synced</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
+                  <Cpu className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Gemini LLM API: <strong className="text-white">Connected</strong></span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       {/* KPI Stats widgets with 20px rounded cards */}
       {user.role === 'admin' && (
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Students</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{stats.totalStudents}</h3>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl text-primary border border-blue-100/50 dark:border-blue-900/30"><Users className="h-6 w-6" /></div>
+        <div className="space-y-4">
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Total Students</p>
+                  <span className="text-[9px] bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 font-extrabold px-1 py-0.2 rounded">+12%</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{stats.totalStudents}</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Enrolled globally</p>
+              </div>
+              <div className="bg-sky-50 dark:bg-sky-950/40 p-3.5 rounded-xl text-sky-600 dark:text-sky-400 border border-sky-100/50 dark:border-sky-900/30"><Users className="h-6 w-6" /></div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Academic Faculty</p>
+                  <span className="text-[9px] bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-extrabold px-1 py-0.2 rounded">Optimal</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{stats.totalProfessors}</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Assigned teachers</p>
+              </div>
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30"><BookOpen className="h-6 w-6" /></div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Storage Utilized</p>
+                  <span className="text-[9px] bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 font-extrabold px-1 py-0.2 rounded">0.4%</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{stats.storageUsageMB} MB</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Used by media/JSON</p>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-xl text-amber-600 dark:text-amber-400 border border-amber-100/50 dark:border-amber-900/30"><Database className="h-6 w-6" /></div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Live Online Users</p>
+                  <span className="text-[9px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-1 py-0.2 rounded">Real-time</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{stats.activeSessions} active</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Sessions tracked</p>
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-950/40 p-3.5 rounded-xl text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30"><Activity className="h-6 w-6" /></div>
+            </motion.div>
           </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Academic Faculty</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{stats.totalProfessors}</h3>
+
+          {/* Infrastructure Health Status panel exclusively for Administrators */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-[20px] p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                <Server className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">LMS Infrastructure Node Monitor</h4>
+                <p className="text-[10px] text-slate-400">Status registry of running servers and storage APIs</p>
+              </div>
             </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl text-accent-emerald border border-emerald-100/50 dark:border-emerald-900/30"><BookOpen className="h-6 w-6" /></div>
-          </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Storage Usage</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{stats.storageUsageMB} MB</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-1">
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Primary SQL Core</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">Fully Online</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Gemini LLM API</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">Connected (220ms)</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Security Sandbox</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">Active (Shield On)</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+                </span>
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">Static Media Edge</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white">Optimal (99.9% CDN)</p>
+                </div>
+              </div>
             </div>
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl text-amber-600 border border-amber-100/50 dark:border-amber-900/30"><Database className="h-6 w-6" /></div>
-          </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Latency Sessions</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{stats.activeSessions} online</h3>
-            </div>
-            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-xl text-indigo-600 border border-indigo-100/50 dark:border-indigo-900/30"><Activity className="h-6 w-6" /></div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
 
       {user.role === 'professor' && (
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Courses</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{courses.length}</h3>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl text-primary border border-blue-100/50 dark:border-blue-900/30"><BookOpen className="h-6 w-6" /></div>
+        <div className="space-y-4">
+          <motion.div 
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Courses</p>
+                  <span className="text-[9px] bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400 font-extrabold px-1 py-0.2 rounded">Publishing</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{courses.length}</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Syllabi configured</p>
+              </div>
+              <div className="bg-sky-50 dark:bg-sky-950/40 p-3.5 rounded-xl text-sky-600 dark:text-sky-400 border border-sky-100/50 dark:border-sky-900/30"><BookOpen className="h-6 w-6" /></div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Student Rosters</p>
+                  <span className="text-[9px] bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-extrabold px-1 py-0.2 rounded">Active</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{stats.totalStudents} enrolled</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Connected profiles</p>
+              </div>
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30"><Users className="h-6 w-6" /></div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">LMS Avg Attendance</p>
+                  <span className="text-[9px] bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 font-extrabold px-1 py-0.2 rounded">Target &gt;80%</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{stats.attendanceRate}%</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Average watch metric</p>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-xl text-amber-600 dark:text-amber-400 border border-amber-100/50 dark:border-amber-900/30"><Calendar className="h-6 w-6" /></div>
+            </motion.div>
+
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+              <div className="text-left">
+                <div className="flex items-center gap-1">
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Consultation Desk</p>
+                  <span className="text-[9px] bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-extrabold px-1 py-0.2 rounded animate-pulse">Pending</span>
+                </div>
+                <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">Queries</h3>
+                <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Live student messaging</p>
+              </div>
+              <div className="bg-indigo-50 dark:bg-indigo-950/40 p-3.5 rounded-xl text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30"><MessageSquare className="h-6 w-6" /></div>
+            </motion.div>
           </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Student Rosters</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{stats.totalStudents} enrolled</h3>
+
+          {/* Quick Consultation queries reminder board */}
+          <div className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30 rounded-[20px] p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex gap-3 text-left">
+              <div className="p-2.5 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-700 dark:text-amber-400">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div>
+                <h5 className="text-xs font-extrabold text-slate-800 dark:text-amber-200">Pending Student Queries Room</h5>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+                  Zayn Malik submitted course questions regarding Binary Search recursion vs iteration logic. Respond instantly inside the course Direct Queries desk.
+                </p>
+              </div>
             </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl text-accent-emerald border border-emerald-100/50 dark:border-emerald-900/30"><Users className="h-6 w-6" /></div>
-          </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">LMS Average Attendance</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{stats.attendanceRate}%</h3>
-            </div>
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl text-amber-600 border border-amber-100/50 dark:border-amber-900/30"><Calendar className="h-6 w-6" /></div>
-          </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-            <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Online Nodes</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">Live</h3>
-            </div>
-            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-xl text-indigo-600 border border-indigo-100/50 dark:border-indigo-900/30"><Activity className="h-6 w-6" /></div>
-          </motion.div>
-        </motion.div>
+            <button
+              onClick={() => {
+                // Navigate to course list or trigger first course view
+                if (courses.length > 0) {
+                  onLaunchCourse(courses[0]);
+                }
+              }}
+              className="bg-amber-600 hover:bg-amber-500 dark:bg-amber-700 dark:hover:bg-amber-600 text-white text-[11px] font-bold px-4 py-2 rounded-xl transition duration-200 flex items-center gap-1 shrink-0 shadow-sm cursor-pointer"
+            >
+              <span>Launch Queries Room</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
       )}
 
       {user.role === 'student' && (
@@ -215,35 +525,54 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
         >
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">My Enrolled Courses</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{courses.length}</h3>
+              <div className="flex items-center gap-1">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">My Enrolled Courses</p>
+                <span className="text-[9px] bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-extrabold px-1 rounded">CS Track</span>
+              </div>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{courses.length}</h3>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Academic curriculums</p>
             </div>
-            <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl text-primary border border-blue-100/50 dark:border-blue-900/30 transition-all"><BookOpen className="h-6 w-6" /></div>
+            <div className="bg-blue-50 dark:bg-blue-950/40 p-3.5 rounded-xl text-sky-600 dark:text-sky-400 border border-blue-100/50 dark:border-blue-900/30 transition-all"><BookOpen className="h-6 w-6" /></div>
           </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
+
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">My Attendance Rate</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{userAttendancePercent || 0}%</h3>
+              <div className="flex items-center gap-1">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">My Attendance Rate</p>
+                <span className="text-[9px] bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 font-extrabold px-1 rounded">Target Met</span>
+              </div>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{userAttendancePercent || 0}%</h3>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Video playback threshold</p>
             </div>
-            <div className="bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl text-accent-emerald border border-emerald-100/50 dark:border-emerald-900/30 transition-all"><Calendar className="h-6 w-6" /></div>
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30 transition-all"><Calendar className="h-6 w-6" /></div>
           </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
+
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Quizzes Passed</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{attempts.filter(a => a.passed).length}</h3>
+              <div className="flex items-center gap-1">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">Quizzes Passed</p>
+                <span className="text-[9px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-extrabold px-1 rounded">GPA Lock</span>
+              </div>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{attempts.filter(a => a.passed).length}</h3>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Evaluation modules</p>
             </div>
-            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-xl text-indigo-600 border border-indigo-100/50 dark:border-indigo-900/30 transition-all"><Zap className="h-6 w-6" /></div>
+            <div className="bg-indigo-50 dark:bg-indigo-950/40 p-3.5 rounded-xl text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30 transition-all"><Zap className="h-6 w-6" /></div>
           </motion.div>
-          <motion.div variants={cardVariants} className="bg-white dark:bg-[#0F172A] p-5 rounded-[20px] border border-slate-200/65 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
+
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
-              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Earned Certificates</p>
-              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-slate-100 mt-1">{certs.length}</h3>
+              <div className="flex items-center gap-1">
+                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">Earned Certificates</p>
+                <span className="text-[9px] bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 font-extrabold px-1 rounded">PDF Verified</span>
+              </div>
+              <h3 className="text-2xl font-poppins font-black text-slate-900 dark:text-white mt-1">{certs.length}</h3>
+              <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">Credential badges</p>
             </div>
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl text-amber-600 border border-amber-100/50 dark:border-amber-900/30 transition-all"><Award className="h-6 w-6" /></div>
+            <div className="bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-xl text-amber-600 dark:text-amber-400 border border-amber-100/50 dark:border-amber-900/30 transition-all"><Award className="h-6 w-6" /></div>
           </motion.div>
         </motion.div>
       )}
@@ -415,6 +744,182 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
                   ))
                 )}
               </motion.div>
+            </motion.div>
+          )}
+
+          {/* Office Hours Scheduling tool for professors */}
+          {user.role === 'professor' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
+              className="bg-white dark:bg-[#0F172A] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 transition-colors duration-300 mt-6"
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400 rounded-xl">
+                    <Clock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Office Hours Scheduler</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Define availability slots for student bookings</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                {/* Form to create slots */}
+                <div className="lg:col-span-2 space-y-4">
+                  <h4 className="text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider">Set New Availability</h4>
+                  <form onSubmit={handleCreateSlot} className="space-y-4 bg-slate-50 dark:bg-slate-900/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/60 text-left">
+                    <div className="space-y-1">
+                      <label className="text-xxs font-bold text-slate-400 uppercase">Select Course</label>
+                      <select 
+                        value={newSlotCourse}
+                        onChange={(e) => setNewSlotCourse(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                      >
+                        <option value="">-- Choose Course --</option>
+                        {courses.map(course => (
+                          <option key={course.id} value={course.id}>
+                            {course.code} - {course.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xxs font-bold text-slate-400 uppercase">Date</label>
+                      <input 
+                        type="date"
+                        value={newSlotDate}
+                        onChange={(e) => setNewSlotDate(e.target.value)}
+                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xxs font-bold text-slate-400 uppercase">Start Time</label>
+                        <input 
+                          type="time"
+                          value={newSlotStart}
+                          onChange={(e) => setNewSlotStart(e.target.value)}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xxs font-bold text-slate-400 uppercase">End Time</label>
+                        <input 
+                          type="time"
+                          value={newSlotEnd}
+                          onChange={(e) => setNewSlotEnd(e.target.value)}
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none dark:text-white"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {slotMessage.text && (
+                      <p className={`text-xxs font-semibold p-2.5 rounded-lg border ${
+                        slotMessage.type === 'success' 
+                          ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30' 
+                          : 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-900/30'
+                      }`}>
+                        {slotMessage.text}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmittingSlot}
+                      className="w-full bg-sky-600 hover:bg-sky-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 text-white font-bold py-2 px-4 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-sky-100/10"
+                    >
+                      <span>Publish Availability Slot</span>
+                    </button>
+                  </form>
+                </div>
+
+                {/* List of slots */}
+                <div className="lg:col-span-3 space-y-4 text-left">
+                  <h4 className="text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider font-mono">My Availability Slots</h4>
+                  
+                  <div className="border border-slate-100 dark:border-slate-800/85 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800 bg-slate-50/20 dark:bg-transparent max-h-[360px] overflow-y-auto">
+                    {officeHours.filter(slot => slot.professorId === user.id).length === 0 ? (
+                      <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-xs flex flex-col items-center justify-center gap-1.5">
+                        <Clock className="h-6 w-6 text-slate-300 dark:text-slate-700" />
+                        <p>No availability slots registered. Create your first availability slot above.</p>
+                      </div>
+                    ) : (
+                      officeHours
+                        .filter(slot => slot.professorId === user.id)
+                        .sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`))
+                        .map(slot => {
+                          const course = courses.find(c => c.id === slot.courseId);
+                          return (
+                            <div key={slot.id} className="p-4 flex flex-col gap-2.5 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                              <div className="flex items-start justify-between">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xxs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+                                      {course ? course.code : 'Syllabus'}
+                                    </span>
+                                    <span className={`text-[9px] px-2 py-0.5 rounded font-bold border ${
+                                      slot.status === 'booked'
+                                        ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40'
+                                        : 'bg-sky-50 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400 border-sky-100 dark:border-sky-900/40'
+                                    }`}>
+                                      {slot.status === 'booked' ? 'Booked' : 'Available'}
+                                    </span>
+                                  </div>
+                                  <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                    {new Date(slot.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} at {slot.startTime} - {slot.endTime}
+                                  </h5>
+                                </div>
+
+                                <div className="flex items-center gap-1.5">
+                                  {slot.status === 'booked' && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCancelBooking(slot.id)}
+                                      className="text-[10px] text-amber-600 hover:text-amber-500 font-bold px-2 py-1 rounded bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 cursor-pointer"
+                                      title="Unbook Slot"
+                                    >
+                                      Unbook
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteSlot(slot.id)}
+                                    className="text-[10px] text-rose-600 hover:text-rose-500 font-bold px-2 py-1 rounded bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/40 cursor-pointer"
+                                    title="Delete Availability Slot"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+
+                              {slot.status === 'booked' && (
+                                <div className="bg-emerald-50/40 dark:bg-emerald-950/10 border border-emerald-100/50 dark:border-emerald-900/20 rounded-xl p-3 text-xxs space-y-1.5">
+                                  <div className="flex items-center justify-between font-semibold text-emerald-800 dark:text-emerald-300">
+                                    <span>Student: {slot.studentName} ({slot.studentEmail})</span>
+                                  </div>
+                                  {slot.meetingNotes && (
+                                    <p className="text-slate-600 dark:text-slate-400 italic">
+                                      " {slot.meetingNotes} "
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                    )}
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
 

@@ -14,7 +14,8 @@ import {
   Certificate, 
   LmsNotification, 
   Lesson,
-  ChatMessage
+  ChatMessage,
+  OfficeHourSlot
 } from './src/types.js';
 import { getInitialCourses } from './src/data/coursesData.js';
 
@@ -1293,6 +1294,7 @@ interface DatabaseSchema {
   certificates: Certificate[];
   notifications: LmsNotification[];
   chatMessages: ChatMessage[];
+  officeHours: OfficeHourSlot[];
 }
 
 const defaultDb: DatabaseSchema = {
@@ -1304,7 +1306,29 @@ const defaultDb: DatabaseSchema = {
   quizAttempts: [],
   certificates: [],
   notifications: initialNotifications,
-  chatMessages: initialChatMessages
+  chatMessages: initialChatMessages,
+  officeHours: [
+    {
+      id: 'slot_1',
+      courseId: 'course_1',
+      professorId: 'user_prof_1',
+      professorName: 'Dr. Sarah Jenkins',
+      date: '2026-06-25',
+      startTime: '10:00',
+      endTime: '11:00',
+      status: 'available'
+    },
+    {
+      id: 'slot_2',
+      courseId: 'course_1',
+      professorId: 'user_prof_1',
+      professorName: 'Dr. Sarah Jenkins',
+      date: '2026-06-26',
+      startTime: '14:00',
+      endTime: '15:00',
+      status: 'available'
+    }
+  ]
 };
 
 function readDb(): DatabaseSchema {
@@ -1321,6 +1345,11 @@ function readDb(): DatabaseSchema {
     
     if (!parsed.chatMessages || !Array.isArray(parsed.chatMessages)) {
       parsed.chatMessages = initialChatMessages;
+      changed = true;
+    }
+
+    if (!parsed.officeHours || !Array.isArray(parsed.officeHours)) {
+      parsed.officeHours = defaultDb.officeHours;
       changed = true;
     }
 
@@ -2113,6 +2142,123 @@ app.post('/api/ai/quiz-generate', async (req, res) => {
       ]
     });
   }, 1000);
+});
+
+// -----------------------------------------------------
+// Office Hours Scheduling API Endpoints
+// -----------------------------------------------------
+
+// Get all office hour slots
+app.get('/api/office-hours', (req, res) => {
+  const db = readDb();
+  res.json(db.officeHours || []);
+});
+
+// Create a new office hour slot (by instructor/professor)
+app.post('/api/office-hours', (req, res) => {
+  const { courseId, professorId, professorName, date, startTime, endTime } = req.body;
+  
+  if (!courseId || !professorId || !professorName || !date || !startTime || !endTime) {
+    return res.status(400).json({ error: 'Missing required office hour parameters' });
+  }
+
+  const db = readDb();
+  if (!db.officeHours) {
+    db.officeHours = [];
+  }
+
+  const newSlot: OfficeHourSlot = {
+    id: `slot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    courseId,
+    professorId,
+    professorName,
+    date,
+    startTime,
+    endTime,
+    status: 'available'
+  };
+
+  db.officeHours.push(newSlot);
+  writeDb(db);
+  res.status(201).json(newSlot);
+});
+
+// Book an office hour slot (by student)
+app.post('/api/office-hours/:id/book', (req, res) => {
+  const { id } = req.params;
+  const { studentId, studentName, studentEmail, meetingNotes } = req.body;
+
+  if (!studentId || !studentName || !studentEmail) {
+    return res.status(400).json({ error: 'Missing student booking details' });
+  }
+
+  const db = readDb();
+  if (!db.officeHours) {
+    db.officeHours = [];
+  }
+
+  const slotIndex = db.officeHours.findIndex(s => s.id === id);
+  if (slotIndex === -1) {
+    return res.status(404).json({ error: 'Office hour slot not found' });
+  }
+
+  const slot = db.officeHours[slotIndex];
+  if (slot.status === 'booked') {
+    return res.status(400).json({ error: 'Office hour slot is already booked' });
+  }
+
+  slot.status = 'booked';
+  slot.studentId = studentId;
+  slot.studentName = studentName;
+  slot.studentEmail = studentEmail;
+  slot.meetingNotes = meetingNotes || '';
+
+  writeDb(db);
+  res.json(slot);
+});
+
+// Cancel a booking or slot
+app.post('/api/office-hours/:id/cancel', (req, res) => {
+  const { id } = req.params;
+  const db = readDb();
+  if (!db.officeHours) {
+    db.officeHours = [];
+  }
+
+  const slotIndex = db.officeHours.findIndex(s => s.id === id);
+  if (slotIndex === -1) {
+    return res.status(404).json({ error: 'Office hour slot not found' });
+  }
+
+  const slot = db.officeHours[slotIndex];
+  
+  // Revert status to available, clear student booking info
+  slot.status = 'available';
+  delete slot.studentId;
+  delete slot.studentName;
+  delete slot.studentEmail;
+  delete slot.meetingNotes;
+
+  writeDb(db);
+  res.json(slot);
+});
+
+// Delete an office hour slot entirely (by professor)
+app.delete('/api/office-hours/:id', (req, res) => {
+  const { id } = req.params;
+  const db = readDb();
+  if (!db.officeHours) {
+    db.officeHours = [];
+  }
+
+  const slotIndex = db.officeHours.findIndex(s => s.id === id);
+  if (slotIndex === -1) {
+    return res.status(404).json({ error: 'Office hour slot not found' });
+  }
+
+  db.officeHours.splice(slotIndex, 1);
+  writeDb(db);
+  res.json({ success: true, message: 'Office hour slot deleted successfully' });
 });
 
 // -----------------------------------------------------

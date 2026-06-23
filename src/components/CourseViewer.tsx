@@ -21,7 +21,7 @@ import {
   Bot,
   Send
 } from 'lucide-react';
-import { Course, Module, Lesson, User, Quiz, Question } from '../types';
+import { Course, Module, Lesson, User, Quiz, Question, OfficeHourSlot } from '../types';
 
 interface CourseViewerProps {
   user: User;
@@ -74,11 +74,91 @@ export default function CourseViewer({
     { id: 'q_1', text: 'Enter assessment question?', options: ['', '', '', ''], correctOptionIndex: 0 }
   ]);
 
-  const [dashboardTab, setDashboardTab] = useState<'overview' | 'forum' | 'grades' | 'resources' | 'queries'>('overview');
+  const [dashboardTab, setDashboardTab] = useState<'overview' | 'forum' | 'grades' | 'resources' | 'queries' | 'office-hours'>('overview');
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  // Office Hour Booking states
+  const [officeHourSlots, setOfficeHourSlots] = useState<OfficeHourSlot[]>([]);
+  const [activeBookingSlotId, setActiveBookingSlotId] = useState<string | null>(null);
+  const [activeBookingNotes, setActiveBookingNotes] = useState('');
+  const [isBookingInProgress, setIsBookingInProgress] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState({ type: '', text: '' });
+
+  const fetchCourseOfficeHours = () => {
+    fetch('/api/office-hours')
+      .then(res => res.json())
+      .then(data => {
+        setOfficeHourSlots(data);
+      })
+      .catch(err => console.error('Error fetching office hours:', err));
+  };
+
+  const handleBookSlot = (slotId: string) => {
+    setIsBookingInProgress(true);
+    setBookingMessage({ type: '', text: '' });
+
+    fetch(`/api/office-hours/${slotId}/book`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentId: user.id,
+        studentName: user.name,
+        studentEmail: user.email || 'student@university.edu',
+        meetingNotes: activeBookingNotes
+      })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to book slot');
+        return res.json();
+      })
+      .then(() => {
+        setBookingMessage({ type: 'success', text: 'Slot booked successfully!' });
+        setActiveBookingSlotId(null);
+        setActiveBookingNotes('');
+        fetchCourseOfficeHours();
+      })
+      .catch(err => {
+        console.error(err);
+        setBookingMessage({ type: 'error', text: 'Failed to book slot. It might have been booked already.' });
+      })
+      .finally(() => {
+        setIsBookingInProgress(false);
+      });
+  };
+
+  const handleCancelSlotBooking = (slotId: string) => {
+    if (!confirm('Are you sure you want to cancel your booking for this slot?')) return;
+    setIsBookingInProgress(true);
+    setBookingMessage({ type: '', text: '' });
+
+    fetch(`/api/office-hours/${slotId}/cancel`, {
+      method: 'POST'
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to cancel booking');
+        return res.json();
+      })
+      .then(() => {
+        setBookingMessage({ type: 'success', text: 'Booking cancelled successfully.' });
+        fetchCourseOfficeHours();
+      })
+      .catch(err => {
+        console.error(err);
+        setBookingMessage({ type: 'error', text: 'Failed to cancel booking.' });
+      })
+      .finally(() => {
+        setIsBookingInProgress(false);
+      });
+  };
+
+  useEffect(() => {
+    if (dashboardTab === 'office-hours') {
+      fetchCourseOfficeHours();
+    }
+  }, [dashboardTab, selectedCourse?.id]);
 
   useEffect(() => {
     if (dashboardTab !== 'queries' || !selectedCourse?.id) return;
@@ -1011,6 +1091,17 @@ export default function CourseViewer({
                     <MessageSquare className="h-3.5 w-3.5" />
                     Direct Queries
                   </button>
+                  <button
+                    onClick={() => setDashboardTab('office-hours')}
+                    className={`px-4 py-2 text-xs font-bold transition-all border-b-2 shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                      dashboardTab === 'office-hours'
+                        ? 'border-sky-600 text-sky-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    Office Hours
+                  </button>
                 </div>
 
                 {/* Tab content switcher */}
@@ -1548,6 +1639,165 @@ export default function CourseViewer({
 
                       </div>
 
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === 'office-hours' && (
+                  <div className="space-y-4 font-sans animate-fadeIn text-left">
+                    <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 pb-4 mb-4">
+                        <div>
+                          <h4 className="text-sm font-extrabold text-slate-800">Office Hours &amp; Consultations</h4>
+                          <p className="text-[11px] text-slate-500">Book dedicated, one-on-one virtual help with Professor {selectedCourse.instructor}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-sky-100 text-sky-800 font-extrabold px-2.5 py-1 rounded-full border border-sky-200">
+                            Course: {selectedCourse.code}
+                          </span>
+                        </div>
+                      </div>
+
+                      {bookingMessage.text && (
+                        <div className={`p-3 rounded-xl border mb-4 text-xs font-semibold ${
+                          bookingMessage.type === 'success' 
+                            ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-100' 
+                            : 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border-rose-100'
+                        }`}>
+                          {bookingMessage.text}
+                        </div>
+                      )}
+
+                      <div className="space-y-3">
+                        {officeHourSlots.filter(s => s.courseId === selectedCourse.id).length === 0 ? (
+                          <div className="bg-white rounded-xl border border-slate-100 p-8 text-center text-slate-400">
+                            <Clock className="h-8 w-8 mx-auto text-slate-300 mb-2" />
+                            <h5 className="text-xs font-bold text-slate-700">No slots scheduled</h5>
+                            <p className="text-[10px] text-slate-500 max-w-sm mx-auto mt-1">
+                              There are currently no office hour availability slots configured for this course syllabus. Check back later or send a Direct Query.
+                            </p>
+                          </div>
+                        ) : (
+                          officeHourSlots
+                            .filter(s => s.courseId === selectedCourse.id)
+                            .sort((a, b) => `${a.date} ${a.startTime}`.localeCompare(`${b.date} ${b.startTime}`))
+                            .map(slot => {
+                              const isMyBooking = slot.studentId === user.id;
+                              const isBookedByOthers = slot.status === 'booked' && !isMyBooking;
+                              const isSlotSelectedForBooking = activeBookingSlotId === slot.id;
+
+                              return (
+                                <div 
+                                  key={slot.id} 
+                                  className={`bg-white rounded-xl border p-4 transition-all ${
+                                    isMyBooking 
+                                      ? 'border-emerald-200 bg-emerald-50/5' 
+                                      : 'border-slate-100 hover:border-slate-200'
+                                  }`}
+                                >
+                                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                                    <div className="space-y-1.5">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-[10px] text-slate-500 font-medium">
+                                          Session Slot
+                                        </span>
+                                        <span className={`text-[9px] px-2 py-0.5 rounded font-bold border ${
+                                          slot.status === 'booked'
+                                            ? isMyBooking
+                                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                              : 'bg-slate-100 text-slate-500 border-slate-200'
+                                            : 'bg-sky-50 text-sky-700 border-sky-100'
+                                        }`}>
+                                          {slot.status === 'booked' ? isMyBooking ? 'Booked by You' : 'Unavailable' : 'Available'}
+                                        </span>
+                                      </div>
+
+                                      <h5 className="text-sm font-bold text-slate-800">
+                                        {new Date(slot.date).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })} at {slot.startTime} - {slot.endTime}
+                                      </h5>
+                                      <p className="text-[10px] text-slate-500">Instructor: {slot.professorName}</p>
+                                    </div>
+
+                                    <div className="shrink-0">
+                                      {slot.status === 'available' && !isSlotSelectedForBooking && (
+                                        <button
+                                          onClick={() => {
+                                            setActiveBookingSlotId(slot.id);
+                                            setActiveBookingNotes('');
+                                          }}
+                                          className="bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition cursor-pointer"
+                                        >
+                                          Book Appointment
+                                        </button>
+                                      )}
+
+                                      {isMyBooking && (
+                                        <button
+                                          onClick={() => handleCancelSlotBooking(slot.id)}
+                                          disabled={isBookingInProgress}
+                                          className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-4 py-2 rounded-xl border border-rose-200 transition cursor-pointer"
+                                        >
+                                          Cancel Appointment
+                                        </button>
+                                      )}
+
+                                      {isBookedByOthers && (
+                                        <span className="text-xs text-slate-400 font-bold px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                                          Booked / Full
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Inline Booking Confirmation Form */}
+                                  {isSlotSelectedForBooking && (
+                                    <div className="mt-4 pt-3 border-t border-slate-100 space-y-3 animate-fadeIn text-left font-sans">
+                                      <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                                          What would you like to discuss?
+                                        </label>
+                                        <textarea
+                                          value={activeBookingNotes}
+                                          onChange={(e) => setActiveBookingNotes(e.target.value)}
+                                          placeholder="Enter meeting notes or topics (e.g. help with recursion lab, clarification on assignment grading, thesis discussion)"
+                                          className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-sky-500 rounded-xl p-3 text-xs focus:outline-none transition min-h-[80px]"
+                                        />
+                                      </div>
+                                      <div className="flex justify-end gap-2 text-xs font-bold">
+                                        <button
+                                          type="button"
+                                          onClick={() => setActiveBookingSlotId(null)}
+                                          className="px-3.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 cursor-pointer"
+                                        >
+                                          Cancel
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={isBookingInProgress}
+                                          onClick={() => handleBookSlot(slot.id)}
+                                          className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white flex items-center gap-1 cursor-pointer"
+                                        >
+                                          {isBookingInProgress && <Loader2 className="h-3 w-3 animate-spin" />}
+                                          <span>Confirm Appointment Booking</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Meeting notes if Booked by You */}
+                                  {isMyBooking && slot.meetingNotes && (
+                                    <div className="mt-3 pt-2 border-t border-emerald-100/50 text-xxs text-emerald-800">
+                                      <span className="font-bold">Your Discussion Notes:</span>
+                                      <p className="mt-1 bg-emerald-50 text-emerald-900 p-2.5 rounded-lg italic">
+                                        " {slot.meetingNotes} "
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

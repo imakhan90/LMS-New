@@ -84,6 +84,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactMessage, setContactMessage] = useState('');
+  const [activeHeroNode, setActiveHeroNode] = useState<'student' | 'professor' | 'admin' | 'core'>('core');
 
   const departments = [
     'Computer Science',
@@ -440,12 +441,12 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
             </div>
           </div>
 
-          {/* Right Column: Interactive Ecosystem Hero Illustration */}
+                  {/* Right Column: Interactive Ecosystem Hero Illustration */}
           <div className="lg:col-span-6 relative mt-8 lg:mt-0 flex justify-center">
-            <div className="w-full max-w-[500px] bg-white p-6 sm:p-8 rounded-[24px] shadow-2xl border border-slate-200/40 relative overflow-hidden">
+            <div className="w-full max-w-[500px] bg-white p-6 sm:p-8 rounded-[24px] shadow-2xl border border-slate-200/40 relative overflow-hidden flex flex-col justify-between">
               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full filter blur-xl" />
               
-              <div className="flex justify-between items-center pb-4 mb-6 border-b border-slate-100">
+              <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-100">
                 <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping inline-block" />
                   Ecosystem State: Connected
@@ -455,80 +456,169 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                 </span>
               </div>
 
+              {/* Interactive Node Guide Banner */}
+              <div className="text-center mb-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                  ⚡ Click or hover any node below to simulate active logs
+                </span>
+              </div>
+
               {/* Interconnected Nodes Visualizer Map */}
-              <div className="relative py-8 flex flex-col items-center justify-center">
+              <div className="relative py-12 flex flex-col items-center justify-center min-h-[280px]">
                 
                 {/* Central Database Core Node */}
-                <div id="central-db-core" className="relative z-20 w-24 h-24 bg-gradient-to-tr from-slate-900 to-slate-800 rounded-3xl shadow-xl flex flex-col items-center justify-center border-4 border-white text-white p-2 text-center group">
+                <button 
+                  type="button"
+                  onClick={() => setActiveHeroNode('core')}
+                  onMouseEnter={() => setActiveHeroNode('core')}
+                  className={`relative z-20 w-24 h-24 bg-gradient-to-tr from-slate-900 to-slate-800 rounded-3xl shadow-xl flex flex-col items-center justify-center border-4 text-white p-2 text-center transition-all duration-300 cursor-pointer ${
+                    activeHeroNode === 'core' ? 'border-sky-400 scale-105 shadow-sky-200/50' : 'border-white hover:border-slate-400'
+                  }`}
+                >
                   <div className="absolute -inset-2 bg-blue-500/20 rounded-[28px] filter blur-md animate-pulse" />
-                  <Database className="h-8 w-8 text-blue-400 mb-1 group-hover:scale-110 transition-transform" />
+                  <Database className="h-7 w-7 text-blue-400 mb-1" />
                   <span className="text-[9px] uppercase font-black tracking-widest text-slate-200">LMS CORE</span>
-                  <span className="text-[8px] font-mono text-blue-400">POSTGRESQL</span>
-                </div>
+                  <span className="text-[7px] font-mono text-blue-400">DB INGRESS</span>
+                </button>
 
                 {/* Satellite Portal Node 1: Student Portal (Left) */}
-                <div className="absolute top-0 left-0 z-10 w-32 bg-white hover:bg-blue-50/40 p-3.5 rounded-2xl border border-slate-200/80 shadow-md text-left transition-all duration-200 hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="bg-blue-50 p-1.5 rounded-lg text-blue-600">
-                      <GraduationCap className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={() => setActiveHeroNode('student')}
+                  onMouseEnter={() => setActiveHeroNode('student')}
+                  className={`absolute top-0 left-0 z-10 w-32 bg-white p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col gap-1 ${
+                    activeHeroNode === 'student' 
+                      ? 'border-blue-500 shadow-md scale-105 -translate-y-1 bg-blue-50/20' 
+                      : 'border-slate-200/80 hover:border-blue-300 hover:bg-slate-50/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <div className="bg-blue-50 p-1 rounded-lg text-blue-600">
+                      <GraduationCap className="h-3.5 w-3.5" />
                     </div>
-                    <span className="text-xs font-bold text-slate-800">Student Portal</span>
+                    <span className="text-[11px] font-bold text-slate-800">Student Portal</span>
                   </div>
-                  <p className="text-[9px] text-slate-400 leading-tight">Launches courses, submits assignments, views current grades.</p>
-                </div>
+                  <p className="text-[8.5px] text-slate-400 leading-tight">Enrolls lectures, solves dynamic quizzes, logs Quran readings.</p>
+                </button>
 
                 {/* Satellite Portal Node 2: Professor Portal (Right) */}
-                <div className="absolute top-0 right-0 z-10 w-32 bg-white hover:bg-emerald-50/40 p-3.5 rounded-2xl border border-slate-200/80 shadow-md text-left transition-all duration-200 hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className="bg-emerald-50 p-1.5 rounded-lg text-emerald-600">
-                      <BookOpen className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={() => setActiveHeroNode('professor')}
+                  onMouseEnter={() => setActiveHeroNode('professor')}
+                  className={`absolute top-0 right-0 z-10 w-32 bg-white p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col gap-1 ${
+                    activeHeroNode === 'professor' 
+                      ? 'border-emerald-500 shadow-md scale-105 -translate-y-1 bg-emerald-50/20' 
+                      : 'border-slate-200/80 hover:border-emerald-300 hover:bg-slate-50/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <div className="bg-emerald-50 p-1 rounded-lg text-emerald-600">
+                      <BookOpen className="h-3.5 w-3.5" />
                     </div>
-                    <span className="text-xs font-bold text-slate-800">Professor Portal</span>
+                    <span className="text-[11px] font-bold text-slate-800">Professor Portal</span>
                   </div>
-                  <p className="text-[9px] text-slate-400 leading-tight">Controls curricula, creates quizzes, records grades &amp; logs.</p>
-                </div>
+                  <p className="text-[8.5px] text-slate-400 leading-tight">Publishes clinical syllabus tracks, records student registers.</p>
+                </button>
 
                 {/* Satellite Portal Node 3: Admin Portal (Bottom) */}
-                <div className="absolute bottom-0 z-10 w-36 bg-white hover:bg-indigo-50/40 p-3.5 rounded-2xl border border-slate-200/80 shadow-md text-left transition-all duration-200 hover:translate-y-1">
-                  <div className="flex items-center gap-2 mb-1.5 justify-center">
-                    <div className="bg-indigo-50 p-1.5 rounded-lg text-indigo-600">
-                      <Shield className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={() => setActiveHeroNode('admin')}
+                  onMouseEnter={() => setActiveHeroNode('admin')}
+                  className={`absolute bottom-0 z-10 w-36 bg-white p-3 rounded-2xl border text-center transition-all duration-300 cursor-pointer flex flex-col items-center gap-1 ${
+                    activeHeroNode === 'admin' 
+                      ? 'border-indigo-500 shadow-md scale-105 translate-y-1 bg-indigo-50/20' 
+                      : 'border-slate-200/80 hover:border-indigo-300 hover:bg-slate-50/40'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 justify-center">
+                    <div className="bg-indigo-50 p-1 rounded-lg text-indigo-600">
+                      <Shield className="h-3.5 w-3.5" />
                     </div>
-                    <span className="text-xs font-bold text-slate-800">Admin Portal</span>
+                    <span className="text-[11px] font-bold text-slate-800">Admin Portal</span>
                   </div>
-                  <p className="text-[9px] text-slate-400 leading-tight text-center">Spans departments, handles users, generates system performance analytics.</p>
-                </div>
+                  <p className="text-[8.5px] text-slate-400 leading-tight">Coordinates system files, manages users, optimizes server nodes.</p>
+                </button>
 
                 {/* Sync Connector SVG paths with flowing laser dots */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none -z-10" viewBox="0 0 400 300">
                   {/* Student to Core */}
                   <path d="M 120 70 L 200 150" stroke="#E2E8F0" strokeWidth="2.5" strokeDasharray="5,5" fill="none" />
-                  <circle r="4" fill="#3B82F6">
-                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M 120 70 L 200 150" />
+                  <circle r="4.5" fill="#3B82F6">
+                    <animateMotion dur="2s" repeatCount="indefinite" path="M 120 70 L 200 150" />
                   </circle>
 
                   {/* Professor to Core */}
                   <path d="M 280 70 L 200 150" stroke="#E2E8F0" strokeWidth="2.5" strokeDasharray="5,5" fill="none" />
-                  <circle r="4" fill="#10B981">
-                    <animateMotion dur="3s" repeatCount="indefinite" path="M 280 70 L 200 150" />
+                  <circle r="4.5" fill="#10B981">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M 280 70 L 200 150" />
                   </circle>
 
                   {/* Core to Admin */}
                   <path d="M 200 150 L 200 240" stroke="#E2E8F0" strokeWidth="2.5" strokeDasharray="5,5" fill="none" />
-                  <circle r="4" fill="#6366F1">
-                    <animateMotion dur="2s" repeatCount="indefinite" path="M 200 150 L 200 240" />
+                  <circle r="4.5" fill="#6366F1">
+                    <animateMotion dur="1.8s" repeatCount="indefinite" path="M 200 150 L 200 240" />
                   </circle>
                 </svg>
               </div>
 
-              {/* Central Sync Badge */}
-              <div className="mt-6 bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center justify-between text-xs text-slate-600 font-medium">
-                <span className="flex items-center gap-2 font-bold text-slate-700">
-                  <Database className="h-4 w-4 text-blue-500" />
-                  Real-Time DBMS Synchronization
-                </span>
-                <span className="text-[#38B889] font-extrabold">Active Now</span>
+              {/* Dynamic Real-Time Terminal Activity Logs Inspector */}
+              <div className="mt-4 bg-slate-950 text-slate-200 rounded-2xl p-4 shadow-inner text-left font-mono text-[10.5px] space-y-1.5 relative overflow-hidden border border-slate-800">
+                <div className="absolute top-0 right-0 p-1.5 bg-slate-900 border-l border-b border-slate-800 text-[8px] font-black tracking-widest text-slate-500 uppercase flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
+                  <span>Terminal Inspector</span>
+                </div>
+                
+                {activeHeroNode === 'core' && (
+                  <>
+                    <p className="text-[#38B889] font-black flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      &gt; CORE STATE: STANDBY_OPTIMAL
+                    </p>
+                    <p className="text-slate-400">Database Engine: local_file_system (Drizzle SQLite/Memory)</p>
+                    <p className="text-slate-400">Platform Sync: Active (WebSocket proxying bypassed)</p>
+                    <p className="text-slate-400">Gemini LLM Channel: Connected (Model: gemini-2.5-flash)</p>
+                  </>
+                )}
+
+                {activeHeroNode === 'student' && (
+                  <>
+                    <p className="text-blue-400 font-black flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping inline-block" />
+                      &gt; NODE STIMULUS: STUDENT_PORTAL_ACTIVE
+                    </p>
+                    <p className="text-slate-400">User: Zayn Malik (student@university.edu)</p>
+                    <p className="text-slate-400">Recent: Passed quiz "Variables & Types" (Grade: 100%)</p>
+                    <p className="text-slate-400">Sync payload: &#123; attPercentage: 92%, certs: 1 &#125;</p>
+                  </>
+                )}
+
+                {activeHeroNode === 'professor' && (
+                  <>
+                    <p className="text-emerald-400 font-black flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
+                      &gt; NODE STIMULUS: PROFESSOR_PORTAL_ACTIVE
+                    </p>
+                    <p className="text-slate-400">User: Dr. Sarah Jenkins (professor@university.edu)</p>
+                    <p className="text-[#38B889]">Broadcast: Sent answer to Zayn Malik query</p>
+                    <p className="text-slate-400">Sync payload: &#123; coursesCreated: 4, gradingIndex: 100% &#125;</p>
+                  </>
+                )}
+
+                {activeHeroNode === 'admin' && (
+                  <>
+                    <p className="text-indigo-400 font-black flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-ping inline-block" />
+                      &gt; NODE STIMULUS: ADMIN_CONSOLE_ACTIVE
+                    </p>
+                    <p className="text-slate-400">System thread ID: node_main_ingress_0</p>
+                    <p className="text-slate-400">Database Sync: Storage allocation verified</p>
+                    <p className="text-slate-400">Diagnostics: Latency 12ms | Memory 94MB | Storage OK</p>
+                  </>
+                )}
               </div>
+
             </div>
           </div>
         </div>

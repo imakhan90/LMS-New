@@ -143,3 +143,18 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+export interface OfficeHourSlot {
+  id: string;
+  courseId: string;
+  professorId: string;
+  professorName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: 'available' | 'booked';
+  studentId?: string;
+  studentName?: string;
+  studentEmail?: string;
+  meetingNotes?: string;
+}
+
