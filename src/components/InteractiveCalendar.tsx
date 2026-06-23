@@ -37,7 +37,7 @@ interface CalendarEvent {
   courseCode: string;
   courseTitle: string;
   courseId: string;
-  type: 'live' | 'quiz' | 'custom';
+  type: 'live' | 'quiz' | 'exam' | 'custom';
   description?: string;
   dateStr: string; // YYYY-MM-DD
   linkQuiz?: any;
@@ -70,10 +70,30 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
     localStorage.setItem(`lms_custom_events_${user.id}`, JSON.stringify(customEvents));
   }, [customEvents, user.id]);
 
+  // Rescheduled date overrides persistent in localStorage
+  const [rescheduledEvents, setRescheduledEvents] = useState<{ [id: string]: string }>(() => {
+    try {
+      const stored = localStorage.getItem(`lms_rescheduled_events_${user.id}`);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Saving rescheduled dates
+  useEffect(() => {
+    localStorage.setItem(`lms_rescheduled_events_${user.id}`, JSON.stringify(rescheduledEvents));
+  }, [rescheduledEvents, user.id]);
+
+  // Drag and drop states
+  const [draggingEventId, setDraggingEventId] = useState<string | null>(null);
+  const [dragOverDate, setDragOverDate] = useState<string | null>(null);
+
   // Form input variables for custom event scheduler
   const [showEventForm, setShowEventForm] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventTime, setNewEventTime] = useState('14:00');
+  const [newEventCategory, setNewEventCategory] = useState<'live' | 'quiz' | 'exam' | 'custom'>('custom');
   const [newEventDesc, setNewEventDesc] = useState('');
   
   // Immersive Virtual Classroom state
@@ -88,6 +108,49 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, eventId: string) => {
+    setDraggingEventId(eventId);
+    e.dataTransfer.setData('text/plain', eventId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, dateStr: string) => {
+    e.preventDefault();
+    setDragOverDate(dateStr);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverDate(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetDateStr: string) => {
+    e.preventDefault();
+    setDragOverDate(null);
+    const eventId = e.dataTransfer.getData('text/plain') || draggingEventId;
+    if (!eventId) return;
+
+    // Update state depending on whether it's a custom event or default event
+    const event = allEvents.find(ev => ev.id === eventId);
+    if (!event) return;
+
+    if (event.type === 'custom') {
+      setCustomEvents(prev => prev.map(ev => {
+        if (ev.id === eventId) {
+          return { ...ev, dateStr: targetDateStr };
+        }
+        return ev;
+      }));
+    } else {
+      setRescheduledEvents(prev => ({
+        ...prev,
+        [eventId]: targetDateStr
+      }));
+    }
+
+    setDraggingEventId(null);
+  };
+
   // Map courses to dynamic recurrences
   const getSchedules = (): CalendarEvent[] => {
     const list: CalendarEvent[] = [];
@@ -95,11 +158,6 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
     // Loop through academic courses
     courses.forEach((course, idx) => {
       // Determine designated recurring weekdays for live sessions based on index helper
-      // course 0 -> Tuesday & Thursday
-      // course 1 -> Monday & Wednesday
-      // course 2 -> Wednesday & Friday
-      // course 3 -> Tuesday & Saturday
-      // course 4 -> Monday & Thursday
       let weekdays: number[] = [2, 4]; // default Tue Thu
       if (idx === 1) weekdays = [1, 3];
       else if (idx === 2) weekdays = [3, 5];
@@ -133,7 +191,7 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
         }
       }
 
-      // Quiz deadlines
+      // Quiz and Assignment deadlines
       course.modules.forEach((module, mIdx) => {
         module.lessons.forEach((lesson, lIdx) => {
           if (lesson.type === 'quiz' && lesson.quiz) {
@@ -156,6 +214,21 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
           }
         });
       });
+
+      // Scheduled high-stakes term exams
+      const examDay = 11 + (idx * 3) % 15; // spread exams across the month
+      const examDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(examDay).padStart(2, '0')}`;
+      list.push({
+        id: `exam_${course.id}_midterm`,
+        title: `🏆 Midterm Examination: ${course.code}`,
+        time: '09:00 - 11:30',
+        courseCode: course.code,
+        courseTitle: course.title,
+        courseId: course.id,
+        type: 'exam',
+        description: `Comprehensive evaluation covering theoretical and applied lectures from Modules 1-3. Mandatory for terminal grading.`,
+        dateStr: examDateStr
+      });
     });
 
     // Merge in custom events that match current month
@@ -169,7 +242,15 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
       return false;
     });
 
-    return [...list, ...customMatch];
+    const combined = [...list, ...customMatch];
+
+    // Apply rescheduled overrides
+    return combined.map(ev => {
+      if (rescheduledEvents[ev.id]) {
+        return { ...ev, dateStr: rescheduledEvents[ev.id] };
+      }
+      return ev;
+    });
   };
 
   const allEvents = getSchedules();
@@ -259,21 +340,36 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
     e.preventDefault();
     if (!newEventTitle.trim()) return;
 
+    // Get default course metadata labels matching category selection
+    let courseCode = 'Personal Log';
+    let courseTitle = 'My Revision Schedule';
+    if (newEventCategory === 'quiz') {
+      courseCode = 'Course Milestone';
+      courseTitle = 'Custom Quiz / Assignment';
+    } else if (newEventCategory === 'live') {
+      courseCode = 'Live Session';
+      courseTitle = 'Custom Seminar / Workshop';
+    } else if (newEventCategory === 'exam') {
+      courseCode = 'Exam Milestone';
+      courseTitle = 'Custom Examination / Test';
+    }
+
     const newEv: CalendarEvent = {
       id: `custom_${Date.now()}`,
       title: newEventTitle,
       time: newEventTime,
-      courseCode: 'My Study Log',
-      courseTitle: 'Personal Revision Milestone',
+      courseCode,
+      courseTitle,
       courseId: 'personal_log',
-      type: 'custom',
-      description: newEventDesc || 'Dedicated study focus block.',
+      type: newEventCategory,
+      description: newEventDesc || 'Dedicated calendar study focus block.',
       dateStr: selectedDateStr
     };
 
     setCustomEvents(prev => [...prev, newEv]);
     setNewEventTitle('');
     setNewEventDesc('');
+    setNewEventCategory('custom');
     setShowEventForm(false);
   };
 
@@ -333,53 +429,69 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
   };
 
   return (
-    <div className="bg-white rounded-[20px] border border-slate-200/70 shadow-sm overflow-hidden mt-6">
-      <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="bg-white dark:bg-[#0F172A] rounded-[20px] border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden mt-6 transition-colors duration-300">
+      <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-primary p-2.5 text-white rounded-xl shadow-md shrink-0">
             <CalendarIcon className="h-5 w-5" />
           </div>
           <div className="text-left">
-            <h3 className="text-base sm:text-lg font-poppins font-black text-slate-800">Academic Program Schedule</h3>
-            <p className="text-xs text-slate-500 font-semibold flex items-center gap-1">
+            <h3 className="text-base sm:text-lg font-poppins font-black text-slate-800 dark:text-slate-100">Academic Program Schedule</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">
               <Sparkles className="h-3.3 w-3.3 text-primary animate-pulse" />
-              Interactive live lectures, assignments, and study milestones
+              Interactive live lectures, assignments, and study milestones (Drag & Drop any event to reschedule)
             </p>
           </div>
         </div>
 
-        {/* Current Month Navigator buttons */}
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          <button 
-            type="button" 
-            onClick={handlePrevMonth}
-            className="p-2 border border-slate-200 hover:border-primary/50 hover:bg-slate-100/50 rounded-xl transition text-slate-600 bg-white"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          
-          <span className="font-poppins font-bold text-xs sm:text-sm text-slate-800 tracking-wider min-w-[120px] text-center uppercase">
-            {MONTHS[currentMonth]} {currentYear}
-          </span>
+        {/* Current Month Navigator and Revert buttons */}
+        <div className="flex flex-wrap items-center gap-3 self-start sm:self-center">
+          {Object.keys(rescheduledEvents).length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Reset all dragged lectures, quizzes, and exams to their standard academic dates?")) {
+                  setRescheduledEvents({});
+                }
+              }}
+              className="text-[10px] font-extrabold bg-rose-50 text-rose-600 hover:bg-rose-100 px-3 py-2 rounded-xl border border-rose-200/60 transition shadow-xxs uppercase tracking-wider"
+            >
+              🔄 Revert To Standard Dates
+            </button>
+          )}
 
-          <button 
-            type="button" 
-            onClick={handleNextMonth}
-            className="p-2 border border-slate-200 hover:border-primary/50 hover:bg-slate-100/50 rounded-xl transition text-slate-600 bg-white"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button" 
+              onClick={handlePrevMonth}
+              className="p-2 border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 rounded-xl transition text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            
+            <span className="font-poppins font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 tracking-wider min-w-[120px] text-center uppercase">
+              {MONTHS[currentMonth]} {currentYear}
+            </span>
+
+            <button 
+              type="button" 
+              onClick={handleNextMonth}
+              className="p-2 border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/40 rounded-xl transition text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+      <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-slate-800">
         
         {/* Calendar Interactive Grid - spans 8 columns */}
         <div className="lg:col-span-8 p-4 sm:p-5">
           {/* Weekday Labels Header row */}
           <div className="grid grid-cols-7 text-center mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <span key={day} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest py-1">
+              <span key={day} className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest py-1">
                 {day}
               </span>
             ))}
@@ -391,24 +503,32 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
               const cellEvents = allEvents.filter(ev => ev.dateStr === cell.dateStr);
               const isSelected = cell.dateStr === selectedDateStr;
               const isToday = cell.dateStr === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+              const isDraggedOver = dragOverDate === cell.dateStr;
               
               // Count specific types of events in cell
               const hasLive = cellEvents.some(e => e.type === 'live');
               const hasQuiz = cellEvents.some(e => e.type === 'quiz');
+              const hasExam = cellEvents.some(e => e.type === 'exam');
               const hasCustom = cellEvents.some(e => e.type === 'custom');
 
               return (
-                <button
+                <div
                   key={idx}
-                  type="button"
                   onClick={() => setSelectedDateStr(cell.dateStr)}
-                  className={`aspect-square sm:aspect-video rounded-xl p-1.5 flex flex-col justify-between items-start border relative transition-all group ${
+                  onDragOver={(e) => handleDragOver(e, cell.dateStr)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, cell.dateStr)}
+                  className={`aspect-square sm:aspect-[4/3] rounded-xl p-1.5 flex flex-col justify-between items-start border relative transition-all group cursor-pointer select-none ${
                     !cell.isCurrentMonth 
-                      ? 'bg-slate-50/50 text-slate-300 border-slate-100' 
-                      : 'bg-white text-slate-700 border-slate-200/80 hover:border-primary/60 hover:shadow-xs'
+                      ? 'bg-slate-50/50 dark:bg-slate-900/10 text-slate-300 dark:text-slate-600 border-slate-100 dark:border-slate-800/45' 
+                      : 'bg-white dark:bg-[#0F172A] text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:border-primary/60 hover:shadow-xs'
                   } ${
                     isSelected 
-                      ? 'ring-2 ring-primary border-primary bg-primary/5' 
+                      ? 'ring-2 ring-primary border-primary bg-primary/5 dark:bg-primary/10' 
+                      : ''
+                  } ${
+                    isDraggedOver
+                      ? 'border-dashed border-2 border-blue-500 bg-blue-50/40 dark:bg-blue-950/20 shadow-sm scale-[0.98]'
                       : ''
                   }`}
                 >
@@ -417,67 +537,91 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                     isToday 
                       ? 'bg-primary text-white font-black shadow-sm' 
                       : isSelected 
-                        ? 'text-primary font-extrabold' 
-                        : 'text-slate-700'
+                        ? 'text-primary font-extrabold bg-primary/10 dark:bg-primary/20' 
+                        : 'text-slate-700 dark:text-slate-300'
                   }`}>
                     {cell.day}
                   </span>
 
-                  {/* Tiny Badges for desktop/tablet, or small circles for mobile */}
-                  <div className="w-full flex flex-wrap gap-0.5 mt-auto">
-                    {/* Live indicator */}
-                    {hasLive && (
-                      <span className="hidden md:inline-flex items-center gap-0.5 text-[8px] font-bold bg-blue-50 text-primary border border-blue-100 rounded px-1 py-0.2 w-full truncate">
-                        🎙️ Live Session
-                      </span>
-                    )}
-                    {/* Quiz indicator */}
-                    {hasQuiz && (
-                      <span className="hidden md:inline-flex items-center gap-0.5 text-[8px] font-bold bg-rose-50 text-rose-700 border border-rose-100 rounded px-1 py-0.2 w-full truncate">
-                        📝 Quiz Deadline
-                      </span>
-                    )}
-                    {/* Personal task indicator */}
-                    {hasCustom && (
-                      <span className="hidden md:inline-flex items-center gap-0.5 text-[8px] font-bold bg-amber-50 text-amber-700 border border-amber-100 rounded px-1 py-0.2 w-full truncate">
-                        🌟 Personal Event
-                      </span>
-                    )}
+                  {/* Dynamic event tags list for desktop/tablet view */}
+                  <div className="w-full hidden md:flex flex-col gap-1 mt-1 max-h-[70px] overflow-hidden">
+                    {cellEvents.slice(0, 3).map((ev) => {
+                      const isL = ev.type === 'live';
+                      const isQ = ev.type === 'quiz';
+                      const isE = ev.type === 'exam';
+                      
+                      let badgeBg = 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-100/50 dark:border-blue-900/30';
+                      let prefix = '🎙️';
+                      if (isQ) {
+                        badgeBg = 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-100/50 dark:border-rose-900/30';
+                        prefix = '📝';
+                      } else if (isE) {
+                        badgeBg = 'bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border-purple-100/50 dark:border-purple-900/30';
+                        prefix = '🏆';
+                      } else if (ev.type === 'custom') {
+                        badgeBg = 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-100/50 dark:border-amber-900/30';
+                        prefix = '🌟';
+                      }
 
-                    {/* Compact mobile dot displays */}
-                    <div className="flex md:hidden gap-1 justify-center w-full mt-1">
-                      {hasLive && <span className="h-1.5 w-1.5 bg-primary rounded-full shrink-0" />}
-                      {hasQuiz && <span className="h-1.5 w-1.5 bg-rose-500 rounded-full shrink-0" />}
-                      {hasCustom && <span className="h-1.5 w-1.5 bg-amber-500 rounded-full shrink-0" />}
-                    </div>
+                      return (
+                        <div
+                          key={ev.id}
+                          draggable
+                          onDragStart={(e) => {
+                            e.stopPropagation();
+                            handleDragStart(e, ev.id);
+                          }}
+                          className={`flex items-center gap-0.5 text-[8px] font-bold border rounded-lg px-1 py-0.5 w-full truncate cursor-grab active:cursor-grabbing hover:brightness-95 transition-all ${badgeBg}`}
+                          title={`${prefix} ${ev.title} (${ev.time})`}
+                        >
+                          {prefix} {ev.title}
+                        </div>
+                      );
+                    })}
+                    {cellEvents.length > 3 && (
+                      <div className="text-[7px] text-slate-400 font-extrabold pl-1 self-start">
+                        +{cellEvents.length - 3} more
+                      </div>
+                    )}
                   </div>
-                </button>
+
+                  {/* Compact mobile dot displays */}
+                  <div className="flex md:hidden gap-1 justify-center w-full mt-auto pt-1">
+                    {hasLive && <span className="h-1.5 w-1.5 bg-primary rounded-full shrink-0" />}
+                    {hasQuiz && <span className="h-1.5 w-1.5 bg-rose-500 rounded-full shrink-0" />}
+                    {hasExam && <span className="h-1.5 w-1.5 bg-purple-500 rounded-full shrink-0" />}
+                    {hasCustom && <span className="h-1.5 w-1.5 bg-amber-500 rounded-full shrink-0" />}
+                  </div>
+                </div>
               );
             })}
           </div>
 
           {/* Quick instructions bar */}
-          <div className="mt-4 flex flex-wrap gap-4 items-center justify-start text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1">
+          <div className="mt-4 flex flex-wrap gap-4 items-center justify-start text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider px-1 border-t border-slate-100 dark:border-slate-800 pt-3">
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-primary block" /> Live Lecture
+              <span className="h-2 w-2 rounded-full bg-primary block" /> Class Session
             </span>
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-rose-500 block" /> Quiz Deadline
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-amber-500 block" /> Personal Studylogs
+              <span className="h-2 w-2 rounded-full bg-purple-500 block" /> Scheduled Exam
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-amber-500 block" /> Personal Study-log
             </span>
           </div>
 
         </div>
 
         {/* Selected Date planner Detail lists - spans 4 columns */}
-        <div className="lg:col-span-4 p-5 bg-slate-50/20 flex flex-col justify-between">
+        <div className="lg:col-span-4 p-5 bg-slate-50/20 dark:bg-slate-900/10 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
                 <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Schedule for</p>
-                <h4 className="text-sm font-extrabold text-slate-800 font-mono">
+                <h4 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 font-mono">
                   {selectedDateStr}
                 </h4>
               </div>
@@ -493,8 +637,8 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
 
             {/* Custom Interactive Event Form container */}
             {showEventForm && (
-              <form onSubmit={handleAddCustomEvent} className="bg-white border border-blue-100 p-4 rounded-2xl shadow-sm space-y-3.5">
-                <h5 className="text-xs font-extrabold text-blue-700 flex items-center gap-1">
+              <form onSubmit={handleAddCustomEvent} className="bg-white dark:bg-[#0F172A] border border-blue-100 dark:border-blue-900/40 p-4 rounded-2xl shadow-sm space-y-3.5">
+                <h5 className="text-xs font-extrabold text-blue-700 dark:text-blue-400 flex items-center gap-1">
                   <Sparkles className="h-3 w-3" /> Create Study Milestone
                 </h5>
                 <div>
@@ -505,7 +649,7 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                     placeholder="e.g. Study Group / Lab Prep"
                     value={newEventTitle}
                     onChange={(e) => setNewEventTitle(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+                    className="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -515,14 +659,21 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                       type="time"
                       value={newEventTime}
                       onChange={(e) => setNewEventTime(e.target.value)}
-                      className="mt-1 block w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+                      className="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-500 uppercase">Category</label>
-                    <span className="block mt-1 bg-amber-50 text-amber-700 font-bold border border-amber-200 px-2.5 py-1.5 rounded-lg text-[10px] text-center">
-                      🌟 Personal Log
-                    </span>
+                    <select
+                      value={newEventCategory}
+                      onChange={(e) => setNewEventCategory(e.target.value as any)}
+                      className="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1.5 text-[10px] text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none font-bold"
+                    >
+                      <option value="custom">🌟 Personal Log</option>
+                      <option value="quiz">📝 Quiz / Assignment</option>
+                      <option value="live">🎙️ Class Session</option>
+                      <option value="exam">🏆 Scheduled Exam</option>
+                    </select>
                   </div>
                 </div>
                 <div>
@@ -532,14 +683,14 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                     placeholder="Brief notes..."
                     value={newEventDesc}
                     onChange={(e) => setNewEventDesc(e.target.value)}
-                    className="mt-1 block w-full rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs focus:border-blue-500 focus:outline-none"
+                    className="mt-1 block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:border-blue-500 focus:outline-none"
                   />
                 </div>
                 <div className="flex gap-1.5 justify-end pt-1">
                   <button
                     type="button"
                     onClick={() => setShowEventForm(false)}
-                    className="border border-slate-200 hover:bg-slate-50 text-slate-500 font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition"
+                    className="border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-500 dark:text-slate-400 font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition"
                   >
                     Cancel
                   </button>
@@ -556,64 +707,69 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
             {/* List of elements for selected day */}
             <div className="space-y-3">
               {selectedDayEvents.length === 0 ? (
-                <div className="py-8 text-center text-slate-400 bg-white border border-slate-100 rounded-2xl flex flex-col items-center justify-center p-4">
+                <div className="py-8 text-center text-slate-400 bg-white dark:bg-[#0F172A] border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center p-4 transition-colors">
                   <span className="text-lg mb-1">🕊️</span>
-                  <p className="text-xs font-bold text-slate-700">No scheduled activities</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Perfect day for personal library readings or AI assistance!</p>
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No scheduled activities</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Perfect day for personal library readings or AI assistance!</p>
                 </div>
               ) : (
                 selectedDayEvents.map(event => {
                   const isLive = event.type === 'live';
                   const isQuiz = event.type === 'quiz';
+                  const isExam = event.type === 'exam';
                   const isCustom = event.type === 'custom';
 
                   return (
                     <div 
                       key={event.id}
-                      className={`p-4 rounded-2xl border transition-all hover:shadow-xs flex flex-col justify-between gap-3 bg-white ${
-                        isLive ? 'border-l-4 border-l-blue-600 border-slate-100' :
-                        isQuiz ? 'border-l-4 border-l-rose-500 border-slate-100' :
-                        'border-l-4 border-l-amber-400 border-slate-100'
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, event.id)}
+                      className={`p-4 rounded-2xl border transition-all hover:shadow-md cursor-grab active:cursor-grabbing flex flex-col justify-between gap-3 bg-white dark:bg-[#0F172A] ${
+                        isExam ? 'border-l-4 border-l-purple-600 border-slate-100 dark:border-slate-800 hover:border-purple-200 dark:hover:border-purple-800' :
+                        isLive ? 'border-l-4 border-l-blue-600 border-slate-100 dark:border-slate-800 hover:border-blue-200 dark:hover:border-blue-800' :
+                        isQuiz ? 'border-l-4 border-l-rose-500 border-slate-100 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-800' :
+                        'border-l-4 border-l-amber-400 border-slate-100 dark:border-slate-800 hover:border-amber-200 dark:hover:border-amber-800'
                       }`}
                     >
                       <div className="space-y-1">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${
-                            isLive ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                            isQuiz ? 'bg-rose-50 text-rose-700 border-rose-100' :
-                            'bg-amber-50 text-amber-700 border-amber-100'
+                            isExam ? 'bg-purple-50 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400 border-purple-100 dark:border-purple-900/30' :
+                            isLive ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-900/30' :
+                            isQuiz ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-900/30' :
+                            'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-900/30'
                           }`}>
-                            {isLive ? '💻 Live Session' : isQuiz ? '📝 Quiz Deadline' : '🌟 Personal Log'}
+                            {isExam ? '🏆 Scheduled Exam' : isLive ? '🎙️ Class Session' : isQuiz ? '📝 Quiz Deadline' : '🌟 Personal Log'}
                           </span>
                           
-                          <span className="text-[10px] text-slate-400 font-extrabold font-mono flex items-center gap-1">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold font-mono flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {event.time}
                           </span>
                         </div>
 
-                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 line-clamp-2 pt-1">
+                        <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-slate-100 line-clamp-2 pt-1">
                           {event.title}
                         </h4>
                         
-                        <p className="text-[11px] text-slate-500 font-bold">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold">
                           {event.courseCode} &bull; {event.courseTitle}
                         </p>
                         
                         {event.description && (
-                          <p className="text-[10px] text-slate-400 font-medium leading-relaxed bg-slate-50/50 p-2 rounded-lg border border-slate-100">
+                          <p className="text-[10px] text-slate-400 dark:text-slate-400 font-medium leading-relaxed bg-slate-50/50 dark:bg-slate-900/40 p-2 rounded-lg border border-slate-100 dark:border-slate-800/80">
                             {event.description}
                           </p>
                         )}
                       </div>
 
                       {/* Action Triggers depending on user role and session type */}
-                      <div className="flex items-center gap-1.5 mt-1 border-t border-slate-50 pt-3 justify-between">
+                      <div className="flex items-center gap-1.5 mt-1 border-t border-slate-50 dark:border-slate-800/80 pt-3 justify-between">
                         {isLive ? (
                           <button
                             type="button"
                             onClick={() => handleJoinClassroom(event)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm shadow-blue-100"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] px-3.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-sm shadow-blue-100/10"
                           >
                             <Video className="h-3 w-3" />
                             Join Virtual Lecture Hall
@@ -635,15 +791,17 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                           </button>
                         ) : (
                           <div className="flex justify-between w-full items-center">
-                            <span className="text-[10px] text-slate-400 font-medium italic">Manually added logs</span>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteEvent(event.id)}
-                              className="text-slate-300 hover:text-rose-500 p-1 rounded-lg transition"
-                              title="Delete Personal Study Log"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium italic">Draggable schedule card</span>
+                            {event.id.startsWith('custom_') && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteEvent(event.id)}
+                                className="text-slate-300 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 p-1 rounded-lg transition"
+                                title="Delete Personal Study Log"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -655,9 +813,9 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
 
           </div>
 
-          <div className="mt-8 pt-4 border-t border-slate-100 bg-blue-50/30 rounded-2xl p-3 text-xxs text-slate-500 leading-normal">
-            <p className="font-bold text-slate-700 mb-0.5 uppercase tracking-wider">Automatic Integration</p>
-            This planner dynamically synchronizes with active campus courses. Adding or modifying quizzes instantly reflects here.
+          <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800 bg-blue-50/30 dark:bg-blue-950/20 rounded-2xl p-3 text-xxs text-slate-500 dark:text-slate-400 leading-normal">
+            <p className="font-bold text-slate-700 dark:text-slate-300 mb-0.5 uppercase tracking-wider">Dynamic Rescheduling Active</p>
+            You can drag and drop any session card from the monthly grid or this daily panel onto other dates to instantly reschedule class sessions, exam windows, or milestone logs!
           </div>
         </div>
 

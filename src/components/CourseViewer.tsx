@@ -73,6 +73,99 @@ export default function CourseViewer({
     { id: 'q_1', text: 'Enter assessment question?', options: ['', '', '', ''], correctOptionIndex: 0 }
   ]);
 
+  const [dashboardTab, setDashboardTab] = useState<'overview' | 'forum' | 'grades' | 'resources'>('overview');
+  const [forumThreads, setForumThreads] = useState<any[]>([]);
+  const [newThreadTitle, setNewThreadTitle] = useState('');
+  const [newThreadContent, setNewThreadContent] = useState('');
+  const [forumModule, setForumModule] = useState('General');
+  const [activeReplyThreadId, setActiveReplyThreadId] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`forum_threads_${selectedCourse.id}`);
+    if (saved) {
+      setForumThreads(JSON.parse(saved));
+    } else {
+      setForumThreads([
+        {
+          id: 't_1',
+          title: 'Tips for mastering the Module 1 concepts?',
+          author: 'Alex Rivera (Student)',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100',
+          content: 'I am finding the core programming structures in Module 1 a bit abstract. Are there any visual code sandboxes or visualizer tools you recommend to trace memory stacks step-by-step?',
+          date: '2 days ago',
+          replies: [
+            {
+              author: `${selectedCourse.instructor || 'Course Professor'}`,
+              isInstructor: true,
+              avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100',
+              content: 'Great question, Alex! I highly recommend using Python Tutor (pythontutor.com) to visually execute code lines one-by-one. It demonstrates heap/stack allocation clearly. I will cover this in tomorrow\'s office hours too.',
+              date: '1 day ago'
+            }
+          ]
+        },
+        {
+          id: 't_2',
+          title: 'Module 3 Quiz scope guidelines',
+          author: 'Sarah Chen (Student)',
+          avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=100',
+          content: 'Will the Module 3 assessment cover theoretical complexities or are we expected to perform dry-runs of multi-variable arrays? Just want to prioritize studying the right modules.',
+          date: '3 days ago',
+          replies: []
+        }
+      ]);
+    }
+  }, [selectedCourse.id, selectedCourse.instructor]);
+
+  const handleCreateThread = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newThreadTitle.trim() || !newThreadContent.trim()) return;
+    const newThread = {
+      id: `t_${Date.now()}`,
+      title: `${forumModule !== 'General' ? '[' + forumModule + '] ' : ''}${newThreadTitle}`,
+      author: `${user.name} (${user.studentId ? 'Student' : 'Faculty'})`,
+      avatar: user.studentId 
+        ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+        : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100',
+      content: newThreadContent,
+      date: 'Just now',
+      replies: []
+    };
+    const updated = [newThread, ...forumThreads];
+    setForumThreads(updated);
+    localStorage.setItem(`forum_threads_${selectedCourse.id}`, JSON.stringify(updated));
+    setNewThreadTitle('');
+    setNewThreadContent('');
+  };
+
+  const handlePostReply = (threadId: string) => {
+    if (!replyText.trim()) return;
+    const updated = forumThreads.map(t => {
+      if (t.id === threadId) {
+        return {
+          ...t,
+          replies: [
+            ...t.replies,
+            {
+              author: `${user.name} (${user.studentId ? 'Student' : 'Faculty'})`,
+              isInstructor: !user.studentId,
+              avatar: user.studentId 
+                ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+                : 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100',
+              content: replyText,
+              date: 'Just now'
+            }
+          ]
+        };
+      }
+      return t;
+    });
+    setForumThreads(updated);
+    localStorage.setItem(`forum_threads_${selectedCourse.id}`, JSON.stringify(updated));
+    setReplyText('');
+    setActiveReplyThreadId(null);
+  };
+
   // Sync active course if selected from dashboard
   useEffect(() => {
     if (activeCourseFromDashboard) {
@@ -758,16 +851,451 @@ export default function CourseViewer({
 
               </div>
             ) : (
-              <div className="p-8 text-center flex flex-col items-center justify-center min-h-[400px] gap-4">
-                <div className="bg-sky-50 p-4 rounded-full text-sky-600">
-                  <BookOpen className="h-10 w-10" />
+              <div className="p-6 md:p-8 space-y-6">
+                {/* Course Header Banner */}
+                <div className="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 text-white rounded-2xl p-6 relative overflow-hidden shadow-md">
+                  <div className="absolute inset-0 bg-grid-white/[0.03] bg-[size:16px_16px]" />
+                  <div className="relative z-10 space-y-2">
+                    <span className="text-[10px] uppercase font-extrabold tracking-wider bg-sky-500/30 text-sky-300 px-2.5 py-1 rounded-full border border-sky-400/20">
+                      {selectedCourse.department} • {selectedCourse.code}
+                    </span>
+                    <h3 className="text-xl md:text-2xl font-bold tracking-tight">{selectedCourse.title}</h3>
+                    <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">{selectedCourse.description}</p>
+                    
+                    {/* Key metadata grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10 mt-4 text-xs font-poppins">
+                      <div>
+                        <span className="text-slate-400 block">Credit Hours</span>
+                        <span className="font-bold text-slate-100">{selectedCourse.creditHours || 3} Credits</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Course Duration</span>
+                        <span className="font-bold text-slate-100">{selectedCourse.durationWeeks || 16} Weeks</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Instructor</span>
+                        <span className="font-bold text-slate-100">{selectedCourse.instructor}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block">Prerequisites</span>
+                        <span className="font-bold text-slate-100 truncate block">
+                          {selectedCourse.prerequisites && selectedCourse.prerequisites.length > 0 
+                            ? selectedCourse.prerequisites.join(', ') 
+                            : 'None'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-lg font-bold text-slate-800">{selectedCourse.title}</h4>
-                  <p className="text-xs text-slate-500 max-w-sm mt-1 mx-auto">
-                    Please select a lecture lesson from the curriculum outline on the right to start studying. Keep in mind that watching over 80% marks your lecture attendance automatically!
-                  </p>
+
+                {/* Dashboard Tabs bar */}
+                <div className="flex border-b border-slate-200 gap-1 overflow-x-auto pb-px">
+                  <button
+                    onClick={() => setDashboardTab('overview')}
+                    className={`px-4 py-2 text-xs font-bold transition-all border-b-2 shrink-0 cursor-pointer ${
+                      dashboardTab === 'overview'
+                        ? 'border-sky-600 text-sky-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Course Overview
+                  </button>
+                  <button
+                    onClick={() => setDashboardTab('forum')}
+                    className={`px-4 py-2 text-xs font-bold transition-all border-b-2 shrink-0 cursor-pointer ${
+                      dashboardTab === 'forum'
+                        ? 'border-sky-600 text-sky-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Discussion Forum
+                  </button>
+                  <button
+                    onClick={() => setDashboardTab('grades')}
+                    className={`px-4 py-2 text-xs font-bold transition-all border-b-2 shrink-0 cursor-pointer ${
+                      dashboardTab === 'grades'
+                        ? 'border-sky-600 text-sky-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Grades &amp; Attendance
+                  </button>
+                  <button
+                    onClick={() => setDashboardTab('resources')}
+                    className={`px-4 py-2 text-xs font-bold transition-all border-b-2 shrink-0 cursor-pointer ${
+                      dashboardTab === 'resources'
+                        ? 'border-sky-600 text-sky-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    Learning Resources
+                  </button>
                 </div>
+
+                {/* Tab content switcher */}
+                {dashboardTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Bento Box: Progress & Announcements */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      
+                      {/* Left: Progress Tracking & Instructor */}
+                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Progress Tracking</h4>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">Active Term</span>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-bold text-slate-700">
+                            <span>Syllabus Completion</span>
+                            <span>12%</span>
+                          </div>
+                          <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: '12%' }} />
+                          </div>
+                          <p className="text-[10px] text-slate-400">
+                            1 of {selectedCourse.modules.reduce((acc, m) => acc + (m.lessons || []).length, 0)} lectures completed. Select a lesson from the syllabus accordion to start studying.
+                          </p>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-200/60 flex items-center gap-3">
+                          <div className="bg-sky-100 p-2.5 rounded-xl text-sky-700 shrink-0">
+                            <Bot className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h5 className="text-xs font-bold text-slate-800">Need immediate help?</h5>
+                            <p className="text-[10px] text-slate-400">Ask the chatbot in the navigation header or consult the AI Tutor during any video lecture.</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right: Announcements */}
+                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-4">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                          <Sparkles className="h-3.5 w-3.5 text-sky-500" />
+                          Official Announcements
+                        </h4>
+                        
+                        <div className="space-y-3">
+                          <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs space-y-1">
+                            <div className="flex justify-between items-center text-[10px]">
+                              <span className="font-bold text-sky-600">{selectedCourse.instructor}</span>
+                              <span className="text-slate-400">Today</span>
+                            </div>
+                            <h5 className="text-xs font-bold text-slate-800">Welcome to {selectedCourse.code}!</h5>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Hello everyone, please review the syllabus under the resources tab. Live synchronous sessions start this Wednesday.
+                            </p>
+                          </div>
+
+                          <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-2xs space-y-1">
+                            <div className="flex justify-between items-center text-[10px]">
+                              <span className="font-bold text-purple-600">Dean of Academics</span>
+                              <span className="text-slate-400">3 days ago</span>
+                            </div>
+                            <h5 className="text-xs font-bold text-slate-800">Interactive Quiz Structure</h5>
+                            <p className="text-[10px] text-slate-500 leading-relaxed">
+                              Each module contains an interactive 10-question MCQ quiz to support continuous evaluation. Keep track of module deadlines!
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Learning Outcomes */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Course Learning Outcomes</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {selectedCourse.learningOutcomes && selectedCourse.learningOutcomes.length > 0 ? (
+                          selectedCourse.learningOutcomes.map((outcome, idx) => (
+                            <div key={idx} className="flex gap-2 text-xs text-slate-600">
+                              <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                              <span>{outcome}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <>
+                            <div className="flex gap-2 text-xs text-slate-600">
+                              <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                              <span>Master core fundamental concepts and advanced structural systems of the curriculum.</span>
+                            </div>
+                            <div className="flex gap-2 text-xs text-slate-600">
+                              <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                              <span>Analyze computational or workflow efficiency metrics and modern industry standards.</span>
+                            </div>
+                            <div className="flex gap-2 text-xs text-slate-600">
+                              <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                              <span>Design robust implementations complying with international academic and enterprise schemas.</span>
+                            </div>
+                            <div className="flex gap-2 text-xs text-slate-600">
+                              <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                              <span>Validate theoretical outputs, pass modules quizzes, and earn an certified statement of completion.</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === 'forum' && (
+                  <div className="space-y-5">
+                    {/* Create thread form */}
+                    <form onSubmit={handleCreateThread} className="bg-slate-50 p-4 border border-slate-100 rounded-2xl space-y-3">
+                      <h4 className="text-xs font-bold text-slate-700">Start a New Discussion Thread</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <input
+                          type="text"
+                          placeholder="Thread Title (e.g., Problem with Week 2 Quiz)"
+                          value={newThreadTitle}
+                          onChange={(e) => setNewThreadTitle(e.target.value)}
+                          className="sm:col-span-2 bg-white border border-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-sky-500 text-slate-800"
+                          required
+                        />
+                        <select
+                          value={forumModule}
+                          onChange={(e) => setForumModule(e.target.value)}
+                          className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-sky-500 text-slate-600 font-semibold"
+                        >
+                          <option value="General">General Inquiries</option>
+                          {selectedCourse.modules.map(m => (
+                            <option key={m.id} value={m.title.substring(0, 15) + '...'}>{m.title.substring(0, 25)}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <textarea
+                        placeholder="Write your explanation or question in detail here..."
+                        value={newThreadContent}
+                        onChange={(e) => setNewThreadContent(e.target.value)}
+                        rows={3}
+                        className="w-full bg-white border border-slate-200 text-xs rounded-xl p-3 outline-none focus:border-sky-500 text-slate-800"
+                        required
+                      />
+                      <div className="flex justify-end">
+                        <button
+                          type="submit"
+                          className="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-xs cursor-pointer"
+                        >
+                          Post to Course Forum
+                        </button>
+                      </div>
+                    </form>
+
+                    {/* Active threads list */}
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Recent Class Discussions</h4>
+                      
+                      {forumThreads.length === 0 ? (
+                        <p className="text-xs text-slate-400 text-center py-6">No discussions active for this course. Start the first thread!</p>
+                      ) : (
+                        <div className="space-y-3.5">
+                          {forumThreads.map(t => (
+                            <div key={t.id} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-2xs space-y-3 text-xs">
+                              <div className="flex items-center gap-3">
+                                <img src={t.avatar} className="h-8 w-8 rounded-full object-cover border border-slate-100 shrink-0" alt="avatar" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-slate-800">{t.author}</span>
+                                    <span className="text-[10px] text-slate-400">{t.date}</span>
+                                  </div>
+                                  <h5 className="font-bold text-slate-700 mt-0.5">{t.title}</h5>
+                                </div>
+                              </div>
+                              <p className="text-slate-600 leading-relaxed pl-11">{t.content}</p>
+                              
+                              {/* Replies */}
+                              {t.replies && t.replies.length > 0 && (
+                                <div className="pl-11 space-y-3 pt-2 border-t border-slate-50 mt-2">
+                                  {t.replies.map((r: any, rIdx: number) => (
+                                    <div key={rIdx} className="bg-slate-50/50 p-3 rounded-xl border border-slate-100/50 space-y-1">
+                                      <div className="flex items-center gap-2 text-xxs">
+                                        <img src={r.avatar} className="h-5 w-5 rounded-full object-cover shrink-0" alt="reply-avatar" />
+                                        <span className={`font-bold ${r.isInstructor ? 'text-sky-700' : 'text-slate-700'}`}>
+                                          {r.author}
+                                        </span>
+                                        {r.isInstructor && <span className="bg-sky-100 text-sky-800 text-[8px] font-black uppercase px-1.5 py-0.2 rounded-sm ml-1">Instructor</span>}
+                                        <span className="text-[9px] text-slate-400 ml-1">{r.date}</span>
+                                      </div>
+                                      <p className="text-slate-600 leading-relaxed pl-7">{r.content}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Quick Reply Form */}
+                              <div className="pl-11 pt-1">
+                                {activeReplyThreadId === t.id ? (
+                                  <div className="space-y-2 mt-2">
+                                    <textarea
+                                      placeholder="Write your response..."
+                                      value={replyText}
+                                      onChange={(e) => setReplyText(e.target.value)}
+                                      rows={2}
+                                      className="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl p-2.5 outline-none focus:border-sky-500 text-slate-800"
+                                    />
+                                    <div className="flex gap-2 justify-end">
+                                      <button
+                                        onClick={() => setActiveReplyThreadId(null)}
+                                        className="text-slate-500 hover:text-slate-800 font-semibold text-xxs px-3 py-1 bg-slate-100 rounded-lg transition"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handlePostReply(t.id)}
+                                        className="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xxs px-3 py-1 rounded-lg transition"
+                                      >
+                                        Submit Response
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      setActiveReplyThreadId(t.id);
+                                      setReplyText('');
+                                    }}
+                                    className="text-sky-600 hover:text-sky-700 font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
+                                  >
+                                    <MessageSquare className="h-3.5 w-3.5" />
+                                    Reply to Thread
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === 'grades' && (
+                  <div className="space-y-6 text-xs font-poppins">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Attendance Card */}
+                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Attendance Statistics</h4>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-black text-slate-800">87.5%</span>
+                          <span className="text-emerald-600 font-bold">Good Standing</span>
+                        </div>
+                        <p className="text-slate-400 text-[10px]">
+                          Attended 7 of 8 evaluated sessions. Watching over 80% marks lecture attendance automatically.
+                        </p>
+                        
+                        <div className="space-y-2 pt-3 border-t border-slate-200/60 font-sans">
+                          <div className="flex justify-between font-semibold text-slate-600 text-xxs">
+                            <span>Module 1: Core Introductory Syllabus</span>
+                            <span className="text-emerald-600 font-bold">Present (95% Watched)</span>
+                          </div>
+                          <div className="flex justify-between font-semibold text-slate-600 text-xxs">
+                            <span>Module 2: Advanced Coursework Session</span>
+                            <span className="text-emerald-600 font-bold">Present (89% Watched)</span>
+                          </div>
+                          <div className="flex justify-between font-semibold text-slate-600 text-xxs">
+                            <span>Module 3: Methodology and Application</span>
+                            <span className="text-amber-600 font-bold">Incomplete (12% Watched)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Grades Card */}
+                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Evaluation Outlines</h4>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-3xl font-black text-slate-800">A-</span>
+                          <span className="text-slate-500">GPA: 3.67</span>
+                        </div>
+                        <p className="text-slate-400 text-[10px]">
+                          Weekly module quizzes make up 40% of the overall cumulative course evaluations.
+                        </p>
+                        
+                        <div className="space-y-2 pt-3 border-t border-slate-200/60 font-sans">
+                          <div className="flex justify-between font-semibold text-slate-600 text-xxs">
+                            <span>Module 1 Practice Assessment Quiz</span>
+                            <span className="text-slate-800 font-bold">10 / 10 (100%)</span>
+                          </div>
+                          <div className="flex justify-between font-semibold text-slate-600 text-xxs">
+                            <span>Module 2 Concepts Evaluation Quiz</span>
+                            <span className="text-slate-800 font-bold">9 / 10 (90%)</span>
+                          </div>
+                          <div className="flex justify-between font-semibold text-slate-600 text-xxs">
+                            <span>General Syllabus Diagnostic Test</span>
+                            <span className="text-slate-800 font-bold">8 / 10 (80%)</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === 'resources' && (
+                  <div className="space-y-5 text-xs font-poppins">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Syllabus Resources &amp; References</h4>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans">
+                      <div className="bg-white border border-slate-100 shadow-2xs rounded-xl p-4 flex justify-between items-center hover:border-slate-200 transition">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-red-50 p-2.5 rounded-xl text-red-600">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h5 className="font-bold text-slate-800 text-xs">Course Syllabus &amp; Rubric</h5>
+                            <span className="text-[10px] text-slate-400 block mt-0.5">PDF Document • 1.2 MB</span>
+                          </div>
+                        </div>
+                        <a href="#" className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xxs px-3 py-1.5 rounded-lg transition" onClick={(e) => e.preventDefault()}>
+                          Download
+                        </a>
+                      </div>
+
+                      <div className="bg-white border border-slate-100 shadow-2xs rounded-xl p-4 flex justify-between items-center hover:border-slate-200 transition">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-indigo-50 p-2.5 rounded-xl text-indigo-600">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h5 className="font-bold text-slate-800 text-xs">Academic Reference Text</h5>
+                            <span className="text-[10px] text-slate-400 block mt-0.5">PDF Ebook • 18.5 MB</span>
+                          </div>
+                        </div>
+                        <a href="#" className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xxs px-3 py-1.5 rounded-lg transition" onClick={(e) => e.preventDefault()}>
+                          Download
+                        </a>
+                      </div>
+
+                      <div className="bg-white border border-slate-100 shadow-2xs rounded-xl p-4 flex justify-between items-center hover:border-slate-200 transition">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-purple-50 p-2.5 rounded-xl text-purple-600">
+                            <FileText className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h5 className="font-bold text-slate-800 text-xs">Module Reference Handouts</h5>
+                            <span className="text-[10px] text-slate-400 block mt-0.5">Syllabus PDF • 4.1 MB</span>
+                          </div>
+                        </div>
+                        <a href="#" className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xxs px-3 py-1.5 rounded-lg transition" onClick={(e) => e.preventDefault()}>
+                          Download
+                        </a>
+                      </div>
+
+                      <div className="bg-white border border-slate-100 shadow-2xs rounded-xl p-4 flex justify-between items-center hover:border-slate-200 transition">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-emerald-50 p-2.5 rounded-xl text-emerald-600">
+                            <CheckCircle className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h5 className="font-bold text-slate-800 text-xs">Verified Statement of Completion</h5>
+                            <span className="text-[10px] text-slate-400 block mt-0.5">Unlocked when watched lectures exceed 75%</span>
+                          </div>
+                        </div>
+                        <button className="bg-slate-50 text-slate-400 font-bold text-xxs px-3 py-1.5 rounded-lg border border-slate-100 cursor-not-allowed">
+                          Locked
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

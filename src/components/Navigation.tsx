@@ -14,7 +14,10 @@ import {
   Bell, 
   User as UserIcon,
   Search,
-  Command
+  Command,
+  Calendar,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { User, Course, Quiz, LibraryItem } from '../types';
 
@@ -29,6 +32,8 @@ interface NavigationProps {
   onSelectCourse?: (course: Course) => void;
   onLaunchQuiz?: (quiz: Quiz, courseId: string) => void;
   children?: React.ReactNode;
+  darkMode: boolean;
+  setDarkMode: (dark: boolean) => void;
 }
 
 // Scored subsequence fuzzy search algorithm
@@ -74,7 +79,9 @@ export default function Navigation({
   courses = [],
   onSelectCourse,
   onLaunchQuiz,
-  children
+  children,
+  darkMode,
+  setDarkMode
 }: NavigationProps) {
 
   // Global search overlays state
@@ -87,6 +94,7 @@ export default function Navigation({
   const menuItems = [
     { id: 'dashboard', label: 'LMS Dashboard', icon: LayoutDashboard, roles: ['student', 'professor', 'admin'] },
     { id: 'courses', label: 'Academic Courses', icon: BookOpen, roles: ['student', 'professor', 'admin'] },
+    { id: 'calendar', label: 'Academic Calendar', icon: Calendar, roles: ['student', 'professor', 'admin'] },
     { id: 'quran', label: 'Fehm-ul-Quran', icon: Compass, roles: ['student', 'professor', 'admin'] },
     { id: 'library', label: 'Digital Library', icon: Library, roles: ['student', 'professor', 'admin'] },
     { id: 'reports', label: 'Reports & Grades', icon: FileText, roles: ['student', 'professor', 'admin'] },
@@ -294,14 +302,14 @@ export default function Navigation({
   return (
     <>
       {/* Top Main Navigation Header Bar */}
-      <header id="lms_main_header" className="sticky top-0 z-40 bg-white border-b border-slate-200/80 shadow-sm flex items-center justify-between px-6 py-3.5">
+      <header id="lms_main_header" className="sticky top-0 z-40 bg-white dark:bg-[#0F172A] border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm flex items-center justify-between px-6 py-3.5 transition-colors duration-300">
         <div className="p-1 flex items-center gap-3 shrink-0">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-100/80 shrink-0">
             <span className="text-white font-bold text-xl font-serif">L</span>
           </div>
           <div className="leading-tight">
-            <p className="font-bold text-slate-900 tracking-tight text-sm sm:text-base">LMS System</p>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">University LMS</p>
+            <p className="font-bold text-slate-900 dark:text-slate-100 tracking-tight text-sm sm:text-base">LMS System</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold">University LMS</p>
           </div>
         </div>
 
@@ -310,14 +318,14 @@ export default function Navigation({
           <button
             type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 hover:border-slate-300 transition-all px-4 py-2 rounded-2xl border border-slate-200/80 text-slate-400 group cursor-pointer"
+            className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100/80 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all px-4 py-2 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-slate-400 group cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <Search className="h-4 w-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-              <span className="text-xs font-semibold text-slate-500 group-hover:text-slate-700 transition-colors">Search courses, library logs, assignments...</span>
+              <Search className="h-4 w-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">Search courses, library logs, assignments...</span>
             </div>
-            <div className="flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-slate-200 shadow-xxs">
-              <span className="text-[9px] font-bold text-slate-400 font-mono">⌘K</span>
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xxs">
+              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 font-mono">⌘K</span>
             </div>
           </button>
         </div>
@@ -329,15 +337,29 @@ export default function Navigation({
           <button 
             type="button" 
             onClick={() => setIsSearchOpen(true)} 
-            className="md:hidden p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded-full transition-colors"
+            className="md:hidden p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
           >
             <Search className="h-5 w-5" />
+          </button>
+
+          {/* Dark Mode Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {darkMode ? (
+              <Sun className="h-5 w-5 text-amber-400" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
           </button>
 
           <button 
             type="button" 
             onClick={onOpenNotifications} 
-            className="relative p-2 text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded-full transition-colors"
+            className="relative p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
           >
             <Bell className="h-5 w-5" />
             {notificationsCount > 0 && (
@@ -347,13 +369,13 @@ export default function Navigation({
             )}
           </button>
 
-          <div className="flex items-center gap-3 border-l border-slate-100 pl-4 py-1">
-            <div className="bg-slate-50 p-1.5 rounded-full border border-slate-200/60 hidden sm:block">
-              <UserIcon className="h-4 w-4 text-slate-500" />
+          <div className="flex items-center gap-3 border-l border-slate-100 dark:border-slate-800 pl-4 py-1">
+            <div className="bg-slate-50 dark:bg-slate-800 p-1.5 rounded-full border border-slate-200/60 dark:border-slate-700 hidden sm:block">
+              <UserIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
             </div>
             <div className="hidden md:flex flex-col text-left">
-              <span className="text-xs font-bold text-slate-800 leading-none">{user.name}</span>
-              <span className="text-[10px] font-mono text-slate-400 mt-1">{user.email}</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-none">{user.name}</span>
+              <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 mt-1">{user.email}</span>
             </div>
             {getRoleBadge(user.role)}
           </div>
@@ -362,16 +384,16 @@ export default function Navigation({
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 relative">
         {/* Floating Left Sidebar Panel or Tab Bar */}
-        <nav id="lms_sidebar" className="fixed bottom-0 left-0 right-0 z-40 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] md:w-64 bg-white border-t border-slate-200 md:border-t-0 md:border-r md:border-slate-200/80 shadow-md md:shadow-none flex md:flex-col justify-between py-2 md:py-6 overflow-y-auto shrink-0">
+        <nav id="lms_sidebar" className="fixed bottom-0 left-0 right-0 z-40 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] md:w-64 bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-slate-850 md:border-t-0 md:border-r md:border-slate-200/80 dark:border-slate-800/80 shadow-md md:shadow-none flex md:flex-col justify-between py-2 md:py-6 overflow-y-auto shrink-0 transition-colors duration-300">
           <div className="flex w-full md:flex-col justify-around md:justify-start px-3 md:px-4 gap-1 md:space-y-1">
             {visibleMenuItems.map((item) => {
                const IconComponent = item.icon;
                const isTabActive = activeTab === item.id;
                const isQuran = item.id === 'quran';
                
-               let activeClasses = 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/20';
+               let activeClasses = 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/20 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
                if (isQuran) {
-                 activeClasses = 'bg-amber-50 text-amber-700 shadow-sm border border-amber-100/20';
+                 activeClasses = 'bg-amber-50 text-amber-700 shadow-sm border border-amber-100/20 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20';
                }
 
                return (
@@ -379,13 +401,13 @@ export default function Navigation({
                    key={item.id}
                    type="button"
                    onClick={() => setActiveTab(item.id)}
-                   className={`flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:py-2.5 rounded-xl transition text-[10px] md:text-sm font-semibold w-full border border-transparent ${
+                   className={`flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:py-2.5 rounded-xl transition text-[10px] md:text-sm font-semibold w-full border border-transparent cursor-pointer ${
                      isTabActive 
                        ? activeClasses 
-                       : 'text-slate-500 hover:bg-slate-50 hover:text-blue-600'
+                       : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
                    }`}
                  >
-                   <IconComponent className={`h-4 w-4 md:h-5 md:w-5 ${isTabActive ? (isQuran ? 'text-amber-600' : 'text-blue-600') : 'text-slate-400'}`} />
+                   <IconComponent className={`h-4 w-4 md:h-5 md:w-5 ${isTabActive ? (isQuran ? 'text-amber-600' : 'text-blue-600') : 'text-slate-400 dark:text-slate-500'}`} />
                    <span className="truncate">{item.label}</span>
                  </button>
                );
@@ -394,20 +416,20 @@ export default function Navigation({
 
           {/* Desktop Sign Out & Profile block */}
           <div className="hidden md:block p-4 mt-auto">
-            <div className="bg-slate-900 rounded-2xl p-4 shadow-sm">
+            <div className="bg-slate-900 dark:bg-[#020617] rounded-2xl p-4 shadow-sm border border-transparent dark:border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold font-mono shrink-0">
+                <div className="w-8 h-8 rounded-full bg-slate-700 dark:bg-slate-800 flex items-center justify-center text-white text-xs font-bold font-mono shrink-0">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <p className="text-xs font-bold text-white truncate">{user.name}</p>
-                  <p className="text-[10px] text-slate-400 truncate capitalize leading-tight">{user.role} &bull; {user.department || 'Academic Office'}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate capitalize leading-tight">{user.role} &bull; {user.department || 'Academic Office'}</p>
                 </div>
                 <button 
                   type="button"
                   onClick={onLogout}
                   title="Log out"
-                  className="text-slate-400 hover:text-rose-400 transition-colors shrink-0"
+                  className="text-slate-400 hover:text-rose-400 dark:hover:text-rose-400 transition-colors shrink-0 cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -417,7 +439,7 @@ export default function Navigation({
         </nav>
 
         {/* Content Wrapper */}
-        <div className="flex-1 w-full overflow-y-auto pb-16 md:pb-0 bg-[#F8FAFC]">
+        <div className="flex-1 w-full overflow-y-auto pb-16 md:pb-0 bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300">
           {children}
         </div>
       </div>
@@ -435,25 +457,25 @@ export default function Navigation({
           />
 
           {/* Content panel */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200/90 w-full max-w-2xl overflow-hidden relative z-10 flex flex-col focus:outline-none">
+          <div className="bg-white dark:bg-[#0F172A] rounded-3xl shadow-2xl border border-slate-200/90 dark:border-slate-800 w-full max-w-2xl overflow-hidden relative z-10 flex flex-col focus:outline-none transition-colors duration-300">
             
             {/* Header portion */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50/50">
-              <Search className="h-5 w-5 text-blue-600 shrink-0" />
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0" />
               <input
                 autoFocus
                 type="text"
                 placeholder="Type course, student document, assignment (e.g. 'cs', 'proof', 'solid')..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-transparent border-none text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-0"
+                className="flex-1 bg-transparent border-none text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm focus:outline-none focus:ring-0"
               />
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[10px] bg-slate-200 text-slate-500 font-extrabold px-1.5 py-0.5 rounded font-mono select-none uppercase">ESC</span>
+                <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-extrabold px-1.5 py-0.5 rounded font-mono select-none uppercase">ESC</span>
                 <button 
                   type="button"
                   onClick={() => setIsSearchOpen(false)}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-all cursor-pointer"
+                  className="p-1 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-all cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -465,25 +487,25 @@ export default function Navigation({
               
               {!searchQuery.trim() ? (
                 <div className="py-8 px-4 text-center space-y-2">
-                  <div className="inline-flex p-3 rounded-2xl bg-blue-50 text-blue-600">
+                  <div className="inline-flex p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
                     <Command className="h-6 w-6 animate-pulse" />
                   </div>
-                  <h4 className="text-sm font-bold text-slate-800">Global Academic Fuzzy Search</h4>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                    Query syllabus, modules, pdf study books, and active student tasks instantaneously using fuzzy subsequence alignment. Type <span className="font-bold text-blue-600 bg-blue-50 px-1 py-0.5 rounded">cs</span> or <span className="font-bold text-blue-600 bg-blue-50 px-1 py-0.5 rounded">tafseer</span> to begin.
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">Global Academic Fuzzy Search</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                    Query syllabus, modules, pdf study books, and active student tasks instantaneously using fuzzy subsequence alignment. Type <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1 py-0.5 rounded">cs</span> or <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-1 py-0.5 rounded">tafseer</span> to begin.
                   </p>
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="py-10 px-4 text-center space-y-2">
                   <p className="text-xl">🔍</p>
-                  <h4 className="text-sm font-bold text-slate-800">No matched academic records</h4>
-                  <p className="text-xs text-slate-400 max-w-xs mx-auto">
-                    No results found for <span className="font-semibold text-slate-700">"{searchQuery}"</span>. Please double-check terms.
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">No matched academic records</h4>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">
+                    No results found for <span className="font-semibold text-slate-700 dark:text-slate-300">"{searchQuery}"</span>. Please double-check terms.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2 px-1">
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mb-2 px-1">
                     Matching Results ({searchResults.length})
                   </p>
                   
@@ -491,16 +513,16 @@ export default function Navigation({
                     const isSelected = idx === activeResultIndex;
                     
                     let CatIcon = BookOpen;
-                    let badgeBg = 'bg-blue-50 text-blue-600 border-blue-100';
+                    let badgeBg = 'bg-blue-50 dark:bg-blue-950/45 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/40';
                     let label = 'Course';
                     
                     if (result.category === 'library') {
                       CatIcon = Library;
-                      badgeBg = 'bg-amber-50 text-amber-600 border-amber-100';
+                      badgeBg = 'bg-amber-50 dark:bg-amber-950/45 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/40';
                       label = 'Library Doc';
                     } else if (result.category === 'assignment') {
                       CatIcon = FileText;
-                      badgeBg = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                      badgeBg = 'bg-emerald-50 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/40';
                       label = 'Task / Assignment';
                     }
 
@@ -511,13 +533,13 @@ export default function Navigation({
                         onMouseEnter={() => setActiveResultIndex(idx)}
                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer select-none ${
                           isSelected 
-                            ? 'bg-blue-50/75 border-blue-200/90 shadow-sm' 
-                            : 'bg-white hover:bg-slate-50/50 border-transparent'
+                            ? 'bg-blue-50/75 dark:bg-blue-950/30 border-blue-200/90 dark:border-blue-800 shadow-sm' 
+                            : 'bg-white dark:bg-[#0F172A] hover:bg-slate-50/50 dark:hover:bg-slate-800/30 border-transparent'
                         }`}
                       >
                         <div className="flex gap-3 items-center min-w-0 flex-1">
                           <div className={`p-2 rounded-xl shrink-0 transition-colors ${
-                            isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
+                            isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                           }`}>
                             <CatIcon className="h-4 w-4" />
                           </div>
@@ -526,18 +548,18 @@ export default function Navigation({
                             <span className={`inline-flex items-center text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${badgeBg} mb-1`}>
                               {label}
                             </span>
-                            <h4 className="text-xs sm:text-sm font-bold text-slate-800 truncate pr-4">
+                            <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate pr-4">
                               {result.title}
                             </h4>
-                            <p className="text-[10px] text-slate-400 font-semibold truncate leading-normal">
+                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold truncate leading-normal">
                               {result.subtitle}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex gap-2 items-center text-slate-400 shrink-0 pl-2">
+                        <div className="flex gap-2 items-center text-slate-400 dark:text-slate-500 shrink-0 pl-2">
                           {isSelected && (
-                            <span className="text-[10px] text-blue-600 font-black animate-pulse hidden sm:inline">
+                            <span className="text-[10px] text-blue-600 dark:text-blue-400 font-black animate-pulse hidden sm:inline">
                               Press ENTER
                             </span>
                           )}
@@ -553,7 +575,7 @@ export default function Navigation({
 
             {/* Navigation Footer */}
             {searchResults.length > 0 && (
-              <div className="bg-slate-50 border-t border-slate-100 px-5 py-2.5 flex items-center justify-between text-[10px] text-slate-400 font-mono select-none">
+              <div className="bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-5 py-2.5 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 font-mono select-none">
                 <span className="flex items-center gap-1">
                   Use arrows <span className="font-bold">&uarr;&darr;</span> to scroll
                 </span>

@@ -10,6 +10,9 @@ export interface User {
   email: string;
   role: UserRole;
   studentId?: string;
+  facultyId?: string;
+  employeeId?: string;
+  designation?: string;
   phone?: string;
   department?: string;
   semester?: string;
@@ -58,6 +61,10 @@ export interface Course {
   isPublished: boolean;
   isQuran?: boolean;
   modules: Module[];
+  creditHours?: number;
+  prerequisites?: string[];
+  learningOutcomes?: string[];
+  durationWeeks?: number;
 }
 
 export interface VideoProgress {

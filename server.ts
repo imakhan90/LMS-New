@@ -15,6 +15,7 @@ import {
   LmsNotification, 
   Lesson 
 } from './src/types.js';
+import { getInitialCourses } from './src/data/coursesData.js';
 
 dotenv.config();
 
@@ -134,6 +135,127 @@ const initialCourses: Course[] = [
             duration: '10:53',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'c1_l5',
+            title: 'Lesson 2.2: Reading Material - Standard Syntax and Keywords',
+            type: 'pdf',
+            pdfUrl: '/documents/cs101_python_syntax.pdf',
+            duration: '12 min read',
+            completed: false
+          },
+          {
+            id: 'c1_l6',
+            title: 'Quiz 2.1: Python Variables and Expressions',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c1_m2',
+              title: 'Python Core Variables Evaluation',
+              questions: [
+                {
+                  id: 'c1_q3',
+                  text: 'What is the exact output of print(type(3 / 2)) in Python 3?',
+                  options: ["<class 'int'>", "<class 'float'>", "<class 'double'>", "<class 'decimal'>"],
+                  correctOptionIndex: 1
+                },
+                {
+                  id: 'c1_q4',
+                  text: 'Which of the following is a completely valid variable name in Python?',
+                  options: ['class', '3rd_value', 'total_count', 'total-count'],
+                  correctOptionIndex: 2
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c1_m3',
+        title: 'Module 3: Control Flow & Loop Iterations',
+        lessons: [
+          {
+            id: 'c1_l7',
+            title: 'Lesson 3.1: Conditional If-Else and Comparison Operators',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            duration: '07:45',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c1_l8',
+            title: 'Lesson 3.2: Definite vs Indefinite Loops: For and While',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            duration: '11:12',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c1_l9',
+            title: 'Quiz 3.1: Core Conditional Loops and Operators',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c1_m3',
+              title: 'Loop and Flow Control Quiz',
+              questions: [
+                {
+                  id: 'c1_q5',
+                  text: 'How do you immediately terminate the execution of the current loop in Python?',
+                  options: ['continue', 'break', 'exit()', 'return'],
+                  correctOptionIndex: 1
+                },
+                {
+                  id: 'c1_q6',
+                  text: 'What is the output of print(list(range(2, 8, 2)))?',
+                  options: ['[2, 4, 6, 8]', '[2, 4, 6]', '[3, 5, 7]', '[2, 3, 4, 5, 6, 7]'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 90
+            }
+          }
+        ]
+      },
+      {
+        id: 'c1_m4',
+        title: 'Module 4: Functions & Problem Solving',
+        lessons: [
+          {
+            id: 'c1_l10',
+            title: 'Lesson 4.1: Custom Function Declarations and Parameters',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            duration: '09:20',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c1_l11',
+            title: 'Lesson 4.2: Scope of Variables and Global Declarations',
+            type: 'pdf',
+            pdfUrl: '/documents/cs101_function_scope.pdf',
+            duration: '10 min read',
+            completed: false
+          },
+          {
+            id: 'c1_l12',
+            title: 'Quiz 4.1: Function Parameters and Callbacks',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c1_m4',
+              title: 'Function Parameters Evaluator',
+              questions: [
+                {
+                  id: 'c1_q7',
+                  text: 'In Python, what is the default return value of a custom function that has no explicit return statement?',
+                  options: ['0', 'False', 'None', 'Null'],
+                  correctOptionIndex: 2
+                }
+              ],
+              timeLimit: 60
+            }
           }
         ]
       }
@@ -163,6 +285,14 @@ const initialCourses: Course[] = [
           },
           {
             id: 'c2_l2',
+            title: 'Lesson 1.2: Reading Material - Complexity Quick Reference Chart',
+            type: 'pdf',
+            pdfUrl: '/documents/cs201_complexity_cheat.pdf',
+            duration: '10 min read',
+            completed: false
+          },
+          {
+            id: 'c2_l3',
             title: 'Module 1 Assessment: Recursion & Complexity',
             type: 'quiz',
             quiz: {
@@ -174,9 +304,146 @@ const initialCourses: Course[] = [
                   text: 'With a balanced Binary Search Tree containing N nodes, what is the worst-case time complexity of an insertion operation?',
                   options: ['O(1)', 'O(N)', 'O(log N)', 'O(N log N)'],
                   correctOptionIndex: 2
+                },
+                {
+                  id: 'c2_q2',
+                  text: 'What is the time complexity of the standard Fibonacci recursive calculation without any memoization optimization?',
+                  options: ['O(N)', 'O(N log N)', 'O(2^N)', 'O(N^2)'],
+                  correctOptionIndex: 2
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c2_m2',
+        title: 'Module 2: Linear Structures: Stacks, Queues, Lists',
+        lessons: [
+          {
+            id: 'c2_l4',
+            title: 'Lesson 2.1: Array Listings vs Linked Nodes',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+            duration: '12:45',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c2_l5',
+            title: 'Lesson 2.2: Stack & Queue Architectures (LIFO/FIFO)',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            duration: '10:15',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c2_l6',
+            title: 'Quiz 2.1: Dynamic Node Memory Performance',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c2_m2',
+              title: 'Linear Structures Evaluator',
+              questions: [
+                {
+                  id: 'c2_q3',
+                  text: 'Which list type is ideal if you require frequent O(1) insertions at arbitrary middle indices but do not need fast random lookups?',
+                  options: ['Singly Linked List', 'Static Array', 'Dynamic Array List', 'Binary Index Search'],
+                  correctOptionIndex: 0
+                },
+                {
+                  id: 'c2_q4',
+                  text: 'What operation is used to retrieve but not remove the top element of a LIFO Stack?',
+                  options: ['Pop', 'Push', 'Peek', 'Shift'],
+                  correctOptionIndex: 2
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c2_m3',
+        title: 'Module 3: Trees, Hierarchies, and Hash Tables',
+        lessons: [
+          {
+            id: 'c2_l7',
+            title: 'Lesson 3.1: Binary Trees and In-Order/Pre-Order Traversals',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            duration: '14:20',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c2_l8',
+            title: 'Lesson 3.2: Hash Collisions and Chain Linking Resolutions',
+            type: 'pdf',
+            pdfUrl: '/documents/cs201_hash_collisions.pdf',
+            duration: '18 min read',
+            completed: false
+          },
+          {
+            id: 'c2_l9',
+            title: 'Quiz 3.1: Tree Hierarchies & Hashing Metrics',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c2_m3',
+              title: 'Hierarchical Structure Quiz',
+              questions: [
+                {
+                  id: 'c2_q5',
+                  text: 'What is the main advantage of utilizing a Hash Map over a standard Binary Search Tree?',
+                  options: ['Preserved sorted order of elements', 'O(1) average lookup and insertion speeds', 'Minimized memory footprint', 'Guaranteed worst-case O(1) performance'],
+                  correctOptionIndex: 1
                 }
               ],
               timeLimit: 60
+            }
+          }
+        ]
+      },
+      {
+        id: 'c2_m4',
+        title: 'Module 4: Sorting & Searching Efficiencies',
+        lessons: [
+          {
+            id: 'c2_l10',
+            title: 'Lesson 4.1: Comparative Analysis: Bubble, Selection, & Insertion Sorts',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+            duration: '11:05',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c2_l11',
+            title: 'Lesson 4.2: Divide and Conquer Paradigm: Merge & Quick Sort',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            duration: '15:30',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c2_l12',
+            title: 'Quiz 4.1: Algorithm Efficiencies and Run-Times',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c2_m4',
+              title: 'Sorting Algorithms Evaluator',
+              questions: [
+                {
+                  id: 'c2_q6',
+                  text: 'Which sorting algorithm has a guaranteed stable, non-adaptive, O(N log N) worst-case time complexity regardless of initial array sorting status?',
+                  options: ['Quick Sort', 'Merge Sort', 'Bubble Sort', 'Selection Sort'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 90
             }
           }
         ]
@@ -204,6 +471,168 @@ const initialCourses: Course[] = [
             duration: '07:30',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'c3_l2',
+            title: 'Lesson 1.2: Reading Material - Scrum Team Roles & Sprint Rituals',
+            type: 'pdf',
+            pdfUrl: '/documents/cs301_scrum_guide.pdf',
+            duration: '15 min read',
+            completed: false
+          },
+          {
+            id: 'c3_l3',
+            title: 'Quiz 1.1: Core Agile Development Models',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c3_m1',
+              title: 'Agile & Scrum Best Practices',
+              questions: [
+                {
+                  id: 'c3_q1',
+                  text: 'Who owns the absolute prioritization of the Product Backlog in a standard Scrum organization model?',
+                  options: ['The Scrum Master', 'The Lead Systems Architect', 'The Product Owner', 'The Lead QA Engineer'],
+                  correctOptionIndex: 2
+                },
+                {
+                  id: 'c3_q2',
+                  text: 'What are the main output artifacts of a Scrum sprint planning ceremony?',
+                  options: ['Sprint Backlog and Sprint Goal', 'Daily Status Log and Burn-down Report', 'Gantt Chart and Project Charter', 'Class Diagrams and Source Repositories'],
+                  correctOptionIndex: 0
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c3_m2',
+        title: 'Module 2: Object-Oriented Principles (SOLID)',
+        lessons: [
+          {
+            id: 'c3_l4',
+            title: 'Lesson 2.1: Single Responsibility & Open-Closed Design Guidelines',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+            duration: '13:10',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c3_l5',
+            title: 'Lesson 2.2: Liskov Substitution, Interface Segregation & Dependency Inversion',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            duration: '15:20',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c3_l6',
+            title: 'Quiz 2.1: Applying SOLID Design Principles',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c3_m2',
+              title: 'SOLID Design Patterns Evaluation',
+              questions: [
+                {
+                  id: 'c3_q3',
+                  text: 'Which SOLID principle is directly breached when high-level business modules import concrete details from low-level infrastructure modules instead of using abstract interfaces?',
+                  options: ['Single Responsibility Principle (SRP)', 'Open/Closed Principle (OCP)', 'Liskov Substitution Principle (LSP)', 'Dependency Inversion Principle (DIP)'],
+                  correctOptionIndex: 3
+                },
+                {
+                  id: 'c3_q4',
+                  text: 'If class B is a subclass of class A, we should be able to substitute an object of class A with B without modifying correct runtime outcomes. This statement describes:',
+                  options: ['Open/Closed Principle', 'Liskov Substitution Principle', 'Interface Segregation Principle', 'Single Responsibility Principle'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c3_m3',
+        title: 'Module 3: System Architecture & UML Design',
+        lessons: [
+          {
+            id: 'c3_l7',
+            title: 'Lesson 3.1: Monoliths vs Distributed Microservices',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+            duration: '11:45',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c3_l8',
+            title: 'Lesson 3.2: Unified Modeling Language: Class and Sequence Blueprints',
+            type: 'pdf',
+            pdfUrl: '/documents/cs301_uml_diagrams.pdf',
+            duration: '22 min read',
+            completed: false
+          },
+          {
+            id: 'c3_l9',
+            title: 'Quiz 3.1: Distributed Systems & UML Annotations',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c3_m3',
+              title: 'Distributed Architectures Quiz',
+              questions: [
+                {
+                  id: 'c3_q5',
+                  text: 'Which UML representation is used to model sequential, logical timeline flow and interaction details between runtime actors and code instances?',
+                  options: ['UML Class Diagram', 'UML Sequence Diagram', 'UML Use Case Diagram', 'UML Deployment Diagram'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 90
+            }
+          }
+        ]
+      },
+      {
+        id: 'c3_m4',
+        title: 'Module 4: Code Testing & Continuous Integration (CI/CD)',
+        lessons: [
+          {
+            id: 'c3_l10',
+            title: 'Lesson 4.1: Unit Testing with Mocking Frameworks',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            duration: '14:50',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c3_l11',
+            title: 'Lesson 4.2: Automated Integration Pipelines and CD Workflows',
+            type: 'pdf',
+            pdfUrl: '/documents/cs301_cicd_pipelines.pdf',
+            duration: '14 min read',
+            completed: false
+          },
+          {
+            id: 'c3_l12',
+            title: 'Quiz 4.1: Unit Test Framework Metrics',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c3_m4',
+              title: 'Testing and DevOps Evaluator',
+              questions: [
+                {
+                  id: 'c3_q6',
+                  text: 'What terminology defines isolating a specific function in a test suite by replacing its external, third-party database dependency with lightweight mock objects?',
+                  options: ['Refactoring', 'Mocking', 'Smoke Testing', 'Continuous Delivery'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 60
+            }
           }
         ]
       }
@@ -230,6 +659,167 @@ const initialCourses: Course[] = [
             duration: '05:40',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'c4_l2',
+            title: 'Lesson 1.2: Reading Material - Comprehensive Off-Page Keyword Link Building',
+            type: 'pdf',
+            pdfUrl: '/documents/mkt101_seo_guide.pdf',
+            duration: '20 min read',
+            completed: false
+          },
+          {
+            id: 'c4_l3',
+            title: 'Quiz 1.1: Core Crawl & Index Optimization',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c4_m1',
+              title: 'SEO Crawl & Keyword Essentials',
+              questions: [
+                {
+                  id: 'c4_q1',
+                  text: 'Which HTML meta tag indicates to search engines that they should favor a specific canonical version of a URL to avoid duplicate content penalties?',
+                  options: ['rel="alternate"', 'rel="canonical"', 'name="robots" content="index"', 'name="viewport"'],
+                  correctOptionIndex: 1
+                },
+                {
+                  id: 'c4_q2',
+                  text: 'What protocol contains instructions telling search engine crawler bots which web directories or paths they are allowed or forbidden from crawling?',
+                  options: ['Sitemap.xml', 'Robots.txt', 'Schema.org metadata', 'Canonical Headers'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c4_m2',
+        title: 'Module 2: Search Engine Marketing & PPC Campaigns',
+        lessons: [
+          {
+            id: 'c4_l4',
+            title: 'Lesson 2.1: Google Ads Auction bidding models',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+            duration: '11:15',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c4_l5',
+            title: 'Lesson 2.2: Perfecting Landing Page Conversion Copywriting',
+            type: 'pdf',
+            pdfUrl: '/documents/mkt101_landing_pages.pdf',
+            duration: '15 min read',
+            completed: false
+          },
+          {
+            id: 'c4_l6',
+            title: 'Quiz 2.1: Paid Ad Metric Formulations',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c4_m2',
+              title: 'PPC Bidding Evaluation',
+              questions: [
+                {
+                  id: 'c4_q3',
+                  text: 'How do you formulate Click-Through Rate (CTR) in search campaign analysis?',
+                  options: ['(Total Clicks / Total Conversions) * 100', '(Total Conversions / Total Impressions) * 100', '(Total Clicks / Total Impressions) * 100', '(Total Cost / Total Clicks) * 100'],
+                  correctOptionIndex: 2
+                },
+                {
+                  id: 'c4_q4',
+                  text: 'In Google Ads, what variable impacts CPC prices and Ad Rank besides maximum bidding size?',
+                  options: ['Organic SEO Domain Rank', 'Quality Score', 'Bounce Rate of home page', 'Domain Registration Length'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c4_m3',
+        title: 'Module 3: Social Media & Brand Awareness',
+        lessons: [
+          {
+            id: 'c4_l7',
+            title: 'Lesson 3.1: Visual Storytelling and Content Funnels on Social Media',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+            duration: '12:50',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c4_l8',
+            title: 'Lesson 3.2: Influencer Outreach Strategy and Compliance Protocols',
+            type: 'pdf',
+            pdfUrl: '/documents/mkt101_social_branding.pdf',
+            duration: '12 min read',
+            completed: false
+          },
+          {
+            id: 'c4_l9',
+            title: 'Quiz 3.1: Engagement Rate Metrics',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c4_m3',
+              title: 'Social Media Engagement Quiz',
+              questions: [
+                {
+                  id: 'c4_q5',
+                  text: 'What KPI defines the percentage of individual page-view sessions that lead to a product download, register, or transaction?',
+                  options: ['CTR', 'Conversion Rate', 'Bounce Rate', 'Click-Share Coefficient'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 90
+            }
+          }
+        ]
+      },
+      {
+        id: 'c4_m4',
+        title: 'Module 4: Marketing Analytics & Funnel Tracking',
+        lessons: [
+          {
+            id: 'c4_l10',
+            title: 'Lesson 4.1: Analyzing Google Analytics 4 Dashboards',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            duration: '14:10',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c4_l11',
+            title: 'Lesson 4.2: Setting Up Urchin Tracking Module (UTM) Parameters',
+            type: 'pdf',
+            pdfUrl: '/documents/mkt101_utm_tracking.pdf',
+            duration: '18 min read',
+            completed: false
+          },
+          {
+            id: 'c4_l12',
+            title: 'Quiz 4.1: Multi-touch Attribution Models',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c4_m4',
+              title: 'Marketing Analytics Evaluator',
+              questions: [
+                {
+                  id: 'c4_q6',
+                  text: 'Which campaign attribution framework distributes equal conversion credits across every touchpoint along the customer journey?',
+                  options: ['First Touch Attribution', 'Last Touch Attribution', 'Linear Attribution Model', 'Time Decay Attribution Model'],
+                  correctOptionIndex: 2
+                }
+              ],
+              timeLimit: 60
+            }
           }
         ]
       }
@@ -256,6 +846,177 @@ const initialCourses: Course[] = [
             duration: '07:02',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'c5_l2',
+            title: 'Lesson 1.2: Reading Material - The Minto Pyramid Principle in Written Memos',
+            type: 'pdf',
+            pdfUrl: '/documents/bus102_pyramid_principle.pdf',
+            duration: '16 min read',
+            completed: false
+          },
+          {
+            id: 'c5_l3',
+            title: 'Quiz 1.1: Executive Memos Structure',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c5_m1',
+              title: 'Executive Summary Core Principles',
+              questions: [
+                {
+                  id: 'c5_q1',
+                  text: 'What is the core argument directive of Barbara Minto\'s Pyramid Principle in executive writing?',
+                  options: [
+                    'Introduce exhaustive background details before revealing your core conclusion',
+                    'State your core answer first, followed immediately by logically grouped supporting arguments',
+                    'Write chronologically matching the investigation process',
+                    'Omit headings entirely to force the executive to read the complete narrative text'
+                  ],
+                  correctOptionIndex: 1
+                },
+                {
+                  id: 'c5_q2',
+                  text: 'Which structural approach ensures that all elements in a supporting group of an executive report are mutually exclusive and collectively exhaustive?',
+                  options: ['The SCIP Strategy', 'The MECE Framework', 'The OKR Checklist', 'The SWOT Matrix'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c5_m2',
+        title: 'Module 2: Boardroom Presentations & Body Language',
+        lessons: [
+          {
+            id: 'c5_l4',
+            title: 'Lesson 2.1: Slide Deck Design Hierarchy & Visual Storytelling',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+            duration: '10:50',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c5_l5',
+            title: 'Lesson 2.2: Managing Dynamic Voice Pacing and Stage Stances',
+            type: 'pdf',
+            pdfUrl: '/documents/bus102_stage_presence.pdf',
+            duration: '11 min read',
+            completed: false
+          },
+          {
+            id: 'c5_l6',
+            title: 'Quiz 2.1: Boardroom Q&A Management',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c5_m2',
+              title: 'Boardroom Presentation Evaluator',
+              questions: [
+                {
+                  id: 'c5_q3',
+                  text: 'Which tactic is ideal when dealing with hostile, unsupportive questions from stakeholders during a board presentation?',
+                  options: [
+                    'Argue aggressively with facts to show they are wrong',
+                    'Acknowledge their concern, reframe the premise productively, and respond objectively using data',
+                    'Pretend you did not hear the question and continue to the next slide',
+                    'Immediately end the session early to prevent conflicts'
+                  ],
+                  correctOptionIndex: 1
+                },
+                {
+                  id: 'c5_q4',
+                  text: 'The 10/20/30 slide presentation guideline created by Guy Kawasaki advises what metrics?',
+                  options: ['10 slides, 20 minutes duration, 30pt minimum font size', '10 slides, 20 ideas, 30 columns of details', '10 minutes, 20 slides, 30 illustrations', '10 pages, 20 graphs, 30 seconds per slide'],
+                  correctOptionIndex: 0
+                }
+              ],
+              timeLimit: 120
+            }
+          }
+        ]
+      },
+      {
+        id: 'c5_m3',
+        title: 'Module 3: Internal Communications & Corporate Synergy',
+        lessons: [
+          {
+            id: 'c5_l7',
+            title: 'Lesson 3.1: Resolution Tactics for Cross-Department Conflicts',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+            duration: '11:40',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c5_l8',
+            title: 'Lesson 3.2: constructive Feedback Delivery Loops (SBI model)',
+            type: 'pdf',
+            pdfUrl: '/documents/bus102_feedback_loops.pdf',
+            duration: '12 min read',
+            completed: false
+          },
+          {
+            id: 'c5_l9',
+            title: 'Quiz 3.1: Professional EQ at Work',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c5_m3',
+              title: 'Corporate Synergy Quiz',
+              questions: [
+                {
+                  id: 'c5_q5',
+                  text: 'What does the SBI constructive feedback delivery model stand for?',
+                  options: ['Source, Behavior, Impact', 'Situation, Behavior, Impact', 'Standard, Blueprint, Improvement', 'Scenario, Breakthrough, Implementation'],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 90
+            }
+          }
+        ]
+      },
+      {
+        id: 'c5_m4',
+        title: 'Module 4: Negotiation & Crisis Communications',
+        lessons: [
+          {
+            id: 'c5_l10',
+            title: 'Lesson 4.1: Principled Negotiation and Best Alternative to Negotiated Agreement (BATNA)',
+            type: 'video',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+            duration: '15:10',
+            completed: false,
+            progressPercent: 0
+          },
+          {
+            id: 'c5_l11',
+            title: 'Lesson 4.2: Writing Crisis PR Statements and Action Plans',
+            type: 'pdf',
+            pdfUrl: '/documents/bus102_crisis_pr.pdf',
+            duration: '22 min read',
+            completed: false
+          },
+          {
+            id: 'c5_l12',
+            title: 'Quiz 4.1: Crisis PR and Negotiation Strategies',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_c5_m4',
+              title: 'Negotiation & Crisis Evaluator',
+              questions: [
+                {
+                  id: 'c5_q6',
+                  text: 'In crisis communications, what is the major risk of publishing defensive, late, or vague statements?',
+                  options: ['Rapid loss of brand equity and public trust', 'Increased organic web traffic', 'Reduction in PR cost metrics', 'Legal class action nullification'],
+                  correctOptionIndex: 0
+                }
+              ],
+              timeLimit: 60
+            }
           }
         ]
       }
@@ -283,6 +1044,37 @@ const initialCourses: Course[] = [
             duration: '08:34',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'cq_l1_sub',
+            title: 'Quran Lesson 1.2: Reading Material - Comprehensive History of Preservation',
+            type: 'pdf',
+            pdfUrl: '/documents/isl101_preservation_history.pdf',
+            duration: '15 min read',
+            completed: false
+          },
+          {
+            id: 'cq_l1_q',
+            title: 'Quiz 1.1: Foundations of Quranic Revelation',
+            type: 'quiz',
+            quiz: {
+              id: 'quiz_quran_m1',
+              title: 'Preservation & Context Evaluation',
+              questions: [
+                {
+                  id: 'q_m1_q1',
+                  text: 'What is the key distinguishing thematic characteristic of Makki (revealed in Makkah) Surahs?',
+                  options: [
+                    'Focus on detail-oriented civil laws and transaction rules',
+                    'Focus on basic beliefs, oneness of God (Tawheed), and the Hereafter',
+                    'Emphasis on international treaty declarations',
+                    'Explicit layouts of modern scientific calculations'
+                  ],
+                  correctOptionIndex: 1
+                }
+              ],
+              timeLimit: 120
+            }
           }
         ]
       },
@@ -298,6 +1090,14 @@ const initialCourses: Course[] = [
             duration: '12:00',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'cq_l2_sub',
+            title: 'Quran Lesson 2.2: Standard Arabic Root Word Identification Rules',
+            type: 'pdf',
+            pdfUrl: '/documents/isl101_arabic_roots.pdf',
+            duration: '18 min read',
+            completed: false
           }
         ]
       },
@@ -336,6 +1136,14 @@ const initialCourses: Course[] = [
             duration: '11:15',
             completed: false,
             progressPercent: 0
+          },
+          {
+            id: 'cq_l5_sub',
+            title: 'Quran Lesson 4.2: Guidelines for Self-Purification (Tazkiyah)',
+            type: 'pdf',
+            pdfUrl: '/documents/isl101_tazkiyah.pdf',
+            duration: '14 min read',
+            completed: false
           }
         ]
       },
@@ -457,7 +1265,7 @@ interface DatabaseSchema {
 
 const defaultDb: DatabaseSchema = {
   users: initialUsers,
-  courses: initialCourses,
+  courses: getInitialCourses(),
   libraryItems: initialLibraryItems,
   progress: [],
   attendance: [],
@@ -491,6 +1299,26 @@ function readDb(): DatabaseSchema {
         }
       });
     }
+
+    // Auto-migrate: Ensure preloaded courses have all their enriched modules and lessons
+    if (parsed.courses && Array.isArray(parsed.courses)) {
+      getInitialCourses().forEach((initCourse) => {
+        const existingIdx = parsed.courses.findIndex((c: any) => c.id === initCourse.id);
+        if (existingIdx === -1) {
+          parsed.courses.push(initCourse);
+          changed = true;
+        } else {
+          const existingCourse = parsed.courses[existingIdx];
+          const existingLessonsCount = existingCourse.modules.reduce((sum: number, m: any) => sum + (m.lessons || []).length, 0);
+          const initLessonsCount = initCourse.modules.reduce((sum: number, m: any) => sum + (m.lessons || []).length, 0);
+          if (existingCourse.modules.length < initCourse.modules.length || existingLessonsCount < initLessonsCount) {
+            parsed.courses[existingIdx] = initCourse;
+            changed = true;
+          }
+        }
+      });
+    }
+
     if (changed) {
       fs.writeFileSync(DB_PATH, JSON.stringify(parsed, null, 2));
     }
@@ -557,7 +1385,7 @@ app.post('/api/auth/login', (req, res) => {
 });
 
 app.post('/api/auth/register', (req, res) => {
-  const { name, email, role, phone, department, semester, studentId, password } = req.body;
+  const { name, email, role, phone, department, semester, studentId, facultyId, employeeId, designation, password } = req.body;
   if (!name || !email || !role) {
     return res.status(400).json({ error: 'Name, email, and role are required fields' });
   }
@@ -576,7 +1404,10 @@ app.post('/api/auth/register', (req, res) => {
     phone: phone || '',
     department: department || 'General Education',
     semester: semester || '',
-    studentId: studentId || (role === 'student' ? `ST-${Math.floor(100000 + Math.random() * 900000)}` : undefined),
+    studentId: role === 'student' ? (studentId || `ST-${Math.floor(100000 + Math.random() * 900000)}`) : undefined,
+    facultyId: role === 'professor' ? (facultyId || `FAC-${Math.floor(10000 + Math.random() * 90000)}`) : undefined,
+    employeeId: role === 'admin' ? (employeeId || `EMP-${Math.floor(1000 + Math.random() * 9000)}`) : undefined,
+    designation: designation || '',
     password: password || (role === 'admin' ? 'admin123' : role === 'professor' ? 'professor123' : 'student123')
   };
 
@@ -937,10 +1768,20 @@ app.post('/api/quiz/submit', (req, res) => {
   });
 });
 
+app.get('/api/certificates', (req, res) => {
+  const db = readDb();
+  res.json(db.certificates);
+});
+
 app.get('/api/certificates/:userId', (req, res) => {
   const { userId } = req.params;
   const db = readDb();
   res.json(db.certificates.filter(c => c.userId === userId));
+});
+
+app.get('/api/quiz-attempts', (req, res) => {
+  const db = readDb();
+  res.json(db.quizAttempts);
 });
 
 app.get('/api/quiz-attempts/:userId', (req, res) => {
