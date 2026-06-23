@@ -13,7 +13,8 @@ import {
   QuizAttempt, 
   Certificate, 
   LmsNotification, 
-  Lesson 
+  Lesson,
+  ChatMessage
 } from './src/types.js';
 import { getInitialCourses } from './src/data/coursesData.js';
 
@@ -1252,6 +1253,36 @@ const initialNotifications: LmsNotification[] = [
   }
 ];
 
+const initialChatMessages: ChatMessage[] = [
+  {
+    id: 'msg_1',
+    courseId: 'course_1',
+    senderId: 'user_student_1',
+    senderName: 'Zayn Malik',
+    senderRole: 'student',
+    content: 'Hello Professor, I had a quick question regarding the Module 1 assignment. Should we implement the binary search algorithm recursively or iteratively?',
+    timestamp: '2026-06-22T09:30:00.000Z'
+  },
+  {
+    id: 'msg_2',
+    courseId: 'course_1',
+    senderId: 'user_prof_1',
+    senderName: 'Dr. Sarah Jenkins',
+    senderRole: 'professor',
+    content: 'Hi Zayn! Either implementation is acceptable, but I recommend recursive as it fits our functional paradigm better. Make sure to document your base cases and complexity bounds!',
+    timestamp: '2026-06-22T10:15:00.000Z'
+  },
+  {
+    id: 'msg_3',
+    courseId: 'course_1',
+    senderId: 'user_student_1',
+    senderName: 'Zayn Malik',
+    senderRole: 'student',
+    content: 'That is clear! Thank you so much for the clarification. I will get working on the recursion base case.',
+    timestamp: '2026-06-22T10:20:00.000Z'
+  }
+];
+
 interface DatabaseSchema {
   users: User[];
   courses: Course[];
@@ -1261,6 +1292,7 @@ interface DatabaseSchema {
   quizAttempts: QuizAttempt[];
   certificates: Certificate[];
   notifications: LmsNotification[];
+  chatMessages: ChatMessage[];
 }
 
 const defaultDb: DatabaseSchema = {
@@ -1271,7 +1303,8 @@ const defaultDb: DatabaseSchema = {
   attendance: [],
   quizAttempts: [],
   certificates: [],
-  notifications: initialNotifications
+  notifications: initialNotifications,
+  chatMessages: initialChatMessages
 };
 
 function readDb(): DatabaseSchema {
@@ -1285,6 +1318,12 @@ function readDb(): DatabaseSchema {
     
     // Auto-migrate database: Ensure our standard demo passwords are set for preloaded users
     let changed = false;
+    
+    if (!parsed.chatMessages || !Array.isArray(parsed.chatMessages)) {
+      parsed.chatMessages = initialChatMessages;
+      changed = true;
+    }
+
     if (parsed.users && Array.isArray(parsed.users)) {
       parsed.users.forEach((u: any) => {
         if (u.email === 'student@university.edu' && !u.password) {
@@ -1847,6 +1886,37 @@ app.get('/api/notifications/:userId', (req, res) => {
   const { userId } = req.params;
   const db = readDb();
   res.json(db.notifications.filter(n => n.userId === userId || n.userId === 'all'));
+});
+
+// Chat Messages REST APIs
+app.get('/api/chat-messages/:courseId', (req, res) => {
+  const { courseId } = req.params;
+  const db = readDb();
+  const messages = (db.chatMessages || []).filter(msg => msg.courseId === courseId);
+  res.json(messages);
+});
+
+app.post('/api/chat-messages', (req, res) => {
+  const { courseId, senderId, senderName, senderRole, content } = req.body;
+  if (!courseId || !senderId || !senderName || !senderRole || !content) {
+    return res.status(400).json({ error: 'Missing required message parameters' });
+  }
+  const db = readDb();
+  if (!db.chatMessages) {
+    db.chatMessages = [];
+  }
+  const newMessage = {
+    id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    courseId,
+    senderId,
+    senderName,
+    senderRole,
+    content,
+    timestamp: new Date().toISOString()
+  };
+  db.chatMessages.push(newMessage);
+  writeDb(db);
+  res.status(201).json(newMessage);
 });
 
 // System Analytics for Dashboard Widgets

@@ -18,7 +18,8 @@ import {
   BookOpen,
   ChevronRight,
   Sparkles,
-  Bot
+  Bot,
+  Send
 } from 'lucide-react';
 import { Course, Module, Lesson, User, Quiz, Question } from '../types';
 
@@ -73,7 +74,76 @@ export default function CourseViewer({
     { id: 'q_1', text: 'Enter assessment question?', options: ['', '', '', ''], correctOptionIndex: 0 }
   ]);
 
-  const [dashboardTab, setDashboardTab] = useState<'overview' | 'forum' | 'grades' | 'resources'>('overview');
+  const [dashboardTab, setDashboardTab] = useState<'overview' | 'forum' | 'grades' | 'resources' | 'queries'>('overview');
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [newChatMessage, setNewChatMessage] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (dashboardTab !== 'queries' || !selectedCourse?.id) return;
+
+    let isMounted = true;
+    const fetchMessages = () => {
+      fetch(`/api/chat-messages/${selectedCourse.id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (isMounted) {
+            setChatMessages(data);
+          }
+        })
+        .catch(err => console.error('Error fetching chat messages:', err));
+    };
+
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 3000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [selectedCourse.id, dashboardTab]);
+
+  useEffect(() => {
+    if (dashboardTab === 'queries') {
+      setTimeout(() => {
+        chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [chatMessages, dashboardTab]);
+
+  const handleSendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChatMessage.trim() || !selectedCourse?.id || isSendingMessage) return;
+
+    setIsSendingMessage(true);
+    const content = newChatMessage.trim();
+    setNewChatMessage('');
+
+    try {
+      const response = await fetch('/api/chat-messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: selectedCourse.id,
+          senderId: user.id,
+          senderName: user.name,
+          senderRole: user.role,
+          content
+        })
+      });
+
+      if (response.ok) {
+        const savedMsg = await response.json();
+        setChatMessages(prev => [...prev, savedMsg]);
+      }
+    } catch (err) {
+      console.error('Error sending chat message:', err);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   const [forumThreads, setForumThreads] = useState<any[]>([]);
   const [newThreadTitle, setNewThreadTitle] = useState('');
   const [newThreadContent, setNewThreadContent] = useState('');
@@ -930,6 +1000,17 @@ export default function CourseViewer({
                   >
                     Learning Resources
                   </button>
+                  <button
+                    onClick={() => setDashboardTab('queries')}
+                    className={`px-4 py-2 text-xs font-bold transition-all border-b-2 shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                      dashboardTab === 'queries'
+                        ? 'border-sky-600 text-sky-600'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Direct Queries
+                  </button>
                 </div>
 
                 {/* Tab content switcher */}
@@ -1293,6 +1374,180 @@ export default function CourseViewer({
                           Locked
                         </button>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === 'queries' && (
+                  <div className="space-y-4 font-sans">
+                    <div className="flex flex-col md:flex-row gap-4 bg-slate-50 rounded-2xl p-4 border border-slate-100 animate-fadeIn">
+                      
+                      {/* Sidebar list for Professors, or simple Info panel for Students */}
+                      <div className="w-full md:w-64 bg-white rounded-xl p-3 border border-slate-100 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-3 px-1">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
+                              Active Query Desk
+                            </span>
+                          </div>
+
+                          {user.role === 'professor' ? (
+                            <div className="space-y-2">
+                              <p className="text-xxs text-slate-400 px-1">SELECT A STUDENT:</p>
+                              <button className="w-full flex items-center gap-3 p-2 bg-sky-50 text-sky-900 font-bold rounded-lg text-xs border border-sky-100 text-left">
+                                <div className="h-7 w-7 rounded-full bg-sky-600 text-white font-extrabold flex items-center justify-center text-xs">
+                                  ZM
+                                </div>
+                                <div>
+                                  <p className="font-bold">Zayn Malik</p>
+                                  <span className="text-[9px] text-sky-600">Student ID: ST-904123</span>
+                                </div>
+                              </button>
+                              <button className="w-full flex items-center gap-3 p-2 hover:bg-slate-50 text-slate-700 rounded-lg text-xs transition text-left cursor-not-allowed opacity-60" onClick={(e) => e.preventDefault()}>
+                                <div className="h-7 w-7 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs">
+                                  AR
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-slate-600">Alex Rivera</p>
+                                  <span className="text-[9px] text-slate-400">Offline</span>
+                                </div>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <div className="p-3 bg-gradient-to-br from-slate-50 to-sky-50/40 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="h-9 w-9 rounded-full bg-sky-100 text-sky-700 font-extrabold flex items-center justify-center text-sm border border-sky-200">
+                                    {selectedCourse.instructor ? selectedCourse.instructor.split(' ').map(n => n[0]).join('') : 'FI'}
+                                  </div>
+                                  <div>
+                                    <h5 className="font-bold text-slate-800 text-xs">{selectedCourse.instructor}</h5>
+                                    <span className="text-[9px] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded-md">Course Instructor</span>
+                                  </div>
+                                </div>
+                                <p className="text-[10px] text-slate-500 leading-relaxed">
+                                  Submit quick course-related queries, code logic doubts, or scheduling clarifications. The professor will respond here in this shared channel.
+                                </p>
+                              </div>
+
+                              <div className="text-xxs text-slate-400 space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                                <p className="font-bold text-slate-500 uppercase tracking-wide mb-1">Response Policy</p>
+                                <p>• Response time is typically within 24 hours.</p>
+                                <p>• Keep conversations academic and respectful.</p>
+                                <p>• Real-time synchronization is running.</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-slate-100 text-[10px] text-slate-400 text-center">
+                          Shared channel via secure LMS port
+                        </div>
+                      </div>
+
+                      {/* Main Chat Area */}
+                      <div className="flex-1 bg-white rounded-xl border border-slate-100 flex flex-col h-[400px]">
+                        
+                        {/* Chat Top Bar */}
+                        <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-xl">
+                          <div className="flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-sky-600" />
+                            <div>
+                              <h4 className="text-xs font-bold text-slate-800">
+                                {user.role === 'professor' ? 'Query Room: Zayn Malik' : `Professor Consultation Chat`}
+                              </h4>
+                              <p className="text-[9px] text-slate-400">
+                                Active Course: {selectedCourse.title} ({selectedCourse.code})
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <span className="text-[9px] bg-emerald-50 text-emerald-700 font-extrabold px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                            Live Sync
+                          </span>
+                        </div>
+
+                        {/* Messages Log */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/20">
+                          {chatMessages.length === 0 ? (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2">
+                              <div className="p-3 bg-slate-50 rounded-full text-slate-400">
+                                <MessageSquare className="h-6 w-6" />
+                              </div>
+                              <h5 className="text-xs font-bold text-slate-700">No Direct Queries yet</h5>
+                              <p className="text-[10px] text-slate-400 max-w-[240px]">
+                                Ask a direct academic or syllabus question to start the consultation thread.
+                              </p>
+                            </div>
+                          ) : (
+                            chatMessages.map((msg) => {
+                              const isSelf = msg.senderId === user.id;
+                              return (
+                                <div
+                                  key={msg.id}
+                                  className={`flex flex-col ${isSelf ? 'items-end' : 'items-start'}`}
+                                >
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <span className="text-[9px] font-bold text-slate-500">{msg.senderName}</span>
+                                    <span className={`text-[8px] px-1 rounded-sm uppercase font-extrabold ${
+                                      msg.senderRole === 'professor' 
+                                        ? 'bg-amber-100 text-amber-800' 
+                                        : 'bg-slate-100 text-slate-700'
+                                    }`}>
+                                      {msg.senderRole}
+                                    </span>
+                                  </div>
+                                  
+                                  <div
+                                    className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed ${
+                                      isSelf
+                                        ? 'bg-sky-600 text-white rounded-tr-none shadow-xs'
+                                        : 'bg-white text-slate-800 rounded-tl-none border border-slate-100 shadow-2xs'
+                                    }`}
+                                  >
+                                    <p className="whitespace-pre-line">{msg.content}</p>
+                                  </div>
+
+                                  <span className="text-[8px] text-slate-400 mt-1 px-1">
+                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
+                              );
+                            })
+                          )}
+                          <div ref={chatBottomRef} />
+                        </div>
+
+                        {/* Input bar */}
+                        <form onSubmit={handleSendChatMessage} className="p-2 border-t border-slate-100 flex gap-2">
+                          <input
+                            type="text"
+                            value={newChatMessage}
+                            onChange={(e) => setNewChatMessage(e.target.value)}
+                            placeholder={user.role === 'professor' ? "Reply to student query..." : "Ask the professor a query..."}
+                            className="flex-1 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-sky-500 rounded-xl px-3 py-1.5 text-xs focus:outline-none transition"
+                            disabled={isSendingMessage}
+                          />
+                          <button
+                            type="submit"
+                            disabled={!newChatMessage.trim() || isSendingMessage}
+                            className="bg-sky-600 hover:bg-sky-500 disabled:bg-slate-100 disabled:text-slate-400 text-white p-2 rounded-xl transition flex items-center justify-center cursor-pointer shrink-0"
+                          >
+                            {isSendingMessage ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                          </button>
+                        </form>
+
+                      </div>
+
                     </div>
                   </div>
                 )}

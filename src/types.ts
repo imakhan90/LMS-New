@@ -132,3 +132,14 @@ export interface LmsNotification {
   recipient: string;
   isRead?: boolean;
 }
+
+export interface ChatMessage {
+  id: string;
+  courseId: string;
+  senderId: string;
+  senderName: string;
+  senderRole: 'student' | 'professor' | 'admin';
+  content: string;
+  timestamp: string;
+}
+
