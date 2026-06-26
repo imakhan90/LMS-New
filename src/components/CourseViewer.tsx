@@ -768,15 +768,15 @@ export default function CourseViewer({
                     <button
                       type="button"
                       onClick={() => setShowUploadForm(false)}
-                      className="bg-white hover:bg-slate-50 text-slate-600 font-bold px-4 py-2 text-xs border border-slate-200 rounded-xl transition"
+                      className="bg-white hover:bg-slate-50 text-slate-600 font-bold px-4 py-2 text-xs border border-slate-200 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2 text-xs rounded-xl transition shadow-xs"
+                      className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold px-5 py-2 text-xs rounded-xl transition-all duration-200 shadow-sm hover:scale-[1.03] active:scale-95 flex items-center gap-1.5"
                     >
-                      Upload &amp; Spin Transcoder
+                      <span>Upload &amp; Spin Transcoder</span>
                     </button>
                   </div>
                 </form>

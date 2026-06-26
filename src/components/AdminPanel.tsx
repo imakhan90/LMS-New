@@ -158,7 +158,7 @@ export default function AdminPanel({ user, courses, onRefreshCourses }: AdminPan
           </div>
 
           <div className="border border-slate-100 rounded-2xl overflow-hidden overflow-x-auto">
-            <table className="w-full text-left font-sans text-xs border-collapse">
+            <table className="w-full text-left font-sans text-xs border-collapse min-w-[650px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                   <th className="p-3">User Profile</th>

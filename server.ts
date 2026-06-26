@@ -1295,15 +1295,91 @@ interface DatabaseSchema {
   notifications: LmsNotification[];
   chatMessages: ChatMessage[];
   officeHours: OfficeHourSlot[];
+  visaBookings?: any[];
 }
 
 const defaultDb: DatabaseSchema = {
   users: initialUsers,
   courses: getInitialCourses(),
   libraryItems: initialLibraryItems,
-  progress: [],
-  attendance: [],
-  quizAttempts: [],
+  progress: [
+    {
+      userId: 'user_student_1',
+      courseId: 'course_1',
+      lessonId: 'c1_l1',
+      watchPercentage: 90,
+      lastPosition: 540,
+      completed: true
+    },
+    {
+      userId: 'user_student_1',
+      courseId: 'course_1',
+      lessonId: 'c1_l4',
+      watchPercentage: 85,
+      lastPosition: 620,
+      completed: true
+    },
+    {
+      userId: 'user_student_1',
+      courseId: 'course_quran',
+      lessonId: 'cq_l1',
+      watchPercentage: 95,
+      lastPosition: 480,
+      completed: true
+    }
+  ],
+  attendance: [
+    {
+      userId: 'user_student_1',
+      userName: 'Zayn Malik',
+      studentId: 'ST-904123',
+      courseId: 'course_1',
+      courseTitle: 'Introduction to Computer Science',
+      lessonId: 'c1_l1',
+      lessonTitle: 'Lesson 1.1: History of Computing & Hardware Architecture',
+      date: '2026-06-22',
+      watchPercentage: 90,
+      status: 'Present'
+    },
+    {
+      userId: 'user_student_1',
+      userName: 'Zayn Malik',
+      studentId: 'ST-904123',
+      courseId: 'course_1',
+      courseTitle: 'Introduction to Computer Science',
+      lessonId: 'c1_l4',
+      lessonTitle: 'Lesson 2.1: Variables, Types, and Basic Arithmetic',
+      date: '2026-06-23',
+      watchPercentage: 85,
+      status: 'Present'
+    },
+    {
+      userId: 'user_student_1',
+      userName: 'Zayn Malik',
+      studentId: 'ST-904123',
+      courseId: 'course_quran',
+      courseTitle: 'Fehm-ul-Quran (Understanding Quran)',
+      lessonId: 'cq_l1',
+      lessonTitle: 'Quran Lesson 1.1: Revelation History & Makki/Madani Distinctions',
+      date: '2026-06-24',
+      watchPercentage: 95,
+      status: 'Present'
+    }
+  ],
+  quizAttempts: [
+    {
+      id: 'attempt_seed_1',
+      userId: 'user_student_1',
+      userName: 'Zayn Malik',
+      courseId: 'course_1',
+      quizId: 'quiz_c1_m1',
+      quizTitle: 'Quiz 1.1: Hardware Foundations',
+      score: 100,
+      totalQuestions: 2,
+      passed: true,
+      date: '2026-06-22'
+    }
+  ],
   certificates: [],
   notifications: initialNotifications,
   chatMessages: initialChatMessages,
@@ -1328,7 +1404,8 @@ const defaultDb: DatabaseSchema = {
       endTime: '15:00',
       status: 'available'
     }
-  ]
+  ],
+  visaBookings: []
 };
 
 function readDb(): DatabaseSchema {
@@ -1350,6 +1427,26 @@ function readDb(): DatabaseSchema {
 
     if (!parsed.officeHours || !Array.isArray(parsed.officeHours)) {
       parsed.officeHours = defaultDb.officeHours;
+      changed = true;
+    }
+
+    if (!parsed.visaBookings || !Array.isArray(parsed.visaBookings)) {
+      parsed.visaBookings = [];
+      changed = true;
+    }
+
+    if (!parsed.attendance || !Array.isArray(parsed.attendance) || parsed.attendance.length === 0) {
+      parsed.attendance = defaultDb.attendance;
+      changed = true;
+    }
+
+    if (!parsed.progress || !Array.isArray(parsed.progress) || parsed.progress.length === 0) {
+      parsed.progress = defaultDb.progress;
+      changed = true;
+    }
+
+    if (!parsed.quizAttempts || !Array.isArray(parsed.quizAttempts) || parsed.quizAttempts.length === 0) {
+      parsed.quizAttempts = defaultDb.quizAttempts;
       changed = true;
     }
 
@@ -2259,6 +2356,159 @@ app.delete('/api/office-hours/:id', (req, res) => {
   db.officeHours.splice(slotIndex, 1);
   writeDb(db);
   res.json({ success: true, message: 'Office hour slot deleted successfully' });
+});
+
+// -----------------------------------------------------
+// Visa & Admissions Counseling APIs (VisaLaga Module)
+// -----------------------------------------------------
+
+// Get all visa counseling bookings
+app.get('/api/visa-bookings', (req, res) => {
+  const db = readDb();
+  res.json(db.visaBookings || []);
+});
+
+// Create a new visa counseling booking
+app.post('/api/visa-bookings', (req, res) => {
+  const { studentId, studentName, studentEmail, advisorId, advisorName, date, timeSlot, notes } = req.body;
+  
+  if (!studentId || !advisorId || !date || !timeSlot) {
+    return res.status(400).json({ error: 'Missing required booking parameters' });
+  }
+
+  const db = readDb();
+  if (!db.visaBookings) {
+    db.visaBookings = [];
+  }
+
+  // Prevent double booking for same advisor on same date + time slot
+  const exists = db.visaBookings.some(b => b.advisorId === advisorId && b.date === date && b.timeSlot === timeSlot);
+  if (exists) {
+    return res.status(409).json({ error: 'This counselor slot is already reserved.' });
+  }
+
+  const newBooking = {
+    id: `v_b_${Date.now()}`,
+    studentId,
+    studentName,
+    studentEmail: studentEmail || 'student@university.edu',
+    advisorId,
+    advisorName,
+    date,
+    timeSlot,
+    notes: notes || ''
+  };
+
+  db.visaBookings.push(newBooking);
+  writeDb(db);
+  res.status(201).json(newBooking);
+});
+
+// Cancel a visa booking
+app.delete('/api/visa-bookings/:id', (req, res) => {
+  const { id } = req.params;
+  const db = readDb();
+  
+  if (!db.visaBookings) {
+    db.visaBookings = [];
+  }
+
+  const index = db.visaBookings.findIndex(b => b.id === id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Visa booking not found' });
+  }
+
+  db.visaBookings.splice(index, 1);
+  writeDb(db);
+  res.json({ success: true, message: 'Advisory consultation cancelled successfully' });
+});
+
+// AI Visa advisory chat route (utilizes server-side Gemini)
+app.post('/api/ai/visa-chat', async (req, res) => {
+  const { message, context, chatHistory } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: 'Query message is required' });
+  }
+
+  const systemInstruction = `
+    You are an expert server-side global admissions and visa consultant counselor inside our custom Learning Management System (LMS) powered by the "VisaLaga" education consultancy.
+    
+    Student details are: ${JSON.stringify(context || {})}.
+    
+    CRITICAL INSTRUCTIONS & GUIDELINES:
+    1. Act as a high-fidelity immigration advisor for students aiming to study in the United Kingdom, United States, Canada, Australia, and Germany.
+    2. Provide highly professional, structured, and accurate guidance on:
+       - University admissions criteria (GPA, English certificates, recommendations)
+       - Fully funded scholarship board deadlines and requirements (Chevening, Fulbright, DAAD)
+       - Required student visa bank statements, block accounts (Sperrkonto: €11,208), or financial proof.
+       - Statement of Purpose (SOP) formulation advice.
+    3. Keep responses structured, professional, exceptionally clear, and encouraging. Use elegant Markdown (bold headings, bullet lists, bolded numbers) directly.
+    4. Speak humbly and respectfully. Do not hallucinate or make up visa fees or timelines. Frame estimates clearly.
+  `;
+
+  // Try calling Gemini first
+  if (ai) {
+    try {
+      const formattedHistory = (chatHistory || []).map((h: any) => ({
+        role: h.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: h.text }]
+      }));
+
+      const chat = ai.chats.create({
+        model: 'gemini-3.5-flash',
+        config: {
+          systemInstruction,
+          temperature: 0.7
+        },
+        history: formattedHistory
+      });
+
+      const response = await chat.sendMessage({ message });
+      return res.json({ text: response.text });
+    } catch (e: any) {
+      console.error('Gemini visa advisory call failed, employing fallback', e);
+    }
+  }
+
+  // Secure backup local response generator
+  setTimeout(() => {
+    const lower = message.toLowerCase();
+    let reply = `Based on the latest **VisaLaga study abroad rules**, let's analyze your inquiry:\n\n`;
+
+    if (lower.includes('uk') || lower.includes('united kingdom') || lower.includes('cas')) {
+      reply += `For the **United Kingdom Student Visa**:\n` +
+               `* **CAS (Confirmation of Acceptance)**: You must secure an unconditional offer from an approved licensed sponsor university.\n` +
+               `* **Financial Statement**: Show tuition fee balance + annual living cost (£12,006 if in London, or £9,207 outside London). The funds must be held in a regulated financial bank account for exactly **28 consecutive days** without dipping below the required balance.\n` +
+               `* **Post-study Work**: Upon graduation, you are eligible for the **2-year Graduate Route post-study work visa**.\n\nWould you like me to book a session with **Sir Imran Ahmed** to review your UK university profile?`;
+    } else if (lower.includes('german') || lower.includes('germany') || lower.includes('block') || lower.includes('sperrkonto')) {
+      reply += `To secure a student visa for **Germany**:\n` +
+               `* **Sperrkonto (Block Account)**: For 2026 entry, you must open a blocked account with €11,208 deposited. It permits monthly payouts of €934 for student living costs.\n` +
+               `* **Tuition Fees**: Free in state universities! You only pay about €150-€350 per semester for public transit and campus union administration fees.\n` +
+               `* **Language Requirements**: IELTS 6.0 to 6.5 is suitable for English-taught master's courses, though conversational German (A2) helps in daily life.\n\nWould you like to explore German EPOS DAAD scholarships?`;
+    } else if (lower.includes('canada') || lower.includes('sds')) {
+      reply += `For **Canada (Study Permit)**:\n` +
+               `* **Student Direct Stream (SDS)**: Extremely fast processing. Requires upfront payment of first-year tuition, a C$20,635 GIC (Guaranteed Investment Certificate) for living expenses, and an **IELTS score of 6.5** with no single module under 6.0.\n` +
+               `* **PGWPP (Post-Graduation Work Permit)**: Outstanding opportunity. Grants up to **3 years of open work rights** depending on study program length.\n\nI recommend utilizing our **Interactive Document Checklist** to monitor your GIC status.`;
+    } else if (lower.includes('scholarship') || lower.includes('chevening') || lower.includes('fulbright')) {
+      reply += `Our **Scholarships Directory** lists several fully funded options:\n` +
+               `1. **Chevening Scholarships (UK)**: Closes in November. Fully funded Masters covering tuition, flight, and £1,200/mo allowance.\n` +
+               `2. **Fulbright Program (USA)**: Outstanding postgraduate scholarship including research support, tuition, and medical insurance.\n` +
+               `3. **DAAD EPOS (Germany)**: Excellent for professionals from developing nations with at least 2 years of experience.\n\nWhat scholarship criteria fits your current level?`;
+    } else if (lower.includes('ielts') || lower.includes('pte') || lower.includes('score')) {
+      reply += `**Language Standard Thresholds**:\n` +
+               `* **Undergraduate**: Overall IELTS 6.0 (no band below 5.5) or PTE Academic 50.\n` +
+               `* **Postgraduate / Masters**: Overall IELTS 6.5 (no band below 6.0) or PTE Academic 58.\n` +
+               `* **Ivy-League US**: Often expects IELTS 7.0 or TOEFL iBT 90+.\n\nYou can upload your test report under the **Document Checklist** to initiate our verified status sequence.`;
+    } else {
+      reply += `That is a vital study abroad question. To succeed with your university application and subsequent visa processing, we recommend checking these parameters:\n` +
+               `1. **Pre-requisite Qualifications**: Verify if your degree GPA or grades meet the host institution standards.\n` +
+               `2. **English Language Certificate**: IELTS, PTE, or TOEFL report validity.\n` +
+               `3. **Proof of Financial Sponsorship**: Bank statements or scholarship letters.\n\nWhich country are you targeting? Select **Target Countries** for direct specifications.`;
+    }
+
+    res.json({ text: reply });
+  }, 1000);
 });
 
 // -----------------------------------------------------

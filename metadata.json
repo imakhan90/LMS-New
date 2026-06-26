@@ -1,6 +1,6 @@
 {
   "name": "Learning Management System",
-  "description": "A comprehensive cloud-based Learning Management System (LMS) for educational institutions and universities, featuring user roles, an interactive course viewer, an advanced simulated video streaming player, attendance tracking, quiz grading, a digital library, analytics reports, and a server-side Gemini AI tutor chatbot.",
+  "description": "A comprehensive cloud-based Learning Management System (LMS) for educational institutions and universities, featuring user roles, an interactive course viewer, student visa and global study admissions counseling, attendance tracking, quiz grading, a digital library, analytics reports, and a server-side Gemini AI tutor chatbot.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -20,6 +20,7 @@ import DigitalLibrary from './components/DigitalLibrary';
 import ReportsPanel from './components/ReportsPanel';
 import AITutor from './components/AITutor';
 import AdminPanel from './components/AdminPanel';
+import VisaAdmissions from './components/VisaAdmissions';
 import QuizModal from './components/QuizModal';
 import InteractiveCalendar from './components/InteractiveCalendar';
 import { User, Course, Quiz } from './types';
@@ -191,6 +192,17 @@ export default function App() {
                   setActiveTab('library');
                 }}
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'visa-admissions' && (
+            <motion.div
+              key="visa-admissions"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+            >
+              <VisaAdmissions user={user} />
             </motion.div>
           )}
 

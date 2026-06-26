@@ -17,7 +17,8 @@ import {
   Command,
   Calendar,
   Sun,
-  Moon
+  Moon,
+  Globe
 } from 'lucide-react';
 import { User, Course, Quiz, LibraryItem } from '../types';
 
@@ -94,6 +95,7 @@ export default function Navigation({
   const menuItems = [
     { id: 'dashboard', label: 'LMS Dashboard', icon: LayoutDashboard, roles: ['student', 'professor', 'admin'] },
     { id: 'courses', label: 'Academic Courses', icon: BookOpen, roles: ['student', 'professor', 'admin'] },
+    { id: 'visa-admissions', label: 'Visa & Admissions', icon: Globe, roles: ['student', 'professor', 'admin'] },
     { id: 'calendar', label: 'Academic Calendar', icon: Calendar, roles: ['student', 'professor', 'admin'] },
     { id: 'quran', label: 'Fehm-ul-Quran', icon: Compass, roles: ['student', 'professor', 'admin'] },
     { id: 'library', label: 'Digital Library', icon: Library, roles: ['student', 'professor', 'admin'] },
@@ -384,8 +386,8 @@ export default function Navigation({
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 relative">
         {/* Floating Left Sidebar Panel or Tab Bar */}
-        <nav id="lms_sidebar" className="fixed bottom-0 left-0 right-0 z-40 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] md:w-64 bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-slate-850 md:border-t-0 md:border-r md:border-slate-200/80 dark:border-slate-800/80 shadow-md md:shadow-none flex md:flex-col justify-between py-2 md:py-6 overflow-y-auto shrink-0 transition-colors duration-300">
-          <div className="flex w-full md:flex-col justify-around md:justify-start px-3 md:px-4 gap-1 md:space-y-1">
+        <nav id="lms_sidebar" className="fixed bottom-0 left-0 right-0 z-40 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] md:w-64 bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-slate-850 md:border-t-0 md:border-r md:border-slate-200/80 dark:border-slate-800/80 shadow-md md:shadow-none flex md:flex-col justify-between py-2 md:py-6 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0 transition-colors duration-300">
+          <div className="flex w-full overflow-x-auto whitespace-nowrap md:flex-col md:overflow-x-visible md:whitespace-normal justify-start md:justify-start px-3 md:px-4 gap-1 md:space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 md:pb-0">
             {visibleMenuItems.map((item) => {
                const IconComponent = item.icon;
                const isTabActive = activeTab === item.id;
@@ -401,7 +403,7 @@ export default function Navigation({
                    key={item.id}
                    type="button"
                    onClick={() => setActiveTab(item.id)}
-                   className={`flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:py-2.5 rounded-xl transition text-[10px] md:text-sm font-semibold w-full border border-transparent cursor-pointer ${
+                   className={`flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:py-2.5 rounded-xl transition text-[10px] md:text-sm font-semibold w-auto md:w-full border border-transparent cursor-pointer shrink-0 ${
                      isTabActive 
                        ? activeClasses 
                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'

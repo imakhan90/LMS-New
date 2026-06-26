@@ -9,7 +9,9 @@ import {
   AlertCircle,
   HelpCircle,
   Loader2,
-  Trash2
+  Trash2,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { User, Course, Question } from '../types';
 
@@ -50,6 +52,91 @@ export default function AITutor({ user, courses, initialPrompt, onClearInitialPr
   // Dynamic inline quiz attempts state (from AI Quiz Generator)
   const [activeQuizAnswers, setActiveQuizAnswers] = useState<Record<string, number>>({});
   const [activeQuizSubmitted, setActiveQuizSubmitted] = useState<Record<string, boolean>>({});
+
+  // Web Speech API Integration States
+  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [autoSpeechEnabled, setAutoSpeechEnabled] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Strip Markdown for readable plain text speech synthesis
+  const stripMarkdownForSpeech = (text: string) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // remove bold asterisks
+      .replace(/[*-\s]\s+/g, ' ')       // replace bullets/dash with space
+      .replace(/`([^`]+)`/g, '$1')     // remove inline code blocks
+      .replace(/#+\s+/g, '')           // remove headers
+      .trim();
+  };
+
+  const handleToggleSpeech = (msgId: string, rawText: string) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      return;
+    }
+
+    if (speakingId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingId(null);
+      return;
+    }
+
+    // Cancel existing speak active tasks
+    window.speechSynthesis.cancel();
+
+    const cleanText = stripMarkdownForSpeech(rawText);
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utteranceRef.current = utterance;
+
+    utterance.onend = () => {
+      setSpeakingId(null);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingId(null);
+    };
+
+    // Try finding Google or Natural English speaking voice as fallback
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(v => 
+      v.lang.startsWith('en-') && (v.name.includes('Google') || v.name.includes('Natural'))
+    ) || voices.find(v => v.lang.startsWith('en-')) || voices[0];
+
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    setSpeakingId(msgId);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Clean up synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  // Handle auto-speak on new assistant replies
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.role === 'assistant' && autoSpeechEnabled) {
+      if (lastMsg.id !== 'msg_welcome') {
+        handleToggleSpeech(lastMsg.id, lastMsg.text);
+      }
+    }
+  }, [messages]);
+
+  // Cancel immediately if user disables auto-speech mid-flight
+  useEffect(() => {
+    if (!autoSpeechEnabled && speakingId) {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        setSpeakingId(null);
+      }
+    }
+  }, [autoSpeechEnabled]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -254,13 +341,26 @@ export default function AITutor({ user, courses, initialPrompt, onClearInitialPr
                 <p className="text-[10px] text-sky-100 font-medium">Undergraduate Pedagogy Agent Active</p>
               </div>
             </div>
-            <button
-              onClick={clearChatLogs}
-              title="Clear academic log history"
-              className="p-1.5 hover:bg-white/10 rounded-full transition text-sky-200 hover:text-white"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setAutoSpeechEnabled(prev => !prev)}
+                title={autoSpeechEnabled ? "Disable Auto-Read Aloud" : "Enable Auto-Read Aloud"}
+                className={`p-1.5 rounded-full transition cursor-pointer ${
+                  autoSpeechEnabled 
+                    ? 'bg-white/25 text-white ring-1 ring-white/40' 
+                    : 'text-sky-200 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {autoSpeechEnabled ? <Volume2 className="h-4 w-4 animate-pulse" /> : <Volume2 className="h-4 w-4 opacity-75" />}
+              </button>
+              <button
+                onClick={clearChatLogs}
+                title="Clear academic log history"
+                className="p-1.5 hover:bg-white/10 rounded-full transition text-sky-200 hover:text-white"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {/* Messages scrolling stack container */}
@@ -361,8 +461,33 @@ export default function AITutor({ user, courses, initialPrompt, onClearInitialPr
                       </div>
                     )}
 
-                    {/* Timestamp log label */}
-                    <span className="text-[9px] text-slate-400 font-medium block text-right pt-1">{msg.timestamp}</span>
+                    {/* Bottom controls row */}
+                    <div className="flex items-center justify-between gap-4 pt-2 border-t border-slate-100/40 mt-1">
+                      {isAI ? (
+                        <button
+                          onClick={() => handleToggleSpeech(msg.id, msg.text)}
+                          className={`flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                            speakingId === msg.id 
+                              ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-400 hover:bg-rose-100' 
+                              : 'text-slate-400 hover:text-sky-600 hover:bg-sky-50/50'
+                          }`}
+                          title={speakingId === msg.id ? "Stop reading aloud" : "Read response aloud"}
+                        >
+                          {speakingId === msg.id ? (
+                            <>
+                              <VolumeX className="h-3.5 w-3.5 text-rose-500" />
+                              <span>Stop AI Speech</span>
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 className="h-3.5 w-3.5 text-sky-500" />
+                              <span>Listen Response</span>
+                            </>
+                          )}
+                        </button>
+                      ) : <div />}
+                      <span className={`text-[9px] font-medium ${isAI ? 'text-slate-400' : 'text-sky-100'}`}>{msg.timestamp}</span>
+                    </div>
 
                   </div>
                 </div>

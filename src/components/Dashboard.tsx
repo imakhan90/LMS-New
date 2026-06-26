@@ -595,7 +595,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left Double-Col Layout (Charts, Course rosters) */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 min-w-0">
           
           {/* Charts Widget (Admin & Professor view) */}
           {(user.role === 'admin' || user.role === 'professor') && (
@@ -639,7 +639,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4"
               >
                 {courses.map(course => {
                   const totalLessons = course.modules.flatMap(m => m.lessons).length || 1;
@@ -926,7 +926,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
         </div>
 
         {/* Right Sidebar layout (Attendance Pie chart, Notification ticker, Certificates) */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           
           {/* Attendance Pie Chart Widget */}
           <motion.div 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
   BookOpen, 
@@ -68,6 +68,18 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   
   const [facultyId, setFacultyId] = useState('');
   const [designation, setDesignation] = useState('Assistant Professor');
+
+  // Keyboard accessibility listeners for Auth modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showAuthModal) {
+        e.preventDefault();
+        setShowAuthModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAuthModal]);
   
   const [employeeId, setEmployeeId] = useState('');
   const [adminRole, setAdminRole] = useState('System Administrator'); // e.g. Registrar, Super Admin, System Administrator
@@ -85,6 +97,137 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const [contactEmail, setContactEmail] = useState('');
   const [contactMessage, setContactMessage] = useState('');
   const [activeHeroNode, setActiveHeroNode] = useState<'student' | 'professor' | 'admin' | 'core'>('core');
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  const categories = [
+    { name: "Computer Science", courses: 14, icon: Laptop, color: "bg-blue-50 text-blue-600 border-blue-100", desc: "Algorithms, Python programming, and systems design." },
+    { name: "Business Administration", courses: 8, icon: TrendingUp, color: "bg-emerald-50 text-emerald-600 border-emerald-100", desc: "Corporate communications, management, and marketing." },
+    { name: "Islamic Studies", courses: 6, icon: BookMarked, color: "bg-amber-50 text-amber-600 border-amber-100", desc: "Translation, Tafseer, and ethics of Quranic studies." },
+    { name: "Electrical Engineering", courses: 11, icon: Cpu, color: "bg-indigo-50 text-indigo-600 border-indigo-100", desc: "Microprocessors, circuit boards, and logical gates." },
+    { name: "General Education", courses: 19, icon: School, color: "bg-purple-50 text-purple-600 border-purple-100", desc: "Academic writing, logic, and global history studies." }
+  ];
+
+  const featuredCourses = [
+    {
+      id: "course_1",
+      title: "Introduction to Computer Science",
+      code: "CS101",
+      desc: "Embark on standard algorithms, CPU microarchitectures, monolithic operating systems, and core Python programming variables.",
+      instructor: "Dr. Sarah Jenkins",
+      creditHours: 4,
+      durationWeeks: 16,
+      rating: 4.9,
+      reviews: 1240,
+      badge: "Core Requirement",
+      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=90&w=1000"
+    },
+    {
+      id: "course_5",
+      title: "Business Communication & Leadership",
+      code: "BUS102",
+      desc: "Learn corporate memo layouts with Barbara Minto's Pyramid Principle, executive Q&A delivery, and conflict resolution tactics.",
+      instructor: "Prof. Marcus Aurelius",
+      creditHours: 3,
+      durationWeeks: 16,
+      rating: 4.8,
+      reviews: 840,
+      badge: "Professional Elective",
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=90&w=1000"
+    },
+    {
+      id: "course_quran",
+      title: "Fehm-ul-Quran (Understanding Quran)",
+      code: "ISL101",
+      desc: "A beautifully structured course dedicated to Translation, Tafseer, semantic Arabic root words, and ethical community leadership.",
+      instructor: "Dr. Tariq Mahmood",
+      creditHours: 2,
+      durationWeeks: 16,
+      rating: 4.9,
+      reviews: 2150,
+      badge: "Ethics Specialization",
+      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=90&w=1000"
+    }
+  ];
+
+  const instructors = [
+    {
+      name: "Dr. Sarah Jenkins",
+      role: "Dean of Computer Science",
+      bio: "Ex-Google Senior Research Scientist specializing in compiler optimizations, algorithmic complexity analysis, and modern full-stack systems design.",
+      rating: "4.95/5",
+      courses: 4,
+      badge: "CS Leader",
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=90&w=1000"
+    },
+    {
+      name: "Prof. Marcus Aurelius",
+      role: "Chair of Business Management",
+      bio: "Corporate consultant with 20+ years of boardroom advisory expertise. Pioneer in executive communication techniques and situational ethics structures.",
+      rating: "4.88/5",
+      courses: 3,
+      badge: "Strategy Coach",
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=90&w=1000"
+    },
+    {
+      name: "Dr. Tariq Mahmood",
+      role: "Director of Islamic Epistemology",
+      bio: "Renowned academic specializing in Arabic semantic root linguistics, comparative theology, and global community leadership frameworks.",
+      rating: "4.98/5",
+      courses: 2,
+      badge: "Ethics Dean",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=90&w=1000"
+    }
+  ];
+
+  const blogPosts = [
+    {
+      title: "The Evolution of AI-Powered Grading in Modern LMS",
+      category: "EdTech Trends",
+      date: "June 24, 2026",
+      readTime: "5 min read",
+      desc: "Discover how large language models are transforming grading workflows from simple rubric ticks to deep semantic analysis of student essays.",
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=90&w=1000"
+    },
+    {
+      title: "The Minto Pyramid Principle: Write Like a McKinsey Consultant",
+      category: "Business Tactics",
+      date: "June 18, 2026",
+      readTime: "8 min read",
+      desc: "A deep dive into Barbara Minto's famous communication model. Learn how placing your conclusion first improves written memorandums.",
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=90&w=1000"
+    },
+    {
+      title: "Semantic Arabic Roots: Preserving Sacred Texts in the Cloud",
+      category: "Theology & Tech",
+      date: "June 12, 2026",
+      readTime: "6 min read",
+      desc: "How digitized translation tools utilize root verb groupings to maintain accuracy and context in modern Quranic tafseer engines.",
+      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=90&w=1000"
+    }
+  ];
+
+  const faqs = [
+    {
+      q: "How does the AI Tutor help me study?",
+      a: "Our platform integrates Google's Gemini models directly into your learning dashboard. It analyzes course lessons and slides to generate custom mock tests, answer concept queries in real-time, and read responses aloud using natural speech synthesis."
+    },
+    {
+      q: "Is there a limit to the number of courses I can enroll in?",
+      a: "No! The Free Learner Seat allows students to register and join as many sandbox courses as they wish, including all Computer Science, Business, and Islamic Studies tracks."
+    },
+    {
+      q: "How is student attendance recorded automatically?",
+      a: "Our system monitors video stream playback percentage and interactive quiz submissions. Once a student completes a lesson, their attendance record updates instantly inside the connected database, reflecting on the Registrar panel."
+    },
+    {
+      q: "Can professors host custom exams and grading structures?",
+      a: "Yes! The Professor Portal includes a comprehensive Gradebook and Exam builder where instructors can configure custom question weights, essay rubrics, and direct grade distribution panels."
+    },
+    {
+      q: "How secure is the Single Sign-On (SSO) gateway?",
+      a: "The portal uses secure token-based authorization. It separates permissions into Student, Professor, and Registrar Administrative roles, preventing cross-portal privilege escalation."
+    }
+  ];
 
   const departments = [
     'Computer Science',
@@ -340,13 +483,15 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <a href="#architecture" className="hover:text-blue-600 transition-colors">Architecture</a>
+          <nav className="hidden lg:flex items-center gap-6 text-[11px] font-black text-slate-500 uppercase tracking-widest">
+            <a href="#categories" className="hover:text-blue-600 transition-colors">Categories</a>
+            <a href="#courses" className="hover:text-blue-600 transition-colors">Courses</a>
+            <a href="#architecture" className="hover:text-blue-600 transition-colors">Portals</a>
             <a href="#workflows" className="hover:text-blue-600 transition-colors">Sync Flows</a>
-            <a href="#features" className="hover:text-blue-600 transition-colors">Core Features</a>
-            <a href="#statistics" className="hover:text-blue-600 transition-colors">System Metrics</a>
-            <a href="#testimonials" className="hover:text-blue-600 transition-colors">Testimonials</a>
-            <a href="#contact" className="hover:text-blue-600 transition-colors">Inquiries</a>
+            <a href="#instructors" className="hover:text-blue-600 transition-colors">Instructors</a>
+            <a href="#pricing" className="hover:text-blue-600 transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-blue-600 transition-colors">FAQ</a>
+            <a href="#blog" className="hover:text-blue-600 transition-colors">Resources</a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -620,6 +765,173 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               </div>
 
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Course Categories Section */}
+      <section id="categories" className="py-20 bg-slate-50 relative overflow-hidden border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 relative z-10">
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <span className="text-xs font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1.5 rounded-full inline-block">
+              Academic Disciplines
+            </span>
+            <h2 className="text-3xl font-poppins font-black text-slate-900 leading-tight">
+              Explore Top Course Categories
+            </h2>
+            <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto">
+              Our curriculum spans major technical, leadership, and ethical branches, curated meticulously by certified university deans.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] gap-6 w-full">
+            {categories.map((cat, idx) => {
+              const IconComponent = cat.icon;
+              return (
+                <div 
+                  key={idx} 
+                  className="bg-white border border-slate-200/60 p-6 rounded-[22px] shadow-xs hover:shadow-md hover:border-blue-500/30 hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between text-left group"
+                >
+                  <div className="space-y-4">
+                    <div className={`p-3 rounded-xl ${cat.color} inline-flex border shadow-inner`}>
+                      <IconComponent className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-poppins font-black text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
+                        {cat.name}
+                      </h3>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase mt-1">
+                        {cat.courses} Active Courses
+                      </p>
+                    </div>
+                    <p className="text-slate-500 text-xxs leading-relaxed">
+                      {cat.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-slate-100/80">
+                    <button 
+                      onClick={() => {
+                        setIsLogin(false);
+                        setShowAuthModal(true);
+                      }}
+                      className="text-slate-500 hover:text-blue-600 font-extrabold text-[11px] inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Browse seats</span>
+                      <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Courses Section */}
+      <section id="courses" className="py-20 bg-white relative overflow-hidden border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-5xl mx-auto">
+            <div className="text-left space-y-3 max-w-2xl">
+              <span className="text-xs font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3.5 py-1.5 rounded-full inline-block">
+                Top-Tier Curriculum
+              </span>
+              <h2 className="text-3xl font-poppins font-black text-slate-900 leading-tight">
+                Our Featured Academic Programs
+              </h2>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Join our standard student sandbox channels to experience state-of-the-art interactive modules with live automated attendance tracking.
+              </p>
+            </div>
+            
+            <button 
+              onClick={() => {
+                setIsLogin(false);
+                setShowAuthModal(true);
+              }}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-widest px-6 py-3.5 rounded-2xl shadow-md transition-all self-start md:self-auto cursor-pointer"
+            >
+              View Full Catalog
+            </button>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-8 max-w-5xl mx-auto w-full">
+            {featuredCourses.map((course, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white border border-slate-200/60 rounded-[24px] overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group"
+              >
+                {/* Course Banner */}
+                <div className="aspect-video w-full bg-slate-100 overflow-hidden relative">
+                  <img 
+                    src={course.image} 
+                    alt={course.title}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+
+                {/* Course Content */}
+                <div className="p-6 text-left flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="bg-slate-100 text-slate-800 text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-md">
+                        {course.code}
+                      </span>
+                      <span className="bg-blue-50 text-blue-600 text-[9px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded-md">
+                        {course.badge}
+                      </span>
+                    </div>
+                    <p className="text-slate-400 text-xxs font-extrabold uppercase tracking-wide">
+                      Instructor: {course.instructor}
+                    </p>
+                    <h3 className="text-base font-poppins font-black text-slate-800 leading-tight group-hover:text-blue-600 transition-colors">
+                      {course.title}
+                    </h3>
+                    <p className="text-slate-500 text-xs leading-relaxed line-clamp-3">
+                      {course.desc}
+                    </p>
+                  </div>
+
+                  {/* Course stats */}
+                  <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 text-[11px] font-bold text-slate-500">
+                    <div className="text-center border-r border-slate-100">
+                      <p className="text-slate-400 text-[9px] uppercase font-bold tracking-widest">Duration</p>
+                      <p className="text-slate-700 font-extrabold mt-0.5">{course.durationWeeks} Weeks</p>
+                    </div>
+                    <div className="text-center border-r border-slate-100">
+                      <p className="text-slate-400 text-[9px] uppercase font-bold tracking-widest">Credits</p>
+                      <p className="text-slate-700 font-extrabold mt-0.5">{course.creditHours} Hours</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-slate-400 text-[9px] uppercase font-bold tracking-widest">Rating</p>
+                      <p className="text-amber-500 font-extrabold mt-0.5 flex items-center justify-center gap-0.5">
+                        <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                        {course.rating}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Price and CTA */}
+                  <div className="flex items-center justify-between pt-2">
+                    <div>
+                      <p className="text-slate-400 text-[9px] font-bold uppercase tracking-wider">Tuition Fee</p>
+                      <p className="text-[#38B889] text-base font-black">Free Learner Seat</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setIsLogin(false);
+                        setShowAuthModal(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] uppercase tracking-widest px-4.5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer"
+                    >
+                      Enroll Seat
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1241,6 +1553,219 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
         </div>
       </section>
 
+      {/* Instructors Showcase Section */}
+      <section id="instructors" className="py-20 bg-slate-50 relative overflow-hidden border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <span className="text-xs font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1.5 rounded-full inline-block">
+              World-Class Faculty
+            </span>
+            <h2 className="text-3xl font-poppins font-black text-slate-900 leading-tight">
+              Learn from Outstanding Scholars
+            </h2>
+            <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto">
+              Our instructors are leading industry scientists, executive chairs, and theologians committed to delivering pristine lectures and real-world skills.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-8 max-w-5xl mx-auto w-full">
+            {instructors.map((inst, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white border border-slate-200/60 rounded-[24px] overflow-hidden shadow-xs hover:shadow-md hover:border-blue-500/20 transition-all duration-300 flex flex-col justify-between text-left group"
+              >
+                <div>
+                  {/* Portrait */}
+                  <div className="aspect-[4/3] w-full bg-slate-100 overflow-hidden relative">
+                    <img 
+                      src={inst.image} 
+                      alt={inst.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
+                    />
+                  </div>
+
+                  <div className="p-6 space-y-3">
+                    <div>
+                      <span className="bg-slate-900 text-white text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded-md inline-block mb-2.5">
+                        {inst.badge}
+                      </span>
+                      <h3 className="text-base font-poppins font-black text-slate-800">{inst.name}</h3>
+                      <p className="text-blue-600 text-xs font-bold mt-0.5">{inst.role}</p>
+                    </div>
+                    <p className="text-slate-500 text-xs leading-relaxed">
+                      {inst.bio}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 pt-0">
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-bold text-slate-500">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="text-slate-800 font-extrabold">{inst.rating}</span>
+                    </div>
+                    <div className="text-slate-400">
+                      {inst.courses} Core Courses
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SaaS Pricing Plans Section */}
+      <section id="pricing" className="py-20 bg-white relative overflow-hidden border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <span className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3.5 py-1.5 rounded-full inline-block">
+              Flexible Licensing
+            </span>
+            <h2 className="text-3xl font-poppins font-black text-slate-900 leading-tight">
+              Simple, Transparent Pricing Tiers
+            </h2>
+            <p className="text-slate-500 text-sm leading-relaxed max-w-2xl mx-auto">
+              Choose the perfect seat type to join lectures, complete quiz certifications, or provision entire university registers.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
+            {/* Free Learner Tier */}
+            <div className="bg-slate-50 border border-slate-200/60 p-8 rounded-[24px] flex flex-col justify-between text-left hover:border-slate-300 transition-all shadow-xs relative">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-poppins font-black text-slate-800">Free Learner Seat</h3>
+                  <p className="text-slate-400 text-xs mt-1">Perfect for individual study & research</p>
+                </div>
+                
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-black text-slate-900">$0</span>
+                  <span className="text-slate-400 text-xs ml-1 font-bold">/ forever</span>
+                </div>
+
+                <div className="border-t border-slate-200/80 pt-6 space-y-3.5">
+                  {[
+                    "Enroll in any 3 standard courses",
+                    "Complete weekly quiz iterations",
+                    "Active automated attendance track",
+                    "Unlock 1 official certificate key",
+                    "Basic offline slide download"
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-600 font-semibold">
+                      <Check className="h-4.5 w-4.5 text-[#38B889] shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-8">
+                <button 
+                  onClick={() => {
+                    setIsLogin(false);
+                    setShowAuthModal(true);
+                  }}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-widest py-3.5 rounded-xl transition cursor-pointer"
+                >
+                  Join Sandbox Seat Free
+                </button>
+              </div>
+            </div>
+
+            {/* Academic Roster Tier - Popular */}
+            <div className="bg-white border-2 border-blue-600 p-8 rounded-[24px] flex flex-col justify-between text-left hover:shadow-lg transition-all shadow-md relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
+                Highly Popular Option
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-poppins font-black text-slate-800">Academic Roster</h3>
+                  <p className="text-blue-600 text-xs font-bold mt-1">Best for professors & departments</p>
+                </div>
+                
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-black text-slate-900">$12</span>
+                  <span className="text-slate-400 text-xs ml-1 font-bold">/ seat / month</span>
+                </div>
+
+                <div className="border-t border-slate-100 pt-6 space-y-3.5">
+                  {[
+                    "Unlock ALL courses & materials",
+                    "Interactive real-time sync charts",
+                    "Full gradebook & rubric builder",
+                    "Automated attendance matching",
+                    "Unlimited certificates printing",
+                    "AI tutor & summaries integrated"
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-600 font-semibold">
+                      <Check className="h-4.5 w-4.5 text-blue-600 shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-8">
+                <button 
+                  onClick={() => {
+                    setIsLogin(false);
+                    setShowAuthModal(true);
+                  }}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-widest py-3.5 rounded-xl shadow-lg shadow-blue-200 transition cursor-pointer"
+                >
+                  Provision Department Seat
+                </button>
+              </div>
+            </div>
+
+            {/* Enterprise Grid Tier */}
+            <div className="bg-slate-900 border border-slate-800 p-8 rounded-[24px] flex flex-col justify-between text-left hover:border-slate-700 transition-all shadow-xs relative text-white">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-poppins font-black text-white">Enterprise Grid</h3>
+                  <p className="text-slate-400 text-xs mt-1">For universities & system aggregators</p>
+                </div>
+                
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-black text-white">Custom</span>
+                  <span className="text-slate-500 text-xs ml-1 font-bold">/ annual contract</span>
+                </div>
+
+                <div className="border-t border-slate-800 pt-6 space-y-3.5">
+                  {[
+                    "White-labeled custom portal domains",
+                    "Dedicated isolated Cloud DB hosting",
+                    "Bulk Registrar SSO integrations",
+                    "Custom local file training for Gemini",
+                    "99.99% system availability SLA",
+                    "Dedicated technical registrar support"
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-start gap-2.5 text-xs text-slate-300 font-semibold">
+                      <Check className="h-4.5 w-4.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-8">
+                <a 
+                  href="#contact"
+                  className="w-full bg-white/10 hover:bg-white/15 text-white border border-white/20 font-extrabold text-xs uppercase tracking-widest py-3.5 rounded-xl transition text-center block cursor-pointer"
+                >
+                  Contact Registrar Office
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials */}
       <section id="testimonials" className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
@@ -1283,6 +1808,140 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                     <p className="text-xs font-black text-slate-800">{t.author}</p>
                     <p className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest">{t.role}</p>
                   </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 bg-slate-50 relative overflow-hidden border-t border-b border-slate-200/50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <span className="text-xs font-black text-blue-600 uppercase tracking-widest bg-blue-50 px-3.5 py-1.5 rounded-full inline-block">
+              Got Questions?
+            </span>
+            <h2 className="text-3xl font-poppins font-black text-slate-900 leading-tight">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              Find instant answers to general inquiries about enrollment, attendance tracking mechanics, AI assistance capabilities, and database security.
+            </p>
+          </div>
+
+          <div className="space-y-4 max-w-3xl mx-auto">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaqIndex === idx;
+              return (
+                <div 
+                  key={idx} 
+                  className="bg-white border border-slate-200/60 rounded-[18px] overflow-hidden transition-all duration-300 shadow-xs"
+                >
+                  <button 
+                    type="button"
+                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                    className="w-full px-6 py-5 flex items-center justify-between text-left font-semibold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer"
+                  >
+                    <span className="text-sm font-poppins font-black leading-tight">{faq.q}</span>
+                    <span className={`text-slate-400 font-extrabold text-lg transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}>
+                      ＋
+                    </span>
+                  </button>
+
+                  <div 
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      isOpen ? 'max-h-48 border-t border-slate-100/80 bg-slate-50/40' : 'max-h-0'
+                    }`}
+                  >
+                    <div className="p-6 text-xs sm:text-sm text-slate-500 leading-relaxed text-left">
+                      {faq.a}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Blog & Resources Section */}
+      <section id="blog" className="py-20 bg-white relative overflow-hidden border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-5xl mx-auto">
+            <div className="text-left space-y-3 max-w-2xl">
+              <span className="text-xs font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-3.5 py-1.5 rounded-full inline-block">
+                Academic Gazette
+              </span>
+              <h2 className="text-3xl font-poppins font-black text-slate-900 leading-tight">
+                Latest News &amp; Resources
+              </h2>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Stay updated with modern EdTech updates, research publications, corporate strategy guides, and theology preservation studies.
+              </p>
+            </div>
+            
+            <button 
+              onClick={() => {
+                setIsLogin(false);
+                setShowAuthModal(true);
+              }}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs uppercase tracking-widest px-6 py-3.5 rounded-2xl shadow-md transition-all self-start md:self-auto cursor-pointer"
+            >
+              Explore Gazette
+            </button>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-8 max-w-5xl mx-auto w-full">
+            {blogPosts.map((post, idx) => (
+              <div 
+                key={idx} 
+                className="bg-white border border-slate-200/60 rounded-[24px] overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group text-left"
+              >
+                <div>
+                  {/* Thumbnail */}
+                  <div className="aspect-video w-full bg-slate-100 overflow-hidden relative">
+                    <img 
+                      src={post.image} 
+                      alt={post.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="bg-slate-100 text-slate-800 text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded-md">
+                        {post.category}
+                      </span>
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <span>{post.date}</span>
+                        <span>•</span>
+                        <span>{post.readTime}</span>
+                      </div>
+                    </div>
+                    <h3 className="text-base font-poppins font-black text-slate-800 group-hover:text-blue-600 transition-colors leading-tight">
+                      {post.title}
+                    </h3>
+                    <p className="text-slate-500 text-xs leading-relaxed line-clamp-3">
+                      {post.desc}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 pt-0">
+                  <button 
+                    onClick={() => {
+                      setIsLogin(false);
+                      setShowAuthModal(true);
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-extrabold text-xs inline-flex items-center gap-1 group/btn cursor-pointer"
+                  >
+                    <span>Read Full Article</span>
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                  </button>
                 </div>
               </div>
             ))}

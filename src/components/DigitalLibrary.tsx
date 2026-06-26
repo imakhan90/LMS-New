@@ -241,17 +241,29 @@ export default function DigitalLibrary({ user, initialSearchTerm, onClearInitial
           <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => setShowAddForm(false)}
-              className="bg-white hover:bg-slate-50 text-slate-500 font-bold px-3 py-1.5 border border-slate-200 rounded-xl text-xs"
+              className="bg-white hover:bg-slate-50 text-slate-500 font-bold px-3 py-1.5 border border-slate-200 rounded-xl text-xs disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-sky-600 hover:bg-sky-500 text-white font-extrabold px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5 disabled:opacity-50 shadow-xs"
+              className={`text-white font-extrabold px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5 disabled:opacity-50 transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
+                isSubmitting 
+                  ? 'bg-sky-700 animate-pulse ring-4 ring-sky-500/30 cursor-wait' 
+                  : 'bg-sky-600 hover:bg-sky-500'
+              }`}
             >
-              {isSubmitting ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : 'Publish Book'}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin h-3.5 w-3.5" />
+                  Publishing...
+                </>
+              ) : (
+                'Publish Book'
+              )}
             </button>
           </div>
         </form>
@@ -335,7 +347,7 @@ export default function DigitalLibrary({ user, initialSearchTerm, onClearInitial
               No matching textbooks or research papers found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-4">
               {filteredItems.map(item => {
                 const isZip = item.title.toLowerCase().includes('zip') || item.title.toLowerCase().includes('code');
                 const isDoc = item.title.toLowerCase().includes('doc') || item.title.toLowerCase().includes('notes') || item.title.toLowerCase().includes('syllabus');

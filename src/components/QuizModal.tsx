@@ -8,7 +8,8 @@ import {
   Printer, 
   Code, 
   RotateCcw,
-  BookOpen
+  BookOpen,
+  Loader2
 } from 'lucide-react';
 import { Quiz, Certificate, User } from '../types';
 
@@ -43,6 +44,68 @@ export default function QuizModal({ user, quiz, courseId, onClose, onRefreshCert
 
     return () => clearInterval(timer);
   }, [secondsLeft, quizFinished]);
+
+  // Keyboard accessibility listeners for Quiz taking (Enter/Numbers/Escape)
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // 1. Close modal with Escape key
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      // 2. Number keys (1-9) to select multiple-choice options
+      if (!quizFinished) {
+        const currentQuestion = quiz.questions[currentQuestionIdx];
+        if (currentQuestion) {
+          const optionKey = parseInt(e.key, 10);
+          if (!isNaN(optionKey) && optionKey >= 1 && optionKey <= currentQuestion.options.length) {
+            e.preventDefault();
+            handleSelectOption(currentQuestion.id, optionKey - 1);
+            return;
+          }
+        }
+      }
+
+      // 3. Enter key for proceeding to next question or submitting
+      if (e.key === 'Enter') {
+        // Prevent double execution if button already has active browser focus
+        if (document.activeElement?.tagName === 'BUTTON') {
+          return;
+        }
+
+        if (!quizFinished) {
+          const currentQuestion = quiz.questions[currentQuestionIdx];
+          if (currentQuestion) {
+            const hasSelected = answers[currentQuestion.id] !== undefined;
+            if (hasSelected) {
+              e.preventDefault();
+              if (currentQuestionIdx < quiz.questions.length - 1) {
+                setCurrentQuestionIdx(prev => prev + 1);
+              } else {
+                handleSubmitQuiz();
+              }
+            }
+          }
+        } else if (result) {
+          e.preventDefault();
+          if (result.passed) {
+            onClose();
+          } else {
+            // Try again / Restart Quiz
+            setAnswers({});
+            setCurrentQuestionIdx(0);
+            setSecondsLeft(quiz.timeLimit || 120);
+            setQuizFinished(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [currentQuestionIdx, quizFinished, answers, quiz, result, onClose, secondsLeft]);
 
   const handleSelectOption = (questionId: string, optionIdx: number) => {
     setAnswers(prev => ({
@@ -215,15 +278,22 @@ export default function QuizModal({ user, quiz, courseId, onClose, onRefreshCert
                     <button
                       onClick={handleSubmitQuiz}
                       disabled={isSubmitting}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-2 rounded-xl text-xs transition shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+                      className={`text-white font-extrabold px-6 py-2 rounded-xl text-xs transition-all duration-200 shadow-sm flex items-center gap-1.5 disabled:opacity-50 hover:scale-[1.03] active:scale-95 ${
+                        isSubmitting 
+                          ? 'bg-emerald-700 animate-pulse ring-4 ring-emerald-500/30' 
+                          : 'bg-emerald-600 hover:bg-emerald-500'
+                      }`}
                     >
                       {isSubmitting ? (
                         <>
-                          <Clock className="animate-spin h-4 w-4" />
-                          Grading...
+                          <Loader2 className="animate-spin h-4 w-4" />
+                          Analyzing Answers...
                         </>
                       ) : (
-                        'Submit Assessment'
+                        <>
+                          <CheckCircle className="h-4 w-4" />
+                          Submit Assessment
+                        </>
                       )}
                     </button>
                   )}

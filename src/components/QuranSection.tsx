@@ -9,7 +9,9 @@ import {
   Award, 
   ArrowRight, 
   Sparkles, 
-  BookMarked 
+  BookMarked,
+  X,
+  Printer
 } from 'lucide-react';
 import { Course, AttendanceRecord, QuizAttempt, Certificate, User, Quiz } from '../types';
 
@@ -26,6 +28,8 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [certs, setCerts] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [showLockedModal, setShowLockedModal] = useState(false);
 
   useEffect(() => {
     // Find the Quran course
@@ -73,6 +77,65 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
   const earnedCertificate = certs.find(cert => cert.courseId === quranCourse.id);
 
   const completionPercent = Math.min(100, Math.round((completedLessons.length / quranLessons.length) * 100));
+
+  const scrollToSyllabus = () => {
+    const el = document.getElementById('syllabus-map');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleQuizClick = () => {
+    const finalQuizLesson = quranCourse?.modules
+      .find(m => m.id === 'cq_m5')
+      ?.lessons.find(l => l.type === 'quiz');
+    if (finalQuizLesson && finalQuizLesson.quiz) {
+      onLaunchQuiz(finalQuizLesson.quiz, quranCourse.id);
+    } else {
+      scrollToSyllabus();
+    }
+  };
+
+  // Keyboard accessibility listeners for Quran section modal overlays (showCertModal and showLockedModal)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showCertModal) {
+          e.preventDefault();
+          setShowCertModal(false);
+        }
+        if (showLockedModal) {
+          e.preventDefault();
+          setShowLockedModal(false);
+        }
+      } else if (e.key === 'Enter') {
+        // Prevent double execution if button already has active browser focus
+        if (document.activeElement?.tagName === 'BUTTON') {
+          return;
+        }
+
+        if (showCertModal && earnedCertificate) {
+          e.preventDefault();
+          window.print();
+        } else if (showLockedModal) {
+          e.preventDefault();
+          setShowLockedModal(false);
+          handleQuizClick();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showCertModal, showLockedModal, earnedCertificate, quranCourse]);
+
+  const handleCertificateClick = () => {
+    if (earnedCertificate) {
+      setShowCertModal(true);
+    } else {
+      setShowLockedModal(true);
+    }
+  };
 
   const moduleDescriptions = [
     { num: 1, title: 'Introduction', subtitle: 'The Revelation historical contexts, compilation process, and Makki/Madani stylistic divisions.' },
@@ -146,29 +209,74 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center pt-2">
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 text-xxs font-bold uppercase block">Total Lessons</span>
-                <span className="text-lg font-bold text-slate-700 font-mono">{quranLessons.length}</span>
-              </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 text-xxs font-bold uppercase block">Completed</span>
-                <span className="text-lg font-bold text-accent-emerald font-mono">{completedLessons.length}</span>
-              </div>
-              <div className="bg-emerald-50/20 p-3 rounded-xl border border-emerald-100/35">
-                <span className="text-emerald-800/60 text-xxs font-bold uppercase block">Quiz Score</span>
-                <span className="text-lg font-bold text-primary font-mono">
-                  {quranAttempts.length > 0 ? `${Math.max(...quranAttempts.map(a => a.score))}%` : 'Pending'}
-                </span>
-              </div>
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <span className="text-slate-400 text-xxs font-bold uppercase block">Award Certificate</span>
-                <span className="text-xs font-bold text-slate-700">{earnedCertificate ? 'Earned ✓' : 'Locked'}</span>
-              </div>
+              <button 
+                type="button"
+                onClick={scrollToSyllabus}
+                className="relative overflow-hidden group bg-gradient-to-br from-sky-50/50 to-blue-50/30 dark:from-slate-900 dark:to-slate-900 hover:from-sky-100 hover:to-blue-100/70 p-4 rounded-2xl border border-sky-100 dark:border-slate-800 hover:border-sky-300 dark:hover:border-slate-700 active:scale-95 transition-all duration-200 cursor-pointer flex flex-col items-start justify-between min-h-[105px] text-left w-full select-none shadow-xs hover:shadow-md"
+              >
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-sky-600 dark:text-sky-400 text-xxs font-black uppercase tracking-wider leading-tight">Total Lessons</span>
+                  <BookOpen className="h-4 w-4 text-sky-500/70 group-hover:scale-110 transition-transform duration-200 shrink-0 ml-1" />
+                </div>
+                <div className="mt-2">
+                  <span className="text-2xl font-black text-slate-800 dark:text-slate-100 font-mono tracking-tight leading-none block">{quranLessons.length}</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5 font-medium leading-none">Syllabus Units</span>
+                </div>
+              </button>
+              
+              <button 
+                type="button"
+                onClick={scrollToSyllabus}
+                className="relative overflow-hidden group bg-gradient-to-br from-emerald-50/50 to-teal-50/30 dark:from-slate-900 dark:to-slate-900 hover:from-emerald-100 hover:to-teal-100/70 p-4 rounded-2xl border border-emerald-100/80 dark:border-slate-800 hover:border-emerald-300 dark:hover:border-slate-700 active:scale-95 transition-all duration-200 cursor-pointer flex flex-col items-start justify-between min-h-[105px] text-left w-full select-none shadow-xs hover:shadow-md"
+              >
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-[#38B889] dark:text-emerald-400 text-xxs font-black uppercase tracking-wider leading-tight">Completed</span>
+                  <CheckCircle className="h-4 w-4 text-[#38B889]/70 group-hover:scale-110 transition-transform duration-200 shrink-0 ml-1" />
+                </div>
+                <div className="mt-2">
+                  <span className="text-2xl font-black text-[#38B889] font-mono tracking-tight leading-none block">{completedLessons.length}</span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5 font-medium leading-none">Units Passed</span>
+                </div>
+              </button>
+              
+              <button 
+                type="button"
+                onClick={handleQuizClick}
+                className="relative overflow-hidden group bg-gradient-to-br from-indigo-50/50 to-purple-50/30 dark:from-slate-900 dark:to-slate-900 hover:from-indigo-100 hover:to-purple-100/70 p-4 rounded-2xl border border-indigo-100/80 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-slate-700 active:scale-95 transition-all duration-200 cursor-pointer flex flex-col items-start justify-between min-h-[105px] text-left w-full select-none shadow-xs hover:shadow-md"
+              >
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-indigo-600 dark:text-indigo-400 text-xxs font-black uppercase tracking-wider leading-tight">Quiz Score</span>
+                  <Lightbulb className="h-4 w-4 text-indigo-500/70 group-hover:scale-110 transition-transform duration-200 shrink-0 ml-1" />
+                </div>
+                <div className="mt-2">
+                  <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tracking-tight leading-none block">
+                    {quranAttempts.length > 0 ? `${Math.max(...quranAttempts.map(a => a.score))}%` : 'Pending'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5 font-medium leading-none">Highest Grade</span>
+                </div>
+              </button>
+              
+              <button 
+                type="button"
+                onClick={handleCertificateClick}
+                className="relative overflow-hidden group bg-gradient-to-br from-amber-50/50 to-yellow-50/30 dark:from-slate-900 dark:to-slate-900 hover:from-amber-100 hover:to-yellow-100/70 p-4 rounded-2xl border border-amber-100/80 dark:border-slate-800 hover:border-amber-300 dark:hover:border-slate-700 active:scale-95 transition-all duration-200 cursor-pointer flex flex-col items-start justify-between min-h-[105px] text-left w-full select-none shadow-xs hover:shadow-md"
+              >
+                <div className="flex justify-between items-start w-full">
+                  <span className="text-amber-600 dark:text-amber-400 text-xxs font-black uppercase tracking-wider leading-tight">Certificate</span>
+                  <Award className="h-4 w-4 text-amber-500/70 group-hover:scale-110 transition-transform duration-200 shrink-0 ml-1" />
+                </div>
+                <div className="mt-2">
+                  <span className={`text-lg font-black tracking-tight leading-none block ${earnedCertificate ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`}>
+                    {earnedCertificate ? 'Earned ✓' : 'Locked'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block mt-0.5 font-medium leading-none">Verify & Print</span>
+                </div>
+              </button>
             </div>
           </div>
-
+ 
           {/* Curriculum Module Map */}
-          <div className="bg-white p-6 rounded-[20px] border border-slate-200/70 shadow-sm space-y-4 text-left">
+          <div id="syllabus-map" className="bg-white p-6 rounded-[20px] border border-slate-200/70 shadow-sm space-y-4 text-left">
             <h4 className="font-poppins font-bold text-slate-800">Course Syllabus Map</h4>
             
             <div className="space-y-4">
@@ -259,6 +367,116 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
         </div>
 
       </div>
+
+      {showCertModal && earnedCertificate && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative border-8 border-amber-900 bg-amber-50/10 border-double">
+            <button 
+              type="button"
+              onClick={() => setShowCertModal(false)}
+              className="absolute right-4 top-4 p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-full transition z-30 cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="p-4 sm:p-6 text-center space-y-4">
+              <div className="space-y-1">
+                <h5 className="font-serif text-sm tracking-widest text-amber-900 font-extrabold uppercase">
+                  University Board of Registrars
+                </h5>
+                <p className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">
+                  Islamic Theology and Ethics Accreditation Commission
+                </p>
+                <div className="h-0.5 w-16 bg-amber-800/40 mx-auto mt-1" />
+              </div>
+
+              <p className="italic font-serif text-xs text-stone-500 mt-4 leading-none">
+                This document formally testifies that
+              </p>
+
+              <h2 className="font-serif text-2xl font-black italic text-stone-800 tracking-tight py-1">
+                {earnedCertificate.userName}
+              </h2>
+
+              <p className="text-[10px] text-stone-500 max-w-sm mx-auto leading-relaxed">
+                has successfully verified proficiency and completed all curriculum specifications for
+              </p>
+
+              <h4 className="font-sans text-sm font-bold text-amber-950 uppercase">
+                {earnedCertificate.courseTitle}
+              </h4>
+
+              <div className="flex justify-between items-center text-left pt-6 max-w-sm mx-auto border-t border-amber-900/10">
+                <div>
+                  <p className="text-[9px] text-stone-400 font-bold uppercase leading-none">Authorized under registry</p>
+                  <span className="text-[10px] font-mono text-amber-900 font-bold block mt-1">{earnedCertificate.certificateCode}</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-[9px] text-stone-400 font-bold uppercase leading-none">Issued Date</p>
+                  <span className="text-[10px] font-mono text-amber-900 font-bold block mt-1">{earnedCertificate.issueDate}</span>
+                </div>
+              </div>
+
+              <div className="pt-4 flex justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-1.5 px-4 rounded-xl text-xs flex items-center gap-1.5 transition shadow-xs cursor-pointer"
+                >
+                  <Printer className="h-4 w-4" />
+                  Print credentials
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLockedModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative text-center space-y-4">
+            <button 
+              type="button"
+              onClick={() => setShowLockedModal(false)}
+              className="absolute right-4 top-4 p-1 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-full transition z-30 cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="h-12 w-12 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-500">
+              <Award className="h-6 w-6" />
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-bold text-slate-800 text-lg">Certificate is Locked</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                You need to complete all modules and pass the final ethical assessment with at least a <strong className="text-emerald-600 font-bold">70%</strong> score to unlock and earn your Ethical Leadership Certificate.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLockedModal(false);
+                  handleQuizClick();
+                }}
+                className="bg-[#38B889] hover:bg-[#2fa377] text-white font-semibold py-2 px-4 rounded-xl text-xs transition cursor-pointer shadow-xs"
+              >
+                Go to Final Assessment
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLockedModal(false)}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 px-4 rounded-xl text-xs transition cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

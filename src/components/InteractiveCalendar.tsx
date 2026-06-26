@@ -15,7 +15,9 @@ import {
   Send, 
   Sparkles,
   HelpCircle,
-  GraduationCap
+  GraduationCap,
+  Check,
+  Loader2
 } from 'lucide-react';
 import { Course, Quiz } from '../types';
 
@@ -95,12 +97,26 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
   const [newEventTime, setNewEventTime] = useState('14:00');
   const [newEventCategory, setNewEventCategory] = useState<'live' | 'quiz' | 'exam' | 'custom'>('custom');
   const [newEventDesc, setNewEventDesc] = useState('');
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   // Immersive Virtual Classroom state
   const [activeLiveSession, setActiveLiveSession] = useState<CalendarEvent | null>(null);
   const [classroomChat, setClassroomChat] = useState<Array<{ sender: string; text: string; time: string; system?: boolean }>>([]);
   const [newMessageText, setNewMessageText] = useState('');
   const [isClassroomRecording, setIsClassroomRecording] = useState(true);
+
+  // Keyboard accessibility listeners for active virtual classroom modal overlay
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && activeLiveSession) {
+        e.preventDefault();
+        setActiveLiveSession(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeLiveSession]);
 
   // Month names helper
   const MONTHS = [
@@ -340,37 +356,50 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
     e.preventDefault();
     if (!newEventTitle.trim()) return;
 
-    // Get default course metadata labels matching category selection
-    let courseCode = 'Personal Log';
-    let courseTitle = 'My Revision Schedule';
-    if (newEventCategory === 'quiz') {
-      courseCode = 'Course Milestone';
-      courseTitle = 'Custom Quiz / Assignment';
-    } else if (newEventCategory === 'live') {
-      courseCode = 'Live Session';
-      courseTitle = 'Custom Seminar / Workshop';
-    } else if (newEventCategory === 'exam') {
-      courseCode = 'Exam Milestone';
-      courseTitle = 'Custom Examination / Test';
-    }
+    setIsSavingEvent(true);
+    setSaveSuccess(false);
 
-    const newEv: CalendarEvent = {
-      id: `custom_${Date.now()}`,
-      title: newEventTitle,
-      time: newEventTime,
-      courseCode,
-      courseTitle,
-      courseId: 'personal_log',
-      type: newEventCategory,
-      description: newEventDesc || 'Dedicated calendar study focus block.',
-      dateStr: selectedDateStr
-    };
+    // Simulated short save time for smooth premium user experience
+    setTimeout(() => {
+      // Get default course metadata labels matching category selection
+      let courseCode = 'Personal Log';
+      let courseTitle = 'My Revision Schedule';
+      if (newEventCategory === 'quiz') {
+        courseCode = 'Course Milestone';
+        courseTitle = 'Custom Quiz / Assignment';
+      } else if (newEventCategory === 'live') {
+        courseCode = 'Live Session';
+        courseTitle = 'Custom Seminar / Workshop';
+      } else if (newEventCategory === 'exam') {
+        courseCode = 'Exam Milestone';
+        courseTitle = 'Custom Examination / Test';
+      }
 
-    setCustomEvents(prev => [...prev, newEv]);
-    setNewEventTitle('');
-    setNewEventDesc('');
-    setNewEventCategory('custom');
-    setShowEventForm(false);
+      const newEv: CalendarEvent = {
+        id: `custom_${Date.now()}`,
+        title: newEventTitle,
+        time: newEventTime,
+        courseCode,
+        courseTitle,
+        courseId: 'personal_log',
+        type: newEventCategory,
+        description: newEventDesc || 'Dedicated calendar study focus block.',
+        dateStr: selectedDateStr
+      };
+
+      setCustomEvents(prev => [...prev, newEv]);
+      setIsSavingEvent(false);
+      setSaveSuccess(true);
+
+      // Dismiss after showing success state for a moment
+      setTimeout(() => {
+        setNewEventTitle('');
+        setNewEventDesc('');
+        setNewEventCategory('custom');
+        setShowEventForm(false);
+        setSaveSuccess(false);
+      }, 800);
+    }, 900);
   };
 
   const handleDeleteEvent = (id: string) => {
@@ -689,16 +718,26 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
                 <div className="flex gap-1.5 justify-end pt-1">
                   <button
                     type="button"
+                    disabled={isSavingEvent || saveSuccess}
                     onClick={() => setShowEventForm(false)}
-                    className="border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-500 dark:text-slate-400 font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition"
+                    className="border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-500 dark:text-slate-400 font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg transition"
+                    disabled={isSavingEvent || saveSuccess}
+                    className={`text-white font-extrabold text-[10px] px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm ${
+                      saveSuccess 
+                        ? 'bg-emerald-600 animate-bounce' 
+                        : isSavingEvent 
+                        ? 'bg-blue-500 animate-pulse cursor-wait' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                   >
-                    Save Note
+                    {isSavingEvent && <Loader2 className="animate-spin h-3 w-3" />}
+                    {saveSuccess && <Check className="h-3 w-3 text-white" />}
+                    {saveSuccess ? 'Saved! ✓' : isSavingEvent ? 'Saving...' : 'Save Note'}
                   </button>
                 </div>
               </form>
