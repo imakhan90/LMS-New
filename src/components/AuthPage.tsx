@@ -358,7 +358,17 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
       body: JSON.stringify({ email: demoEmail, password: demoPassword })
     })
       .then(async (res) => {
-        const data = await res.json();
+        const contentType = res.headers.get('content-type');
+        let data;
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            data = await res.json();
+          } catch (e) {
+            throw new Error('Response parsing failed. Please try again.');
+          }
+        } else {
+          throw new Error('The server is currently starting up or returned an unexpected response. Please try again in a few seconds.');
+        }
         if (!res.ok) {
           throw new Error(data.error || 'Verification failed.');
         }
@@ -385,7 +395,17 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
         body: JSON.stringify({ email, password })
       })
         .then(async (res) => {
-          const data = await res.json();
+          const contentType = res.headers.get('content-type');
+          let data;
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              data = await res.json();
+            } catch (e) {
+              throw new Error('Response parsing failed. Please try again.');
+            }
+          } else {
+            throw new Error('The server is currently starting up or returned an unexpected response. Please try again in a few seconds.');
+          }
           if (!res.ok) {
             throw new Error(data.error || 'Login failed.');
           }
@@ -436,7 +456,17 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
         body: JSON.stringify(payload)
       })
         .then(async (res) => {
-          const data = await res.json();
+          const contentType = res.headers.get('content-type');
+          let data;
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              data = await res.json();
+            } catch (e) {
+              throw new Error('Response parsing failed. Please try again.');
+            }
+          } else {
+            throw new Error('The server is currently starting up or returned an unexpected response. Please try again in a few seconds.');
+          }
           if (!res.ok) {
             throw new Error(data.error || 'Registration failed.');
           }
