@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Sparkles,
   Bot,
-  Send
+  Send,
+  Search,
+  SlidersHorizontal
 } from 'lucide-react';
 import { Course, Module, Lesson, User, Quiz, Question, OfficeHourSlot } from '../types';
 
@@ -79,6 +81,10 @@ export default function CourseViewer({
   const [newChatMessage, setNewChatMessage] = useState('');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  // Lecture Search and Filter state
+  const [syllabusSearch, setSyllabusSearch] = useState('');
+  const [syllabusTypeFilter, setSyllabusTypeFilter] = useState<string>('all');
 
   // Office Hour Booking states
   const [officeHourSlots, setOfficeHourSlots] = useState<OfficeHourSlot[]>([]);
@@ -1807,58 +1813,123 @@ export default function CourseViewer({
 
           {/* Curriculum Modules Outline Accordion */}
           <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-            <h4 className="text-base font-bold text-slate-800">Curriculum Syllabus</h4>
-            <div className="space-y-4">
-              {selectedCourse.modules.map(mod => (
-                <div key={mod.id} className="border border-slate-100 rounded-2xl p-4 bg-slate-50/40 space-y-3">
-                  <h5 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 bg-sky-500 rounded-full" />
-                    {mod.title}
-                  </h5>
-                  
-                  <div className="divide-y divide-slate-100">
-                    {mod.lessons.map(les => {
-                      const isActive = selectedLesson?.id === les.id;
-                      return (
-                        <div
-                          key={les.id}
-                          className={`py-3 flex items-center justify-between text-xs transition ${
-                            isActive ? 'text-sky-600' : 'text-slate-600'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            {les.type === 'video' ? <Tv className="h-4 w-4 shrink-0 text-sky-500" /> : les.type === 'pdf' ? <FileText className="h-4 w-4 shrink-0 text-purple-500" /> : <MessageSquare className="h-4 w-4 shrink-0 text-amber-500" />}
-                            <div>
-                              <p className="font-semibold">{les.title}</p>
-                              <span className="text-[10px] text-slate-400 font-medium">{les.duration || '09:00'}</span>
-                            </div>
-                          </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h4 className="text-base font-bold text-slate-800">Curriculum Syllabus</h4>
+              <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full text-center">
+                Total: {selectedCourse.modules.reduce((acc, m) => acc + (m.lessons || []).length, 0)} Lectures
+              </span>
+            </div>
 
-                          {les.type === 'quiz' ? (
-                            <button
-                              onClick={() => les.quiz && onLaunchQuiz(les.quiz, selectedCourse.id)}
-                              className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1 rounded-xl text-xxs transition"
-                            >
-                              Attempt Quiz
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => setSelectedLesson(les)}
-                              className={`font-semibold px-3 py-1 rounded-xl text-xxs border transition ${
-                                isActive 
-                                  ? 'bg-sky-600 text-white border-sky-600' 
-                                  : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'
+            {/* Instant Scaling Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="sm:col-span-2 relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search syllabus lectures & materials..."
+                  value={syllabusSearch}
+                  onChange={(e) => setSyllabusSearch(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-sky-500 focus:bg-white text-xs rounded-xl pl-9 pr-4 py-2.5 outline-none transition text-slate-800 font-medium"
+                />
+              </div>
+              <div className="relative">
+                <SlidersHorizontal className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 pointer-events-none" />
+                <select
+                  value={syllabusTypeFilter}
+                  onChange={(e) => setSyllabusTypeFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-sky-500 focus:bg-white text-xs rounded-xl pl-9 pr-3 py-2.5 outline-none transition text-slate-600 font-bold appearance-none cursor-pointer"
+                >
+                  <option value="all">All Materials</option>
+                  <option value="video">🎥 Videos</option>
+                  <option value="pdf">📄 PDFs & Handouts</option>
+                  <option value="quiz">📝 Quizzes</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Check if any modules matched the search query */}
+              {selectedCourse.modules.filter(mod => 
+                mod.lessons.some(les => {
+                  const matchesSearch = les.title.toLowerCase().includes(syllabusSearch.toLowerCase());
+                  const matchesType = syllabusTypeFilter === 'all' || les.type === syllabusTypeFilter;
+                  return matchesSearch && matchesType;
+                })
+              ).length === 0 ? (
+                <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                  <p className="text-xs text-slate-500 font-medium">No archived materials or lectures found matching your criteria</p>
+                  <button 
+                    onClick={() => { setSyllabusSearch(''); setSyllabusTypeFilter('all'); }}
+                    className="text-xxs text-sky-600 font-bold hover:underline mt-1 cursor-pointer"
+                  >
+                    Clear Filter Criteria
+                  </button>
+                </div>
+              ) : (
+                selectedCourse.modules.map(mod => {
+                  const filteredLessons = mod.lessons.filter(les => {
+                    const matchesSearch = les.title.toLowerCase().includes(syllabusSearch.toLowerCase());
+                    const matchesType = syllabusTypeFilter === 'all' || les.type === syllabusTypeFilter;
+                    return matchesSearch && matchesType;
+                  });
+
+                  if (filteredLessons.length === 0) return null;
+
+                  return (
+                    <div key={mod.id} className="border border-slate-100 rounded-2xl p-4 bg-slate-50/40 space-y-3">
+                      <h5 className="text-sm font-bold text-slate-800 flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-2">
+                          <span className="h-1.5 w-1.5 bg-sky-500 rounded-full" />
+                          {mod.title}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono font-medium">{filteredLessons.length} item(s)</span>
+                      </h5>
+                      
+                      <div className="divide-y divide-slate-100">
+                        {filteredLessons.map(les => {
+                          const isActive = selectedLesson?.id === les.id;
+                          return (
+                            <div
+                              key={les.id}
+                              className={`py-3 flex items-center justify-between text-xs transition ${
+                                isActive ? 'text-sky-600' : 'text-slate-600'
                               }`}
                             >
-                              Study
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                              <div className="flex items-center gap-2.5">
+                                {les.type === 'video' ? <Tv className="h-4 w-4 shrink-0 text-sky-500" /> : les.type === 'pdf' ? <FileText className="h-4 w-4 shrink-0 text-purple-500" /> : <MessageSquare className="h-4 w-4 shrink-0 text-amber-500" />}
+                                <div>
+                                  <p className="font-semibold">{les.title}</p>
+                                  <span className="text-[10px] text-slate-400 font-medium">{les.duration || '09:00'}</span>
+                                </div>
+                              </div>
+
+                              {les.type === 'quiz' ? (
+                                <button
+                                  onClick={() => les.quiz && onLaunchQuiz(les.quiz, selectedCourse.id)}
+                                  className="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1 rounded-xl text-xxs transition"
+                                >
+                                  Attempt Quiz
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setSelectedLesson(les)}
+                                  className={`font-semibold px-3 py-1 rounded-xl text-xxs border transition ${
+                                    isActive 
+                                      ? 'bg-sky-600 text-white border-sky-600' 
+                                      : 'bg-white hover:bg-slate-50 text-slate-600 border-slate-200'
+                                  }`}
+                                >
+                                  Study
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
