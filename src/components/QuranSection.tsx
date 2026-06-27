@@ -36,15 +36,29 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
     const qCourse = courses.find(c => c.isQuran);
     if (qCourse) setQuranCourse(qCourse);
 
+    const fetchJsonSafe = async (url: string) => {
+      try {
+        const res = await fetch(url);
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return await res.json();
+        }
+        return [];
+      } catch (e) {
+        console.warn(`Silently caught fetch error for ${url}:`, e);
+        return [];
+      }
+    };
+
     Promise.all([
-      fetch('/api/attendance').then(res => res.json()),
-      fetch(`/api/quiz-attempts/${user.id}`).then(res => res.json()),
-      fetch(`/api/certificates/${user.id}`).then(res => res.json())
+      fetchJsonSafe('/api/attendance'),
+      fetchJsonSafe(`/api/quiz-attempts/${user.id}`),
+      fetchJsonSafe(`/api/certificates/${user.id}`)
     ])
       .then(([attendanceData, attemptsData, certsData]) => {
-        setAttendance(attendanceData);
-        setAttempts(attemptsData);
-        setCerts(certsData);
+        setAttendance(Array.isArray(attendanceData) ? attendanceData : []);
+        setAttempts(Array.isArray(attemptsData) ? attemptsData : []);
+        setCerts(Array.isArray(certsData) ? certsData : []);
       })
       .catch(err => console.error('Error fetching Quran section progress parameters', err))
       .finally(() => setLoading(false));
@@ -52,7 +66,7 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-48 animate-pulse text-sky-600">
+      <div className="flex justify-center items-center h-48 animate-pulse text-[#38B889] font-bold">
         Studying Quranic Curriculum specifications...
       </div>
     );
@@ -67,7 +81,7 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
   }
 
   // Calculate completion indices
-  const quranLessons = quranCourse.modules.flatMap(m => m.lessons);
+  const quranLessons = (quranCourse.modules || []).flatMap(m => m.lessons || []);
   const completedLessons = quranLessons.filter(lesson => 
     attendance.some(att => att.lessonId === lesson.id && att.status === 'Present')
   );
@@ -76,7 +90,9 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
   const hasPassedFinalQuiz = quranAttempts.some(att => att.passed);
   const earnedCertificate = certs.find(cert => cert.courseId === quranCourse.id);
 
-  const completionPercent = Math.min(100, Math.round((completedLessons.length / quranLessons.length) * 100));
+  const completionPercent = quranLessons.length > 0 
+    ? Math.min(100, Math.round((completedLessons.length / quranLessons.length) * 100)) 
+    : 0;
 
   const scrollToSyllabus = () => {
     const el = document.getElementById('syllabus-map');
@@ -87,8 +103,8 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
 
   const handleQuizClick = () => {
     const finalQuizLesson = quranCourse?.modules
-      .find(m => m.id === 'cq_m5')
-      ?.lessons.find(l => l.type === 'quiz');
+      ?.find(m => m.id === 'cq_m5')
+      ?.lessons?.find(l => l.type === 'quiz');
     if (finalQuizLesson && finalQuizLesson.quiz) {
       onLaunchQuiz(finalQuizLesson.quiz, quranCourse.id);
     } else {
@@ -282,7 +298,7 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
             <div className="space-y-4">
               {moduleDescriptions.map((mod) => {
                 // Find matching course modules
-                const mSeed = quranCourse.modules.find(m => m.id === `cq_m${mod.num}`);
+                const mSeed = (quranCourse.modules || []).find(m => m.id === `cq_m${mod.num}`);
                 const isFinalQuizModule = mod.num === 5;
                 
                 return (
@@ -301,7 +317,7 @@ export default function QuranSection({ user, courses, onLaunchCourse, onLaunchQu
                       {isFinalQuizModule ? (
                         <button
                           onClick={() => {
-                            const finalQuizLesson = mSeed?.lessons.find(l => l.type === 'quiz');
+                            const finalQuizLesson = mSeed?.lessons?.find(l => l.type === 'quiz');
                             if (finalQuizLesson && finalQuizLesson.quiz) {
                               onLaunchQuiz(finalQuizLesson.quiz, quranCourse.id);
                             }

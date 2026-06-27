@@ -364,10 +364,10 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
           try {
             data = await res.json();
           } catch (e) {
-            throw new Error('Response parsing failed. Please try again.');
+            throw new Error('Failed to parse server response. Please refresh and try again.');
           }
         } else {
-          throw new Error('The server is currently starting up or returned an unexpected response. Please try again in a few seconds.');
+          throw new Error('Iframe cookie block or connection issue detected. Please resolve this by clicking the "Open in new tab" button at the top-right of this preview panel. This is required for authentication in Safari, iOS, or Incognito windows.');
         }
         if (!res.ok) {
           throw new Error(data.error || 'Verification failed.');
@@ -401,10 +401,10 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
             try {
               data = await res.json();
             } catch (e) {
-              throw new Error('Response parsing failed. Please try again.');
+              throw new Error('Failed to parse server response. Please refresh and try again.');
             }
           } else {
-            throw new Error('The server is currently starting up or returned an unexpected response. Please try again in a few seconds.');
+            throw new Error('Iframe cookie block or connection issue detected. Please resolve this by clicking the "Open in new tab" button at the top-right of this preview panel. This is required for authentication in Safari, iOS, or Incognito windows.');
           }
           if (!res.ok) {
             throw new Error(data.error || 'Login failed.');
@@ -462,10 +462,10 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
             try {
               data = await res.json();
             } catch (e) {
-              throw new Error('Response parsing failed. Please try again.');
+              throw new Error('Failed to parse server response. Please refresh and try again.');
             }
           } else {
-            throw new Error('The server is currently starting up or returned an unexpected response. Please try again in a few seconds.');
+            throw new Error('Iframe cookie block or registration connection issue detected. Please resolve this by clicking the "Open in new tab" button at the top-right of this preview panel. This is required for authentication in Safari, iOS, or Incognito windows.');
           }
           if (!res.ok) {
             throw new Error(data.error || 'Registration failed.');
