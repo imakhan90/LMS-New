@@ -17,6 +17,7 @@ export interface User {
   department?: string;
   semester?: string;
   password?: string;
+  focusTime?: number;
 }
 
 export interface Question {

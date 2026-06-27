@@ -1599,6 +1599,27 @@ app.get('/api/auth/users', (req, res) => {
   res.json(db.users);
 });
 
+// Update user total focused time
+app.post('/api/users/:userId/focus-time', (req, res) => {
+  const { userId } = req.params;
+  const { minutes } = req.body;
+  if (minutes === undefined || isNaN(Number(minutes))) {
+    return res.status(400).json({ error: 'Valid minutes parameter is required' });
+  }
+
+  const db = readDb();
+  const userIdx = db.users.findIndex(u => u.id === userId);
+  if (userIdx === -1) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const currentFocusTime = db.users[userIdx].focusTime || 0;
+  db.users[userIdx].focusTime = currentFocusTime + Math.max(0, Number(minutes));
+  writeDb(db);
+
+  res.json({ success: true, focusTime: db.users[userIdx].focusTime });
+});
+
 app.delete('/api/auth/users/:id', (req, res) => {
   const { id } = req.params;
   const db = readDb();

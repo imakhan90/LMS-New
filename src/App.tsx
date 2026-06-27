@@ -23,6 +23,7 @@ import AdminPanel from './components/AdminPanel';
 import VisaAdmissions from './components/VisaAdmissions';
 import QuizModal from './components/QuizModal';
 import InteractiveCalendar from './components/InteractiveCalendar';
+import FocusTimer from './components/FocusTimer';
 import { User, Course, Quiz } from './types';
 
 export default function App() {
@@ -122,6 +123,18 @@ export default function App() {
     fetch(`/api/notifications/${id}/read`, { method: 'POST' })
       .then(() => fetchNotifications())
       .catch(err => console.error(err));
+  };
+
+  const handleFocusTimeUpdated = (minutesAdded: number) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        focusTime: (prev.focusTime || 0) + minutesAdded
+      };
+      localStorage.setItem('lms_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   if (!user) {
@@ -308,6 +321,11 @@ export default function App() {
             fetchCourses();
           }} 
         />
+      )}
+
+      {/* Floating Pomodoro Focus Timer */}
+      {user.role === 'student' && (
+        <FocusTimer user={user} onFocusTimeUpdated={handleFocusTimeUpdated} />
       )}
 
     </div>

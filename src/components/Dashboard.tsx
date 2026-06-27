@@ -24,7 +24,8 @@ import {
   Clock,
   Sparkles,
   ShieldAlert,
-  Sparkle
+  Sparkle,
+  Flame
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { 
@@ -278,6 +279,10 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
                 <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5 text-indigo-400" />
                   <span>Assigned Courses: <strong className="text-white">{courses.length}</strong></span>
+                </div>
+                <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2" title="Total accumulated focus session duration">
+                  <Flame className="h-3.5 w-3.5 text-amber-500 fill-amber-500 animate-pulse" />
+                  <span>Focused Time: <strong className="text-white">{user.focusTime || 0}m</strong></span>
                 </div>
               </>
             ) : user.role === 'professor' ? (
