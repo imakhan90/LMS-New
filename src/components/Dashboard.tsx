@@ -48,6 +48,7 @@ import {
 } from 'recharts';
 import { User, Course, AttendanceRecord, QuizAttempt, Certificate, Quiz, OfficeHourSlot } from '../types';
 import InteractiveCalendar from './InteractiveCalendar';
+import SacredAcademy from './SacredAcademy';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -87,6 +88,12 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
   const [certs, setCerts] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
   const [chartTab, setChartTab] = useState<'all' | 'lectures' | 'quizzes'>('all');
+
+  // Hyper-Premium Futuristic Widget States
+  const [spatialDimension, setSpatialDimension] = useState<'cognitive' | 'practical' | 'pacing' | 'readiness'>('cognitive');
+  const [hologramRotation, setHologramRotation] = useState<number>(0);
+  const [isSeminarRegistered, setIsSeminarRegistered] = useState<boolean>(false);
+  const [seminarCount, setSeminarCount] = useState<number>(148);
 
   // Office Hours states
   const [officeHours, setOfficeHours] = useState<OfficeHourSlot[]>([]);
@@ -332,28 +339,29 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
   })();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Dynamic Header Greeting banner with customized time-of-day greetings and eye-catching academic micro-pills */}
-      <div className="bg-gradient-to-tr from-slate-900 via-sky-950 to-indigo-950 rounded-[24px] p-6 sm:p-8 text-white shadow-xl shadow-slate-900/25 border border-slate-800 relative overflow-hidden">
-        <div className="absolute right-0 bottom-0 opacity-15 pointer-events-none">
-          <GraduationCap className="h-64 w-64 text-sky-500 transform rotate-12 translate-y-20 translate-x-10" />
+      <div className="bg-gradient-to-tr from-[#0b0c15] via-[#141031] to-[#080d1d] rounded-[32px] p-6 sm:p-10 text-white shadow-2xl dark:shadow-[0_20px_50px_-12px_rgba(139,92,246,0.2)] border border-violet-500/15 relative overflow-hidden transition-all duration-500">
+        <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none">
+          <GraduationCap className="h-72 w-72 text-cyan-400 transform rotate-12 translate-y-16 translate-x-8 animate-pulse" />
         </div>
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-sky-500/10 rounded-full filter blur-3xl" />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-600/15 rounded-full filter blur-[100px] animate-pulse-slow pointer-events-none" />
+        <div className="absolute bottom-0 right-10 w-64 h-64 bg-cyan-500/10 rounded-full filter blur-[80px] pointer-events-none" />
         
-        <div className="relative z-10 space-y-4 text-left">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider font-mono">
+        <div className="relative z-10 space-y-6 text-left">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="bg-violet-500/15 text-violet-300 border border-violet-500/20 text-[10px] font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider font-mono">
               {user.role} workspace
             </span>
-            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider font-mono flex items-center gap-1">
-              <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-ping" />
+            <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[10px] font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 bg-cyan-400 rounded-full animate-ping" />
               Live Ledger Connected
             </span>
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-2">
             <h1 className="text-2xl sm:text-4xl font-poppins font-black tracking-tight flex items-center gap-2">
-              {getGreeting()}, {user.name}! <Sparkle className="h-6 w-6 text-amber-400 animate-pulse shrink-0" />
+              {getGreeting()}, {user.name}! <Sparkle className="h-7 w-7 text-amber-400 animate-bounce shrink-0" />
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm max-w-2xl font-medium leading-relaxed">
               {user.role === 'student' 
@@ -365,7 +373,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
           </div>
 
           {/* Mini Quick-stats Pills Bar */}
-          <div className="pt-2 flex flex-wrap gap-2.5">
+          <div className="pt-2 flex flex-wrap gap-3">
             {user.role === 'student' ? (
               <>
                 <div className="bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl text-[11px] text-slate-200 font-bold flex items-center gap-2">
@@ -547,7 +555,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
             animate="visible"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
               <div className="text-left">
                 <div className="flex items-center gap-1">
                   <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Active Courses</p>
@@ -559,7 +567,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
               <div className="bg-sky-50 dark:bg-sky-950/40 p-3.5 rounded-xl text-sky-600 dark:text-sky-400 border border-sky-100/50 dark:border-sky-900/30"><BookOpen className="h-6 w-6" /></div>
             </motion.div>
 
-            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
               <div className="text-left">
                 <div className="flex items-center gap-1">
                   <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Student Rosters</p>
@@ -571,7 +579,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
               <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30"><Users className="h-6 w-6" /></div>
             </motion.div>
 
-            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
               <div className="text-left">
                 <div className="flex items-center gap-1">
                   <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">LMS Avg Attendance</p>
@@ -583,7 +591,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
               <div className="bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-xl text-amber-600 dark:text-amber-400 border border-amber-100/50 dark:border-amber-900/30"><Calendar className="h-6 w-6" /></div>
             </motion.div>
 
-            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+            <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
               <div className="text-left">
                 <div className="flex items-center gap-1">
                   <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Consultation Desk</p>
@@ -632,7 +640,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
         >
-          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
               <div className="flex items-center gap-1">
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">My Enrolled Courses</p>
@@ -644,7 +652,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
             <div className="bg-blue-50 dark:bg-blue-950/40 p-3.5 rounded-xl text-sky-600 dark:text-sky-400 border border-blue-100/50 dark:border-blue-900/30 transition-all"><BookOpen className="h-6 w-6" /></div>
           </motion.div>
 
-          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
               <div className="flex items-center gap-1">
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">My Attendance Rate</p>
@@ -656,7 +664,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
             <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3.5 rounded-xl text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30 transition-all"><Calendar className="h-6 w-6" /></div>
           </motion.div>
 
-          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
               <div className="flex items-center gap-1">
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">Quizzes Passed</p>
@@ -668,7 +676,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
             <div className="bg-indigo-50 dark:bg-indigo-950/40 p-3.5 rounded-xl text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-900/30 transition-all"><Zap className="h-6 w-6" /></div>
           </motion.div>
 
-          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-5 rounded-[20px] border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
+          <motion.div variants={cardVariants} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition duration-300">
             <div className="text-left">
               <div className="flex items-center gap-1">
                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider font-mono">Earned Certificates</p>
@@ -681,6 +689,194 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
           </motion.div>
         </motion.div>
       )}
+
+      {/* HYPER-PREMIUM LUXURY TECH WIDGETS PANEL */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="grid grid-cols-1 lg:grid-cols-5 gap-6 text-left"
+      >
+        {/* WIDGET 1: 3D HOLOGRAPHIC PROGRESS SPATIAL CONTROLLER */}
+        <div className="lg:col-span-3 bg-gradient-to-br from-slate-950 via-[#0B0F19] to-[#05070D] rounded-[32px] border border-violet-500/15 p-6 sm:p-8 shadow-2xl relative overflow-hidden group transition-all duration-500 hover:border-violet-500/25 dark:shadow-[0_0_50px_-12px_rgba(139,92,246,0.15)] flex flex-col justify-between">
+          {/* Neon ambient backing glow */}
+          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 -translate-x-1/2 w-64 h-64 bg-violet-600/10 rounded-full filter blur-3xl pointer-events-none group-hover:bg-violet-600/15 transition-all duration-500" />
+          <div className="absolute bottom-10 right-10 w-48 h-48 bg-cyan-500/10 rounded-full filter blur-3xl pointer-events-none group-hover:bg-cyan-500/15 transition-all duration-500" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-center justify-between pb-4 border-b border-slate-800/60">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-violet-400 animate-pulse" />
+                <span className="text-[10px] font-bold font-mono tracking-widest text-violet-400 uppercase">Neural Space Engine</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black font-poppins text-white tracking-tight mt-1">Spatial Progress Widget</h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-sm">Tap nodes below to rotate the 3D-simulated cognitive matrix and load telemetry stats.</p>
+            </div>
+            
+            {/* Auto Optimize Button */}
+            <button
+              onClick={() => {
+                setHologramRotation(prev => prev + 180);
+                // Simulate temporary optimization pulse
+                const currentCount = seminarCount;
+                setSeminarCount(prev => prev + 1);
+                setTimeout(() => setSeminarCount(currentCount), 1500);
+              }}
+              className="bg-white/5 hover:bg-white/10 text-white border border-slate-800 hover:border-violet-500/30 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all duration-300 flex items-center gap-2 group/btn cursor-pointer shrink-0 self-start md:self-center"
+            >
+              <Cpu className="h-4 w-4 text-violet-400 group-hover/btn:rotate-180 transition-all duration-500" />
+              <span>Optimize Neural Sync</span>
+            </button>
+          </div>
+
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 py-6 items-center">
+            {/* Left Col: 3D Rotating Graphic Widget Mock */}
+            <div className="md:col-span-5 flex justify-center items-center relative py-4 animate-float-gentle">
+              {/* Spinning light ring */}
+              <motion.div 
+                animate={{ rotate: hologramRotation }}
+                transition={{ type: "spring", stiffness: 60, damping: 15 }}
+                className="w-40 h-40 rounded-full border-2 border-dashed border-violet-500/30 flex items-center justify-center relative"
+              >
+                {/* Secondary diagonal grid ring */}
+                <div className="absolute inset-2 rounded-full border border-cyan-500/25 animate-[spin_20s_linear_infinite] pointer-events-none" />
+                <div className="absolute inset-6 rounded-full border border-dashed border-indigo-500/20 animate-[spin_10s_linear_infinite_reverse] pointer-events-none" />
+                
+                {/* Orbital nodes */}
+                <div className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-slate-900 shadow-lg transition-all ${spatialDimension === 'cognitive' ? 'bg-violet-400 scale-125 shadow-violet-500/50' : 'bg-slate-700'}`} />
+                <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-4 h-4 rounded-full border-2 border-slate-900 shadow-lg transition-all ${spatialDimension === 'practical' ? 'bg-cyan-400 scale-125 shadow-cyan-500/50' : 'bg-slate-700'}`} />
+                <div className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-slate-900 shadow-lg transition-all ${spatialDimension === 'pacing' ? 'bg-indigo-400 scale-125 shadow-indigo-500/50' : 'bg-slate-700'}`} />
+                <div className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-4 h-4 rounded-full border-2 border-slate-900 shadow-lg transition-all ${spatialDimension === 'readiness' ? 'bg-emerald-400 scale-125 shadow-emerald-500/50' : 'bg-slate-700'}`} />
+
+                {/* Core Sphere */}
+                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-violet-600/25 via-indigo-600/30 to-cyan-500/25 flex flex-col items-center justify-center border border-white/15 shadow-2xl relative overflow-hidden backdrop-blur-sm">
+                  <span className="text-xxs font-mono font-black text-cyan-400 tracking-widest uppercase">CORE</span>
+                  <span className="text-sm font-black text-white font-mono mt-1">
+                    {spatialDimension === 'cognitive' ? '92%' : spatialDimension === 'practical' ? '84%' : spatialDimension === 'pacing' ? '78%' : '95%'}
+                  </span>
+                </div>
+              </motion.div>
+
+              {/* Particle dust indicators */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-white/[0.02] rounded-full pointer-events-none" />
+              <div className="absolute top-2 left-6 text-[10px] font-mono text-violet-400/50">Z-PLANE</div>
+              <div className="absolute bottom-2 right-6 text-[10px] font-mono text-cyan-400/50">Y-SPEED</div>
+            </div>
+
+            {/* Right Col: Telemetry metrics selector */}
+            <div className="md:col-span-7 space-y-3">
+              {[
+                { key: 'cognitive', title: 'Cognitive Sync Index', percent: 92, desc: 'Neural concept comprehension meets high analytical standings.', color: 'from-violet-500 to-indigo-600', textLight: 'text-violet-400' },
+                { key: 'practical', title: 'Practical Code Labs', percent: 84, desc: '8 interactive engineering modules safely compiled and validated.', color: 'from-cyan-400 to-sky-600', textLight: 'text-cyan-400' },
+                { key: 'pacing', title: 'Lecture Velocity Pacing', percent: 78, desc: 'Consistent watch pattern retention relative to target cohort averages.', color: 'from-indigo-500 to-blue-600', textLight: 'text-indigo-400' },
+                { key: 'readiness', title: 'Grading Evaluation Readiness', percent: 95, desc: '95% probability of achieving optimal score metrics on active streams.', color: 'from-emerald-400 to-teal-500', textLight: 'text-emerald-400' }
+              ].map((dim) => {
+                const isSelected = spatialDimension === dim.key;
+                return (
+                  <button
+                    key={dim.key}
+                    onClick={() => {
+                      setSpatialDimension(dim.key as any);
+                      setHologramRotation(prev => prev + 90);
+                    }}
+                    className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-300 flex items-start gap-3 cursor-pointer ${
+                      isSelected 
+                        ? 'bg-white/5 border-violet-500/35 shadow-lg shadow-violet-950/20' 
+                        : 'bg-transparent border-slate-800/40 hover:bg-white/[0.02] hover:border-slate-800'
+                    }`}
+                  >
+                    <div className={`w-2.5 h-2.5 rounded-full mt-1 shrink-0 ${isSelected ? 'bg-gradient-to-r ' + dim.color : 'bg-slate-700'}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-baseline">
+                        <h4 className={`text-xs font-extrabold ${isSelected ? 'text-white' : 'text-slate-400'}`}>{dim.title}</h4>
+                        <span className={`text-xs font-bold font-mono ${isSelected ? dim.textLight : 'text-slate-500'}`}>{dim.percent}%</span>
+                      </div>
+                      {isSelected && (
+                        <motion.p 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="text-[10px] text-slate-400 mt-1.5 leading-relaxed font-medium"
+                        >
+                          {dim.desc}
+                        </motion.p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* WIDGET 2: ANIMATED GLASS CARD - UPCOMING LIVE SEMINAR */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-[#111425] via-[#0C0E1A] to-[#060810] rounded-[32px] border border-cyan-500/25 p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between group transition-all duration-500 hover:border-cyan-500/40">
+          {/* Animated gradient cyber glow card edges */}
+          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-cyan-500/15 to-violet-500/0 rounded-full blur-3xl pointer-events-none group-hover:from-cyan-500/20 transition-all duration-500 animate-pulse" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-center">
+              <span className="bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest font-mono flex items-center gap-1.5 shadow-sm">
+                <span className="h-1.5 w-1.5 bg-cyan-300 rounded-full animate-ping" />
+                Live In 2 Hours
+              </span>
+              <span className="text-[10px] font-bold text-slate-300 font-mono bg-slate-900/60 px-2 py-1 rounded-md border border-slate-800">18:00 UTC</span>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <p className="text-[10px] font-extrabold text-violet-300 font-mono uppercase tracking-widest">Global Masterclass</p>
+              <h4 className="text-lg sm:text-xl font-extrabold text-white tracking-tight leading-tight group-hover:text-cyan-300 transition-colors duration-300">
+                Advanced Neural Networks: From Transformers to Real-time Agentic Cores
+              </h4>
+              <p className="text-xs text-slate-200 leading-relaxed font-semibold">
+                Deep dive into structural self-attention vectors, token engineering, and scaling local context memories.
+              </p>
+            </div>
+
+            {/* Speaker Bio Glass Card */}
+            <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-3.5 mt-5 flex items-center gap-3 shadow-md">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 to-indigo-600 flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-lg">
+                EV
+              </div>
+              <div className="min-w-0 text-left">
+                <p className="text-xs font-black text-white">Dr. Elias Vance</p>
+                <p className="text-[10px] text-slate-300 font-medium truncate">Director, Advanced Machine Learning Center</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-10 pt-6 mt-6 border-t border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="text-left">
+              <p className="text-[10px] text-slate-300 font-extrabold uppercase tracking-wider">Registered Attendees</p>
+              <p className="text-sm font-black text-white mt-0.5 font-mono">
+                {isSeminarRegistered ? seminarCount + 1 : seminarCount} <span className="text-xs text-cyan-300 font-bold">Enrolled</span>
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setIsSeminarRegistered(!isSeminarRegistered);
+              }}
+              className={`px-4 py-2.5 rounded-2xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
+                isSeminarRegistered 
+                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-none shadow-violet-500/20' 
+                  : 'bg-white text-slate-900 hover:bg-cyan-300 hover:text-slate-950 shadow-cyan-500/20'
+              }`}
+            >
+              {isSeminarRegistered ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 animate-bounce" />
+                  <span>Access Key Granted</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span>Register Free Slot</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Dynamic Academic Calendar mapping upcoming quizzes and live lectures */}
       <motion.div
@@ -842,11 +1038,11 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
                           <div className="h-60">
                             <ResponsiveContainer width="100%" height="100%">
-                              <BarChart data={courseCompletionData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                              <BarChart data={courseCompletionData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                 <defs>
                                   <linearGradient id="completionGradSplit" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.95}/>
-                                    <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.45}/>
+                                    <stop offset="0%" stopColor="#c084fc" stopOpacity={0.95}/>
+                                    <stop offset="100%" stopColor="#22d3ee" stopOpacity={0.45}/>
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-800/60" vertical={false} />
@@ -890,11 +1086,11 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
                           <div className="h-60">
                             <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart data={quizTrendData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                              <AreaChart data={quizTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                 <defs>
                                   <linearGradient id="trendGradSplit" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.4}/>
-                                    <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.02}/>
+                                    <stop offset="0%" stopColor="#818cf8" stopOpacity={0.55}/>
+                                    <stop offset="100%" stopColor="#818cf8" stopOpacity={0.01}/>
                                   </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-800/60" vertical={false} />
@@ -963,10 +1159,10 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
                         <div className="h-72">
                           <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={courseCompletionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <BarChart data={courseCompletionData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                               <defs>
                                 <linearGradient id="completionGradFull" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.95}/>
+                                  <stop offset="0%" stopColor="#a855f7" stopOpacity={0.95}/>
                                   <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.35}/>
                                 </linearGradient>
                               </defs>
@@ -1021,11 +1217,11 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
                         <div className="h-72">
                           <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={quizTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <AreaChart data={quizTrendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                               <defs>
                                 <linearGradient id="trendGradFull" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="0%" stopColor="#6366f1" stopOpacity={0.65}/>
-                                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0.03}/>
+                                  <stop offset="0%" stopColor="#a855f7" stopOpacity={0.7}/>
+                                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0.01}/>
                                 </linearGradient>
                               </defs>
                               <CartesianGrid strokeDasharray="4 4" stroke="#e2e8f0" className="dark:stroke-slate-800/40" vertical={false} />
@@ -1079,7 +1275,7 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
                   </div>
                   <div className="h-60 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-3 bg-slate-50/50 dark:bg-slate-900/30">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={stats.courseAverages} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <BarChart data={stats.courseAverages} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                         <defs>
                           <linearGradient id="gradeGradFull" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9}/>
@@ -1104,65 +1300,69 @@ export default function Dashboard({ user, courses, setActiveTab, onLaunchCourse,
 
           {/* Student Progress and Continuing section */}
           {user.role === 'student' && (
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
-              className="bg-white dark:bg-[#0F172A] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors duration-300"
-            >
-              <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-100 font-poppins">My Educational Courses</h3>
+            <div className="space-y-8 col-span-full">
+              <SacredAcademy />
+              
               <motion.div 
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut", delay: 0.1 }}
+                className="bg-white dark:bg-[#0F172A] p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 transition-colors duration-300"
               >
-                {courses.map(course => {
-                  const totalLessons = (course.modules || []).flatMap(m => m ? (m.lessons || []) : []).length || 1;
-                  const watchedLessons = attendance.filter(a => a.courseId === course.id && a.status === 'Present').length;
-                  const percentComplete = Math.min(100, Math.round((watchedLessons / totalLessons) * 100));
+                <h3 className="text-lg font-extrabold text-slate-800 dark:text-slate-100 font-poppins">My Educational Courses</h3>
+                <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-4"
+                >
+                  {courses.map(course => {
+                    const totalLessons = (course.modules || []).flatMap(m => m ? (m.lessons || []) : []).length || 1;
+                    const watchedLessons = attendance.filter(a => a.courseId === course.id && a.status === 'Present').length;
+                    const percentComplete = Math.min(100, Math.round((watchedLessons / totalLessons) * 100));
 
-                  return (
-                    <motion.div 
-                      key={course.id} 
-                      variants={cardVariants}
-                      className="border border-slate-100 dark:border-slate-800/80 hover:border-sky-300 dark:hover:border-sky-500 rounded-2xl p-4 space-y-3 hover:bg-sky-50/10 dark:hover:bg-slate-900/40 transition-all flex flex-col justify-between"
-                    >
-                      <div className="space-y-1">
-                        <span className="text-xxs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold px-2 py-0.5 rounded uppercase">
-                          {course.code}
-                        </span>
-                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">{course.title}</h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{course.description}</p>
-                      </div>
+                    return (
+                      <motion.div 
+                        key={course.id} 
+                        variants={cardVariants}
+                        className="border border-slate-100 dark:border-slate-800/80 hover:border-sky-300 dark:hover:border-sky-500 rounded-2xl p-4 space-y-3 hover:bg-sky-50/10 dark:hover:bg-slate-900/40 transition-all flex flex-col justify-between"
+                      >
+                        <div className="space-y-1">
+                          <span className="text-xxs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold px-2 py-0.5 rounded uppercase">
+                            {course.code}
+                          </span>
+                          <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1">{course.title}</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{course.description}</p>
+                        </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-medium text-slate-400 dark:text-slate-500 font-semibold">Course Progress</span>
-                          <span className="font-bold text-sky-600 dark:text-sky-400">{percentComplete}%</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="font-medium text-slate-400 dark:text-slate-500 font-semibold">Course Progress</span>
+                            <span className="font-bold text-sky-600 dark:text-sky-400">{percentComplete}%</span>
+                          </div>
+                          <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <motion.div 
+                              className="h-full bg-sky-500 rounded-full" 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentComplete}%` }}
+                              transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => onLaunchCourse(course)}
+                            className="w-full mt-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition duration-250 shadow-md shadow-blue-100/10 hover:shadow-lg active:scale-[0.98] cursor-pointer"
+                          >
+                            <PlayCircle className="h-4 w-4" />
+                            <span>Launch Lectures</span>
+                          </button>
                         </div>
-                        <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-sky-500 rounded-full" 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percentComplete}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => onLaunchCourse(course)}
-                          className="w-full mt-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-xs transition duration-250 shadow-md shadow-blue-100/10 hover:shadow-lg active:scale-[0.98] cursor-pointer"
-                        >
-                          <PlayCircle className="h-4 w-4" />
-                          <span>Launch Lectures</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
               </motion.div>
-            </motion.div>
+            </div>
           )}
 
           {/* Academic attendance ledger summary for professors */}

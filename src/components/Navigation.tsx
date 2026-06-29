@@ -305,14 +305,15 @@ export default function Navigation({
   return (
     <>
       {/* Top Main Navigation Header Bar */}
-      <header id="lms_main_header" className="sticky top-0 z-40 bg-white dark:bg-[#0F172A] border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm flex items-center justify-between px-6 py-3.5 transition-colors duration-300">
+      <header id="lms_main_header" className="sticky top-0 z-40 bg-white/85 dark:bg-[#080B13]/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-violet-500/15 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.4)] flex items-center justify-between px-6 py-3.5 transition-all duration-300">
         <div className="p-1 flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-100/80 shrink-0">
-            <span className="text-white font-bold text-xl font-serif">L</span>
+          <div className="w-10 h-10 bg-gradient-to-tr from-violet-600 via-indigo-600 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 dark:shadow-cyan-500/20 shrink-0 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="text-white font-extrabold text-xl font-poppins tracking-wider drop-shadow-[0_2px_10px_rgba(255,255,255,0.45)]">L</span>
           </div>
-          <div className="leading-tight">
-            <p className="font-bold text-slate-900 dark:text-slate-100 tracking-tight text-sm sm:text-base">LMS System</p>
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-bold">University LMS</p>
+          <div className="leading-tight text-left">
+            <p className="font-extrabold text-slate-900 dark:text-slate-100 tracking-tight text-sm sm:text-base font-sans bg-clip-text bg-gradient-to-r dark:from-white dark:to-slate-300">LMS System</p>
+            <p className="text-[9px] uppercase tracking-widest text-slate-400 dark:text-cyan-400 font-extrabold font-mono">University Portal</p>
           </div>
         </div>
 
@@ -387,26 +388,26 @@ export default function Navigation({
 
       <div className="flex-1 flex flex-col md:flex-row min-h-0 relative">
         {/* Floating Left Sidebar Panel or Tab Bar */}
-        <nav id="lms_sidebar" className="fixed bottom-0 left-0 right-0 z-40 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] md:w-64 bg-white dark:bg-[#0F172A] border-t border-slate-200 dark:border-slate-850 md:border-t-0 md:border-r md:border-slate-200/80 dark:border-slate-800/80 shadow-md md:shadow-none flex md:flex-col justify-between py-2 md:py-6 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0 transition-colors duration-300">
-          <div className="flex w-full overflow-x-auto whitespace-nowrap md:flex-col md:overflow-x-visible md:whitespace-normal justify-start md:justify-start px-3 md:px-4 gap-1 md:space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 md:pb-0">
+        <nav id="lms_sidebar" className="fixed bottom-0 left-0 right-0 z-40 md:sticky md:top-[73px] md:h-[calc(100vh-73px)] md:w-64 bg-white/90 dark:bg-[#060810]/95 backdrop-blur-md border-t border-slate-200 dark:border-violet-500/10 md:border-t-0 md:border-r md:border-slate-200/80 dark:border-violet-500/10 shadow-md md:shadow-none flex md:flex-col justify-between py-2 md:py-6 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0 transition-all duration-300">
+          <div className="flex w-full overflow-x-auto whitespace-nowrap md:flex-col md:overflow-x-visible md:whitespace-normal justify-start md:justify-start px-3 md:px-4 gap-1 md:space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 md:pb-0">
             {visibleMenuItems.map((item) => {
                const IconComponent = item.icon;
                const isTabActive = activeTab === item.id;
                
-               let activeClasses = 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/20 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
+               let activeClasses = 'bg-gradient-to-r from-blue-50/80 to-blue-50/30 text-blue-700 shadow-sm border border-blue-200/20 dark:from-violet-600/15 dark:to-cyan-500/5 dark:text-white dark:border-violet-500/25 shadow-lg dark:shadow-violet-950/20';
 
                return (
                  <button
                    key={item.id}
                    type="button"
                    onClick={() => setActiveTab(item.id)}
-                   className={`flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:py-2.5 rounded-xl transition text-[10px] md:text-sm font-semibold w-auto md:w-full border border-transparent cursor-pointer shrink-0 ${
+                   className={`flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3.5 py-2.5 md:py-3 rounded-2xl transition text-[10px] md:text-xs font-bold w-auto md:w-full border border-transparent cursor-pointer shrink-0 ${
                      isTabActive 
                        ? activeClasses 
-                       : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
+                       : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50/80 dark:hover:bg-slate-800/20 hover:text-indigo-600 dark:hover:text-indigo-300'
                    }`}
                  >
-                   <IconComponent className={`h-4 w-4 md:h-5 md:w-5 ${isTabActive ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500'}`} />
+                   <IconComponent className={`h-4 w-4 md:h-[18px] md:w-[18px] transition-all duration-300 ${isTabActive ? 'text-indigo-600 dark:text-cyan-400 scale-110 drop-shadow-[0_0_8px_rgba(6,182,212,0.55)]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600'}`} />
                    <span className="truncate">{item.label}</span>
                  </button>
                );
@@ -438,7 +439,7 @@ export default function Navigation({
         </nav>
 
         {/* Content Wrapper */}
-        <div className="flex-1 w-full overflow-y-auto pb-16 md:pb-0 bg-[#F8FAFC] dark:bg-[#020617] transition-colors duration-300">
+        <div className="flex-1 w-full overflow-y-auto pb-16 md:pb-0 bg-[#F8FAFC] dark:bg-[#02040A] transition-colors duration-300">
           {children}
         </div>
       </div>
