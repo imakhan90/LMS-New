@@ -13,7 +13,15 @@ import {
   Book,
   FileText,
   Bookmark,
-  ChevronLeft
+  ChevronLeft,
+  Calendar,
+  Volume2,
+  VolumeX,
+  Compass,
+  Hourglass,
+  Star,
+  Activity,
+  CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -22,9 +30,10 @@ interface SacredAcademyProps {
 }
 
 export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
-  // Quran Module state
+  // Quran Module State
   const [recitationBooked, setRecitationBooked] = useState(false);
   const [liveRecitationActive, setLiveRecitationActive] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [quranProgress, setQuranProgress] = useState({
     surahsMastered: 18,
     totalSurahs: 30,
@@ -33,7 +42,7 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
     juzMastered: 14,
   });
 
-  // Hadees Module state
+  // Hadees Module State
   const [activePath, setActivePath] = useState<'bukhari' | 'qudsi' | 'virtues'>('bukhari');
   const [completedNodes, setCompletedNodes] = useState<string[]>(['b_1', 'b_2']);
   const [currentHadeesIndex, setCurrentHadeesIndex] = useState(0);
@@ -44,7 +53,6 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
   const triggerToast = (msg: string, type: 'success' | 'info') => {
     setLocalToast({ message: msg, type });
     if (onNotify) onNotify(msg, type);
-    // Auto hide
     setTimeout(() => {
       setLocalToast(null);
     }, 3500);
@@ -54,33 +62,36 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
   const learningPaths = {
     bukhari: {
       title: "Sahih Al-Bukhari Series",
-      tagline: "Authentic Teachings of faith & practices",
-      color: "from-sky-500 to-indigo-600",
+      tagline: "Authentic teachings of faith, moral behavior, & daily practices.",
+      color: "from-amber-400 to-yellow-600",
+      accent: "amber",
       nodes: [
-        { id: 'b_1', title: "Revelation", desc: "How the revelation began to the Messenger" },
-        { id: 'b_2', title: "Belief (Faith)", desc: "The fundamentals of Islamic belief system" },
-        { id: 'b_3', title: "Knowledge", desc: "The supreme virtues of seeking wisdom" },
-        { id: 'b_4', title: "Ablution (Wudu)", desc: "Preserving spiritual and bodily cleanliness" },
+        { id: 'b_1', title: "Revelation (Wahy)", desc: "How revelation descended upon the Prophet" },
+        { id: 'b_2', title: "Belief (Iman)", desc: "The core pillars and branches of true faith" },
+        { id: 'b_3', title: "Knowledge (Ilm)", desc: "The supreme value of seeking divine wisdom" },
+        { id: 'b_4', title: "Ablution (Wudu)", desc: "Preserving spiritual purity and cleanliness" },
       ]
     },
     qudsi: {
       title: "Hadith Qudsi Collection",
-      tagline: "Direct divine wisdom revealed through words",
-      color: "from-emerald-500 to-teal-600",
+      tagline: "Direct divine inspiration revealed in prophetic words.",
+      color: "from-yellow-500 to-amber-600",
+      accent: "gold",
       nodes: [
-        { id: 'q_1', title: "Mercy of Allah", desc: "My Mercy supersedes My Wrath" },
-        { id: 'q_2', title: "Sincerity (Ikhlas)", desc: "Devoting actions purely for the Divine" },
-        { id: 'q_3', title: "The Power of Prayer", desc: "Closeness to the Almighty through worship" },
+        { id: 'q_1', title: "Mercy of Allah", desc: "My Mercy supersedes and overcomes My Wrath" },
+        { id: 'q_2', title: "Sincerity (Ikhlas)", desc: "Doing every righteous action purely for the Divine" },
+        { id: 'q_3', title: "The Power of Dua", desc: "Sincere supplication and drawing close to the Almighty" },
       ]
     },
     virtues: {
-      title: "Virtues and Ethics",
-      tagline: "The perfection of human character & manners",
-      color: "from-amber-500 to-orange-600",
+      title: "Virtues and Ethics (Akhlaq)",
+      tagline: "The perfection of noble human character, ethics, & manners.",
+      color: "from-orange-400 to-amber-500",
+      accent: "orange",
       nodes: [
-        { id: 'v_1', title: "Kindness to Parents", desc: "The highest ethical duty in daily life" },
-        { id: 'v_2', title: "Truthfulness", desc: "Integrity as a cornerstone of personality" },
-        { id: 'v_3', title: "Generosity", desc: "Noble hospitality and selflessness" },
+        { id: 'v_1', title: "Duty to Parents", desc: "Honor, kindness, and devotion in family life" },
+        { id: 'v_2', title: "Truthfulness (Sidq)", desc: "Integrity and honesty as character baselines" },
+        { id: 'v_3', title: "Generosity (Karam)", desc: "Aesthetic hospitality, selflessness, and sharing" },
       ]
     }
   };
@@ -98,236 +109,250 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
       arabic: "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",
       english: "A true Muslim is the one from whose tongue and hand other Muslims are safe.",
       ref: "Sahih al-Bukhari 10",
-      topic: "Peace & Brotherhood",
-      glowColor: "shadow-cyan-500/10 border-cyan-500/20"
+      topic: "Peace & Character",
+      glowColor: "shadow-yellow-500/10 border-yellow-500/20"
     },
     {
       arabic: "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
       english: "None of you will believe until he wishes for his brother what he wishes for himself.",
       ref: "Sahih al-Bukhari 13",
-      topic: "Altruism & Love",
-      glowColor: "shadow-violet-500/10 border-violet-500/20"
+      topic: "Altruism & Brotherhood",
+      glowColor: "shadow-orange-500/10 border-orange-500/20"
     }
   ];
 
   const handleToggleNode = (id: string) => {
     if (completedNodes.includes(id)) {
       setCompletedNodes(prev => prev.filter(n => n !== id));
-      triggerToast('Chapter node marked incomplete', 'info');
+      triggerToast('Chapter module marked incomplete', 'info');
     } else {
       setCompletedNodes(prev => [...prev, id]);
-      triggerToast('Beautiful! Chapter node marked complete', 'success');
+      triggerToast('Beautiful! Node completed and logged to study dashboard.', 'success');
     }
   };
 
   const handleNextHadees = () => {
     setCurrentHadeesIndex(prev => (prev + 1) % hadeesOfTheDay.length);
-    triggerToast('Showing next prophetic tradition', 'info');
   };
 
   const handlePrevHadees = () => {
     setCurrentHadeesIndex(prev => (prev - 1 + hadeesOfTheDay.length) % hadeesOfTheDay.length);
-    triggerToast('Showing previous prophetic tradition', 'info');
   };
 
   const handleBookRecitation = () => {
     if (recitationBooked) {
       setRecitationBooked(false);
-      triggerToast('Recitation session cancelled', 'info');
+      setLiveRecitationActive(false);
+      triggerToast('Recitation desk connection cancelled.', 'info');
     } else {
       setRecitationBooked(true);
       setLiveRecitationActive(true);
-      triggerToast('Excellent choice! Connecting you to a Live Quran Recitation instructor...', 'success');
+      triggerToast('Connecting you to a Live Quran Recitation instructor...', 'success');
       setTimeout(() => {
         setLiveRecitationActive(false);
-      }, 5000);
+        triggerToast('Connected! Live Sheikh voice channel active.', 'success');
+      }, 4000);
     }
   };
 
-  // Compute stats
+  const handleToggleAudio = () => {
+    setIsAudioPlaying(!isAudioPlaying);
+    if (!isAudioPlaying) {
+      triggerToast('Playing Surah Al-Kahf recitation sample (Madd pronunciation guide).', 'success');
+    } else {
+      triggerToast('Pronunciation sample paused.', 'info');
+    }
+  };
+
+  // Calculations for current path
   const curPath = learningPaths[activePath];
   const pathCompletedCount = curPath.nodes.filter(n => completedNodes.includes(n.id)).length;
   const pathTotalCount = curPath.nodes.length;
   const pathPercent = Math.round((pathCompletedCount / pathTotalCount) * 100);
 
-  // Circular progress math
-  const radius = 54;
+  // Circular progress dimensions for Quran Arc
+  const radius = 64;
   const circumference = 2 * Math.PI * radius;
   const quranPercentage = Math.round((quranProgress.surahsMastered / quranProgress.totalSurahs) * 100);
   const strokeDashoffset = circumference - (quranPercentage / 100) * circumference;
 
   return (
-    <div className="space-y-8 text-left">
-      {/* Title block with premium typography and glowing divider */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center justify-center p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
-              <Sparkles className="h-4 w-4 animate-pulse text-amber-300" />
-            </span>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 font-mono bg-amber-500/20 px-2.5 py-1 rounded-full border border-amber-500/30">
-              Spiritual & Islamic Sciences
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black font-poppins text-slate-800 dark:text-white tracking-tight">
-            Religious Studies
-          </h2>
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
-            Syllabus of pure recitation mastery and prophetic traditions, perfectly designed with holographic progress logs.
-          </p>
-        </div>
+    <div id="religious-studies-root" className="space-y-8 text-left">
+      
+      {/* 2. DUAL-ROW GLASSMORPHISM CARDS GRID WITH NEON SAPPHIRE AND GOLD ACCENTS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         
-        {/* Quick status bar */}
-        <div className="flex items-center gap-4 bg-white dark:bg-[#0b0d19] p-3 rounded-2xl border border-slate-200/60 dark:border-violet-500/30 shadow-sm">
-          <div className="text-right">
-            <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono">Spiritual Pacing</p>
-            <p className="text-xs font-black text-slate-800 dark:text-amber-300">Intelligent Sync &bull; 86%</p>
-          </div>
-          <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-800" />
-          <div className="bg-amber-500/20 text-amber-400 p-2 rounded-xl border border-amber-500/20">
-            <Award className="h-5 w-5 text-amber-300" />
-          </div>
-        </div>
-      </div>
+        {/* CARD 1: AL-QURAN NAZRA RECITATION WITH NEON SAPPHIRE ACCENTS */}
+        <div 
+          id="quran-recitation-card"
+          className="backdrop-blur-xl bg-white/30 dark:bg-slate-950/40 border border-slate-200/50 dark:border-blue-500/20 rounded-[32px] p-6 sm:p-8 shadow-[0_20px_50px_rgba(37,99,235,0.05)] dark:shadow-[0_20px_50px_rgba(37,99,235,0.15)] relative overflow-hidden group transition-all duration-500 hover:border-blue-400/50 hover:shadow-[0_20px_60px_rgba(37,99,235,0.22)]"
+        >
+          {/* Glassmorphism neon sapphire blur points */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-blue-600/15 rounded-full filter blur-[100px] pointer-events-none group-hover:bg-blue-600/20 transition-all duration-700" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-500/10 rounded-full filter blur-[80px] pointer-events-none" />
 
-      {/* Grid container representing both majestic modules */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        
-        {/* MODULE CARD 1: HOLY QURAN NAZRA RECITATION */}
-        <div className="bg-gradient-to-b from-white to-slate-50 dark:from-[#0F172A] dark:to-[#090D1A] rounded-[32px] border border-slate-200 dark:border-blue-500/30 p-6 sm:p-8 shadow-xl relative overflow-hidden group transition-all duration-300 hover:border-cyan-500/60 dark:hover:shadow-[0_0_50px_rgba(37,99,235,0.15)]">
-          {/* Visual gradient backdrop lights with deep neon sapphire */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full filter blur-[80px] pointer-events-none animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-500/10 rounded-full filter blur-[60px] pointer-events-none" />
-
-          {/* Header */}
+          {/* Card Header */}
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-cyan-300 uppercase tracking-widest font-mono bg-cyan-500/20 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
-                Nazra Mastery
+              <span className="text-[9px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest font-mono bg-cyan-500/10 dark:bg-cyan-500/20 px-3 py-1 rounded-full border border-cyan-500/20">
+                Nazra Recitation
               </span>
-              <h3 className="text-xl font-black font-poppins text-slate-800 dark:text-white tracking-tight mt-1">
+              <h3 className="text-xl sm:text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-1.5">
                 Al-Quran: Nazra Recitation
               </h3>
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Immersive recitation correction with dynamic accent tracking.
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 leading-normal max-w-sm">
+                Immersive recitation correction, proper accent (Makhraj) tracking, and custom daily memorization targets.
               </p>
             </div>
             
-            {/* Custom Open Quran Calligraphic Graphic mockup */}
-            <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-600/30 border border-cyan-500/40 flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/10">
-              <BookOpen className="h-7 w-7 text-cyan-400 animate-pulse" />
-              <div className="absolute -inset-0.5 rounded-2xl bg-cyan-500/30 blur opacity-40 group-hover:opacity-70 transition duration-500" />
+            {/* Elegant Open Book icon with sapphire backglow */}
+            <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/20 border border-blue-500/30 dark:border-blue-500/40 flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/15">
+              <BookOpen className="h-7 w-7 text-blue-500 dark:text-blue-400 animate-pulse" />
+              <div className="absolute -inset-1 rounded-2xl bg-blue-500/20 blur opacity-40 group-hover:opacity-75 transition duration-500" />
             </div>
           </div>
 
-          {/* Glowing Arc Progress Tracker */}
-          <div className="relative z-10 my-8 py-4 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 flex flex-col sm:flex-row items-center gap-6 shadow-inner">
+          {/* Premium Sapphire Progress Arc & Stats Column */}
+          <div className="relative z-10 my-6 bg-slate-50/40 dark:bg-slate-900/40 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-800/60 p-6 flex flex-col sm:flex-row items-center gap-6 shadow-inner">
             
-            {/* Circular Progress Wheel */}
+            {/* SVG Progress Arc with a glowing Sapphire-to-Cyan linear gradient */}
             <div className="relative flex items-center justify-center shrink-0">
-              <svg className="w-28 h-28 transform -rotate-90">
+              <svg className="w-36 h-36 transform -rotate-90">
+                <defs>
+                  <linearGradient id="sapphireProgressGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#2563eb" />
+                    <stop offset="100%" stopColor="#22d3ee" />
+                  </linearGradient>
+                </defs>
                 <circle
-                  cx="56"
-                  cy="56"
+                  cx="72"
+                  cy="72"
                   r={radius}
-                  className="stroke-slate-200 dark:stroke-slate-800"
+                  className="stroke-slate-200/60 dark:stroke-slate-800"
                   strokeWidth="8"
                   fill="transparent"
                 />
                 <circle
-                  cx="56"
-                  cy="56"
+                  cx="72"
+                  cy="72"
                   r={radius}
-                  className="stroke-cyan-400 transition-all duration-1000 ease-out"
+                  stroke="url(#sapphireProgressGrad)"
                   strokeWidth="8"
                   fill="transparent"
                   strokeDasharray={circumference}
                   strokeDashoffset={strokeDashoffset}
                   strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out shadow-lg"
+                  style={{ filter: 'drop-shadow(0px 0px 6px rgba(37,99,235,0.5))' }}
                 />
               </svg>
-              {/* Inner Stats */}
-              <div className="absolute flex flex-col items-center">
-                <span className="text-lg font-black text-slate-800 dark:text-white">{quranPercentage}%</span>
-                <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono">Mastered</span>
+              {/* Central text display */}
+              <div className="absolute flex flex-col items-center justify-center">
+                <span className="text-xl font-black text-slate-900 dark:text-white font-mono">{quranPercentage}%</span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-mono">Completed</span>
               </div>
             </div>
 
-            {/* Mastery detail lists */}
-            <div className="flex-1 w-full text-left space-y-3">
+            {/* Progress Metrics Column */}
+            <div className="flex-1 w-full space-y-3.5 text-left">
               <div>
-                <p className="text-xxs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider font-mono">Completed Target logs</p>
-                <div className="grid grid-cols-2 gap-4 mt-1.5">
-                  <div className="bg-slate-100/80 dark:bg-slate-950/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
-                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Surahs Complete</p>
-                    <p className="text-sm font-extrabold text-slate-800 dark:text-cyan-300">{quranProgress.surahsMastered} <span className="text-slate-500 dark:text-slate-400 text-xs font-normal">/ {quranProgress.totalSurahs}</span></p>
+                <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">Memorization & Pacing Indices</p>
+                
+                <div className="grid grid-cols-2 gap-3 mt-1.5">
+                  <div className="bg-white/60 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80">
+                    <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Surahs Complete</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-cyan-400 font-mono mt-0.5">
+                      {quranProgress.surahsMastered} <span className="text-slate-400 font-normal text-xxs">/ {quranProgress.totalSurahs}</span>
+                    </p>
                   </div>
-                  <div className="bg-slate-100/80 dark:bg-slate-950/80 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
-                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ayats Mastered</p>
-                    <p className="text-sm font-extrabold text-slate-800 dark:text-violet-300">{quranProgress.ayatsMastered.toLocaleString()} <span className="text-slate-500 dark:text-slate-400 text-xs font-normal">/ {quranProgress.totalAyats}</span></p>
+                  <div className="bg-white/60 dark:bg-slate-950/60 p-2.5 rounded-xl border border-slate-200/50 dark:border-slate-800/80">
+                    <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">Ayats Mastered</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-blue-400 font-mono mt-0.5">
+                      {quranProgress.ayatsMastered} <span className="text-slate-400 font-normal text-xxs">/ {quranProgress.totalAyats}</span>
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Juz tracked */}
-              <div className="flex items-center justify-between text-xs bg-slate-200/50 dark:bg-slate-950/60 p-2 px-3 rounded-xl border border-slate-200/40 dark:border-slate-800/40">
-                <span className="font-extrabold text-slate-600 dark:text-slate-300">Total Juz Memorized:</span>
-                <span className="font-black text-cyan-600 dark:text-cyan-400 font-mono">{quranProgress.juzMastered} / 30 Juz</span>
+              {/* Total Juz Tracked bar */}
+              <div className="flex items-center justify-between text-xs bg-white/40 dark:bg-slate-950/40 p-2 px-3 rounded-xl border border-slate-200/40 dark:border-slate-800/60 font-semibold text-slate-700 dark:text-slate-300">
+                <span className="flex items-center gap-1.5">
+                  <Compass className="h-3.5 w-3.5 text-blue-500 animate-spin-slow" />
+                  Juz Completed:
+                </span>
+                <span className="font-extrabold text-blue-600 dark:text-cyan-400 font-mono">{quranProgress.juzMastered} / 30 Juz</span>
               </div>
             </div>
           </div>
 
-          {/* Upcoming Next Lesson Indicator panel */}
-          <div className="relative z-10 bg-gradient-to-r from-sky-500/10 to-cyan-500/10 dark:from-sky-500/15 dark:to-cyan-500/5 p-4 rounded-2xl border border-cyan-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
+          {/* Next lesson syllabus segment */}
+          <div className="relative z-10 bg-gradient-to-r from-blue-500/10 to-cyan-500/5 dark:from-blue-600/15 dark:to-cyan-400/5 p-4 rounded-2xl border border-blue-500/20 dark:border-blue-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-left">
             <div className="flex gap-3">
-              <div className="p-2.5 bg-cyan-500/20 rounded-xl text-cyan-600 dark:text-cyan-300 border border-cyan-500/30 shrink-0 self-start sm:self-center">
-                <Clock className="h-5 w-5 text-cyan-500 animate-spin-slow" />
+              <div className="p-2.5 bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400 border border-blue-500/30 shrink-0 self-start sm:self-center">
+                <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400 animate-pulse" />
               </div>
               <div>
-                <p className="text-xxs font-extrabold uppercase text-cyan-600 dark:text-cyan-400 tracking-widest font-mono">Next Scheduled Lesson</p>
-                <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 mt-0.5">Surah Al-Kahf, Ayat 1-10</h4>
-                <p className="text-[10px] text-slate-600 dark:text-slate-300 font-semibold">Focused on pronunciation of "Madd" constraints &bull; Tomorrow 9:00 AM</p>
+                <span className="text-[9px] font-black uppercase text-blue-600 dark:text-cyan-400 tracking-wider font-mono">Syllabus Practice Target</span>
+                <h4 className="text-sm font-black text-slate-900 dark:text-white mt-0.5">Surah Al-Kahf &bull; Ayah 1-10</h4>
+                <p className="text-[10px] text-slate-600 dark:text-slate-300 font-semibold leading-normal mt-0.5">Focusing on Madd letters and beautiful recitation rules. Practice online now.</p>
               </div>
             </div>
 
-            {/* Play sample audio preview click */}
+            {/* Pronunciation sample player */}
             <button 
-              onClick={() => triggerToast('Playing recitation lesson syllabus overview audio', 'info')}
-              className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-700 dark:text-cyan-300 text-xxs font-extrabold p-2.5 rounded-xl border border-cyan-500/30 flex items-center justify-center gap-1 shrink-0 self-end sm:self-center cursor-pointer transition-all"
+              onClick={handleToggleAudio}
+              className={`text-xxs font-extrabold px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all flex items-center justify-center gap-1.5 shrink-0 self-end sm:self-center shadow-md ${
+                isAudioPlaying 
+                  ? 'bg-rose-500/20 border-rose-500/30 text-rose-600 dark:text-rose-400' 
+                  : 'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300 hover:bg-blue-500/30'
+              }`}
             >
-              <Play className="h-3.5 w-3.5 fill-current" />
-              <span>Syllabus Prep</span>
+              {isAudioPlaying ? (
+                <>
+                  <VolumeX className="h-3.5 w-3.5" />
+                  <span>Pause Guide</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="h-3.5 w-3.5" />
+                  <span>Listen Makhraj</span>
+                </>
+              )}
             </button>
           </div>
 
-          {/* Live Instructor Check Session Action Button */}
-          <div className="relative z-10 mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-left">
-              <h5 className="text-xs font-extrabold text-slate-800 dark:text-slate-200">Live Consultation Desk</h5>
-              <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Connect to a live certified Sheikh for immediate recitation feedback.</p>
+          {/* Live Recitation Check with interactive simulation */}
+          <div className="relative z-10 mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-left space-y-0.5">
+              <h5 className="text-xs font-black text-slate-900 dark:text-slate-200">Live Consultation Desk</h5>
+              <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 leading-normal">
+                Submit audio files or connect live to a certified Qari for pronunciation feedback.
+              </p>
             </div>
 
             <button
               onClick={handleBookRecitation}
-              className={`w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg cursor-pointer ${
-                recitationBooked 
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-950/20 border-none' 
-                  : 'bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:via-blue-500 hover:to-indigo-500 text-white shadow-cyan-950/20'
+              className={`w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-black transition-all duration-300 flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
+                liveRecitationActive
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-amber-500/10 border-none animate-pulse'
+                  : recitationBooked 
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/10 border-none' 
+                    : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-600 text-white shadow-blue-500/20'
               }`}
             >
               {liveRecitationActive ? (
                 <>
-                  <span className="h-2 w-2 rounded-full bg-white animate-ping" />
-                  <span>Connecting Sheikh...</span>
+                  <Activity className="h-4 w-4 animate-spin" />
+                  <span>Activating Voice Channel...</span>
                 </>
               ) : recitationBooked ? (
                 <>
-                  <Check className="h-4 w-4" />
-                  <span>Session Booked!</span>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Desk Scheduled</span>
                 </>
               ) : (
                 <>
-                  <Video className="h-4 w-4" />
+                  <Video className="h-4 w-4 animate-pulse" />
                   <span>Live Recitation Check</span>
                 </>
               )}
@@ -336,34 +361,37 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
         </div>
 
 
-        {/* MODULE CARD 2: AHADEES EDUCATION */}
-        <div className="bg-gradient-to-b from-white to-slate-50 dark:from-[#0F172A] dark:to-[#090D1A] rounded-[32px] border border-slate-200 dark:border-amber-500/30 p-6 sm:p-8 shadow-xl relative overflow-hidden group transition-all duration-300 hover:border-amber-500/60 dark:hover:shadow-[0_0_50px_rgba(245,158,11,0.15)]">
-          {/* Visual gradient backdrop lights with premium gold glow */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/15 rounded-full filter blur-[80px] pointer-events-none animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-600/10 rounded-full filter blur-[60px] pointer-events-none" />
+        {/* CARD 2: AHADEES EDUCATION WITH NEON GOLD / AMBER ACCENTS */}
+        <div 
+          id="hadees-education-card"
+          className="backdrop-blur-xl bg-white/30 dark:bg-slate-950/40 border border-slate-200/50 dark:border-amber-500/20 rounded-[32px] p-6 sm:p-8 shadow-[0_20px_50px_rgba(245,158,11,0.05)] dark:shadow-[0_20px_50px_rgba(245,158,11,0.15)] relative overflow-hidden group transition-all duration-500 hover:border-amber-400/50 hover:shadow-[0_20px_60px_rgba(245,158,11,0.22)]"
+        >
+          {/* Glassmorphism neon gold/amber blur points */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/15 rounded-full filter blur-[100px] pointer-events-none group-hover:bg-amber-500/20 transition-all duration-700" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-600/10 rounded-full filter blur-[80px] pointer-events-none" />
 
-          {/* Header */}
+          {/* Card Header */}
           <div className="relative z-10 flex items-start justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest font-mono bg-amber-500/20 px-2.5 py-1 rounded-full border border-amber-500/30">
+              <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest font-mono bg-amber-500/10 dark:bg-amber-500/20 px-3 py-1 rounded-full border border-amber-500/20">
                 Prophetic Tradition
               </span>
-              <h3 className="text-xl font-black font-poppins text-slate-800 dark:text-white tracking-tight mt-1">
+              <h3 className="text-xl sm:text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-1.5">
                 Ahadees Education
               </h3>
-              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Study authentic collections of teachings & morals.
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-300 leading-normal max-w-sm">
+                Unlock systemic learning paths through compilations of authentic Hadees and Prophetic ethics.
               </p>
             </div>
             
-            {/* Dignified scroll / book open calligraphic icon */}
-            <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/30 border border-amber-500/40 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
-              <Bookmark className="h-7 w-7 text-amber-400 animate-pulse" />
-              <div className="absolute -inset-0.5 rounded-2xl bg-amber-500/30 blur opacity-40 group-hover:opacity-70 transition duration-500" />
+            {/* Elegant scroll / book open calligraphic icon in gold */}
+            <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-amber-400/10 to-yellow-500/20 border border-amber-500/30 dark:border-amber-500/40 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/15">
+              <Bookmark className="h-7 w-7 text-amber-500 dark:text-amber-400 animate-pulse" />
+              <div className="absolute -inset-1 rounded-2xl bg-amber-500/20 blur opacity-40 group-hover:opacity-75 transition duration-500" />
             </div>
           </div>
 
-          {/* Interactive Learning Path Categorization Row */}
+          {/* Interactive Learning Path selection row */}
           <div className="relative z-10 mt-6 flex flex-wrap gap-2">
             {(Object.keys(learningPaths) as Array<keyof typeof learningPaths>).map(key => {
               const active = activePath === key;
@@ -374,27 +402,32 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
                     setActivePath(key);
                     triggerToast(`Loaded ${learningPaths[key].title} series`, 'info');
                   }}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all duration-200 cursor-pointer ${
+                  className={`px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-300 border cursor-pointer flex items-center gap-1 ${
                     active 
-                      ? 'bg-gradient-to-r from-amber-500/30 to-amber-600/20 text-amber-400 border border-amber-500/40 shadow-sm font-black' 
-                      : 'bg-slate-200/60 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 border border-slate-300/50 dark:border-slate-800/60 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-900'
+                      ? 'bg-gradient-to-r from-amber-500/20 to-amber-600/30 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-sm font-black scale-102' 
+                      : 'bg-white/40 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-900/60'
                   }`}
                 >
+                  <Star className={`h-3 w-3 ${active ? 'fill-amber-500 text-amber-500 animate-spin-slow' : 'text-slate-400'}`} />
                   {learningPaths[key].title.split(' ')[0]}
                 </button>
               );
             })}
           </div>
 
-          {/* Path Header info */}
-          <div className="relative z-10 mt-4 p-4 rounded-2xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 text-left">
+          {/* Selected Path Details Header */}
+          <div className="relative z-10 mt-4 p-4 rounded-2xl bg-white/50 dark:bg-slate-950/60 border border-slate-200/50 dark:border-slate-800/80 text-left">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-extrabold text-slate-800 dark:text-slate-100 font-poppins">{curPath.title}</span>
-              <span className="font-black text-amber-500 dark:text-amber-400">{pathPercent}% Completed</span>
+              <span className="font-extrabold text-slate-900 dark:text-slate-100 font-poppins flex items-center gap-1.5">
+                <Book className="h-3.5 w-3.5 text-amber-500" />
+                {curPath.title}
+              </span>
+              <span className="font-black text-amber-600 dark:text-amber-400 font-mono">{pathPercent}% Done</span>
             </div>
             <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 leading-normal">{curPath.tagline}</p>
             
-            <div className="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full mt-3 overflow-hidden border border-slate-300/30 dark:border-slate-800">
+            {/* Glowing gold progress bar */}
+            <div className="h-1.5 bg-slate-100 dark:bg-slate-900 rounded-full mt-3 overflow-hidden border border-slate-200/40 dark:border-slate-800/60">
               <motion.div 
                 className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]"
                 initial={{ width: 0 }}
@@ -404,49 +437,49 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
             </div>
           </div>
 
-          {/* Interactive Nodes list */}
-          <div className="relative z-10 mt-4 space-y-2.5">
-            <p className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono text-left">Series Chapters Checklist</p>
+          {/* Learning path checklist nodes */}
+          <div className="relative z-10 mt-4 space-y-2">
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono text-left">Learning Path Progress Nodes</p>
             
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-2 max-h-[195px] overflow-y-auto pr-1">
               {curPath.nodes.map((node) => {
                 const complete = completedNodes.includes(node.id);
                 return (
                   <button
                     key={node.id}
                     onClick={() => handleToggleNode(node.id)}
-                    className={`p-3 rounded-xl border flex items-center justify-between text-left transition-all duration-200 group/item cursor-pointer ${
+                    className={`p-3 rounded-xl border flex items-center justify-between text-left transition-all duration-300 group/item cursor-pointer ${
                       complete 
-                        ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/40 text-slate-800 dark:text-white' 
-                        : 'bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-900/80 text-slate-700 dark:text-slate-300'
+                        ? 'bg-amber-500/10 dark:bg-amber-500/25 border-amber-500/30 text-slate-900 dark:text-white' 
+                        : 'bg-white/40 dark:bg-slate-900/40 border-slate-200/50 dark:border-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-900/60 text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
                         complete 
-                          ? 'bg-emerald-500 border-transparent text-white' 
+                          ? 'bg-amber-500 border-transparent text-slate-950' 
                           : 'border-slate-300 dark:border-slate-700 text-transparent group-hover/item:border-amber-400'
-                      }`}>
+                       }`}>
                         <Check className="h-3 w-3 stroke-[3]" />
                       </div>
                       <div>
-                        <span className="text-xs font-extrabold leading-tight block">{node.title}</span>
+                        <span className="text-xs font-black leading-tight block">{node.title}</span>
                         <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block leading-tight mt-0.5">{node.desc}</span>
                       </div>
                     </div>
                     
-                    <ChevronRight className="h-4 w-4 text-slate-400 group-hover/item:translate-x-0.5 transition" />
+                    <ChevronRight className="h-4 w-4 text-slate-400 group-hover/item:translate-x-1 transition-all" />
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* HADITH OF THE DAY PREVIEW CAROUSEL */}
-          <div className="relative z-10 mt-6 pt-4 border-t border-slate-200 dark:border-slate-800/80 text-left">
+          {/* Hadees of the Day section with navigation */}
+          <div className="relative z-10 mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/80 text-left">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xxs font-extrabold uppercase text-amber-500 dark:text-amber-400 tracking-widest font-mono flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-spin-slow" />
+              <span className="text-xxs font-black uppercase text-amber-500 dark:text-amber-400 tracking-widest font-mono flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
                 Hadees of the Day
               </span>
               
@@ -454,42 +487,39 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
               <div className="flex gap-1.5">
                 <button 
                   onClick={handlePrevHadees}
-                  className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
+                  className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   <ChevronLeft className="h-3 w-3 text-slate-700 dark:text-slate-300" />
                 </button>
                 <button 
                   onClick={handleNextHadees}
-                  className="p-1.5 rounded-lg bg-slate-200 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 hover:bg-slate-300 dark:hover:bg-slate-800 transition cursor-pointer"
+                  className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   <ChevronRight className="h-3 w-3 text-slate-700 dark:text-slate-300" />
                 </button>
               </div>
             </div>
 
-            {/* Carousel Item with custom transitions */}
+            {/* Slider with dynamic animations */}
             <AnimatePresence mode="wait">
               <motion.div 
                 key={currentHadeesIndex}
-                initial={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, x: 15 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.25 }}
-                className="p-4 rounded-2xl bg-slate-900/90 dark:bg-[#090d16] border border-amber-500/25 text-center flex flex-col justify-between space-y-3.5 min-h-[140px] shadow-lg"
+                exit={{ opacity: 0, x: -15 }}
+                transition={{ duration: 0.3 }}
+                className="p-4 rounded-2xl bg-slate-950/90 border border-amber-500/20 text-center flex flex-col justify-between space-y-3 shadow-md"
               >
-                {/* Arabic Calligraphy Style text with clean weight & sizes */}
                 <div className="space-y-2">
-                  <p className="text-sm font-extrabold text-amber-300 font-serif leading-loose tracking-wide select-none">
+                  <p className="text-sm font-black text-amber-300 font-serif leading-loose tracking-wide">
                     "{hadeesOfTheDay[currentHadeesIndex].arabic}"
                   </p>
                   
-                  {/* English Translation */}
-                  <p className="text-[11px] text-slate-100 dark:text-slate-200 font-bold leading-relaxed italic px-2">
+                  <p className="text-[11px] text-slate-200 font-bold leading-normal italic px-1">
                     "{hadeesOfTheDay[currentHadeesIndex].english}"
                   </p>
                 </div>
 
-                {/* Meta details footer */}
                 <div className="flex items-center justify-between text-[9px] font-mono border-t border-slate-800/80 pt-2 text-slate-400">
                   <span className="font-extrabold text-amber-400 uppercase">{hadeesOfTheDay[currentHadeesIndex].topic}</span>
                   <span className="font-bold text-slate-300">{hadeesOfTheDay[currentHadeesIndex].ref}</span>
@@ -501,22 +531,23 @@ export default function SacredAcademy({ onNotify }: SacredAcademyProps) {
 
       </div>
 
-      {/* Floating Micro-Notification Toast */}
+      {/* Local floating premium notification toast */}
       <AnimatePresence>
         {localToast && (
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0A0E1A]/95 backdrop-blur-md border border-amber-500/30 p-4 rounded-2xl shadow-xl shadow-amber-950/20 max-w-sm pointer-events-auto"
+            className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0A0E1A]/95 backdrop-blur-md border border-amber-500/30 p-4 rounded-2xl shadow-xl shadow-amber-950/25 max-w-sm pointer-events-auto"
           >
             <div className={`p-1.5 rounded-lg ${localToast.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
-              <Sparkles className="h-4 w-4 animate-pulse" />
+              <Sparkles className="h-4 w-4 animate-bounce" />
             </div>
             <p className="text-xs font-bold text-slate-100 font-sans leading-snug">{localToast.message}</p>
           </motion.div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

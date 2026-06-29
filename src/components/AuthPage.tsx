@@ -36,7 +36,10 @@ import {
   School,
   Cpu,
   Check,
-  Clock
+  Clock,
+  Search,
+  Video,
+  Activity
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, UserRole } from '../types';
@@ -98,6 +101,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const [contactMessage, setContactMessage] = useState('');
   const [activeHeroNode, setActiveHeroNode] = useState<'student' | 'professor' | 'admin' | 'core'>('core');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [heroSearchQuery, setHeroSearchQuery] = useState('');
 
   const categories = [
     { name: "Computer Science", courses: 14, icon: Laptop, color: "bg-blue-50 text-blue-600 border-blue-100", desc: "Algorithms, Python programming, and systems design." },
@@ -484,33 +488,33 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   };
 
   return (
-    <div id="landing_page_root" className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans antialiased overflow-x-hidden">
+    <div id="landing_page_root" className="min-h-screen bg-[#F8FAFC] dark:bg-[#030712] text-slate-800 dark:text-[#F8FAFC] font-sans antialiased overflow-x-hidden transition-colors duration-300">
       
       {/* Premium Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/50 px-4 sm:px-6 lg:px-8 py-4 shadow-xs">
+      <header className="sticky top-0 z-45 bg-white/75 dark:bg-[#030712]/75 backdrop-blur-md border-b border-slate-200/50 dark:border-indigo-500/10 px-4 sm:px-6 lg:px-8 py-4 shadow-xs transition-colors duration-300">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2.5 rounded-2xl text-white shadow-md shadow-blue-500/20">
+            <div className="bg-indigo-600 p-2.5 rounded-2xl text-white shadow-md shadow-indigo-500/20">
               <GraduationCap className="h-6 w-6" />
             </div>
             <div>
-              <p className="font-poppins font-black text-slate-900 tracking-tight text-lg sm:text-xl">Institute LMS</p>
-              <p className="text-[9px] uppercase tracking-widest text-blue-500 font-extrabold">Connected Enterprise Hub</p>
+              <p className="font-poppins font-black text-slate-900 dark:text-white tracking-tight text-lg sm:text-xl">Institute LMS</p>
+              <p className="text-[9px] uppercase tracking-widest text-indigo-500 dark:text-indigo-400 font-extrabold">Connected Enterprise Hub</p>
             </div>
           </div>
-
+ 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-[11px] font-black text-slate-500 uppercase tracking-widest">
-            <a href="#categories" className="hover:text-blue-600 transition-colors">Categories</a>
-            <a href="#courses" className="hover:text-blue-600 transition-colors">Courses</a>
-            <a href="#architecture" className="hover:text-blue-600 transition-colors">Portals</a>
-            <a href="#workflows" className="hover:text-blue-600 transition-colors">Sync Flows</a>
-            <a href="#instructors" className="hover:text-blue-600 transition-colors">Instructors</a>
-            <a href="#pricing" className="hover:text-blue-600 transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-blue-600 transition-colors">FAQ</a>
-            <a href="#blog" className="hover:text-blue-600 transition-colors">Resources</a>
+          <nav className="hidden lg:flex items-center gap-6 text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+            <a href="#categories" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Categories</a>
+            <a href="#courses" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Courses</a>
+            <a href="#architecture" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Portals</a>
+            <a href="#workflows" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Sync Flows</a>
+            <a href="#instructors" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Instructors</a>
+            <a href="#pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Pricing</a>
+            <a href="#faq" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">FAQ</a>
+            <a href="#blog" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Resources</a>
           </nav>
-
+ 
           <div className="flex items-center gap-3">
             <button
               id="header_login_btn"
@@ -518,7 +522,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                 setIsLogin(true);
                 setShowAuthModal(true);
               }}
-              className="px-4 py-2 text-xs uppercase tracking-wider font-extrabold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer"
+              className="px-4 py-2 text-xs uppercase tracking-wider font-extrabold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer"
             >
               Sign In
             </button>
@@ -528,7 +532,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                 setIsLogin(false);
                 setShowAuthModal(true);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-2xl text-xs uppercase tracking-wider font-extrabold shadow-md shadow-blue-200 hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-2xl text-xs uppercase tracking-wider font-extrabold shadow-md shadow-indigo-500/25 hover:shadow-lg hover:scale-[1.01] transition-all cursor-pointer"
             >
               Get Started
             </button>
@@ -537,250 +541,452 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-12 pb-24 sm:pb-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-slate-50/50 overflow-hidden">
-        {/* Soft background aura glows */}
-        <div className="absolute top-1/6 left-1/10 w-96 h-96 bg-blue-100/30 rounded-full filter blur-3xl -z-10 animate-pulse" />
-        <div className="absolute bottom-1/5 right-1/10 w-[500px] h-[500px] bg-indigo-100/40 rounded-full filter blur-3xl -z-10" />
+      <section className="relative min-h-screen pt-16 pb-28 lg:pt-24 lg:pb-36 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-[#030712] overflow-hidden transition-colors duration-300">
+        
+        {/* Futuristic background aura meshes */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-tr from-violet-600/15 to-indigo-600/0 rounded-full filter blur-[120px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-10 right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-cyan-500/10 to-blue-500/0 rounded-full filter blur-[140px] pointer-events-none -z-10" />
+        <div className="absolute top-1/3 right-10 w-96 h-96 bg-amber-500/5 rounded-full filter blur-[100px] pointer-events-none -z-10 animate-pulse" style={{ animationDuration: '12s' }} />
+        
+        {/* Subtle geometric grid backdrop */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-20 pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* Left Column: Headline and description */}
-          <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider border border-blue-100/80">
-              <Sparkles className="h-4 w-4 text-amber-500 animate-spin" style={{ animationDuration: '4s' }} />
-              <span>Real-Time Database Sync Ecosystem</span>
+          {/* Left Column: Headline, subheadline, CTAs, Trust indicators, and Search bar */}
+          <div className="lg:col-span-6 space-y-8 text-left z-10">
+            
+            {/* SaaS Style Premium Floating Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-[#0A0E1A]/80 backdrop-blur-md px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest border border-slate-200 dark:border-indigo-500/30 shadow-lg shadow-indigo-500/5 text-slate-700 dark:text-slate-200">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+              </span>
+              <span className="text-[10px] tracking-[0.15em] font-mono">Real-Time Sync Ecosystem v2.5</span>
+              <div className="h-3.5 w-[1px] bg-slate-300 dark:bg-slate-800" />
+              <span className="text-amber-500 dark:text-amber-400 font-sans flex items-center gap-1">
+                <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+                AI Powered
+              </span>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-poppins font-black text-slate-900 leading-[1.15] tracking-tight">
-              One Connected Learning Platform for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-700">Students, Professors, and Administrators</span>
-            </h1>
+            {/* Captivating Headline */}
+            <div className="space-y-4">
+              <span className="block text-xs uppercase font-black tracking-[0.25em] text-indigo-600 dark:text-indigo-400 font-mono">
+                The Future of Learning Starts Here
+              </span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-poppins font-black text-slate-950 dark:text-white leading-[1.08] tracking-tight">
+                Transform Learning <br />
+                Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-violet-500 to-cyan-500 dark:from-indigo-400 dark:via-purple-400 dark:to-cyan-400 drop-shadow-[0_2px_10px_rgba(99,102,241,0.15)]">Measurable Success</span>
+              </h1>
+            </div>
 
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
-              Manage courses, assignments, attendance, grading, communication, and academic workflows from a single integrated LMS ecosystem. Built with role-based dashboard mirrors syncing instantly across our university cloud database.
+            {/* Subheadline value proposition */}
+            <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl font-semibold">
+              The first cognitive SaaS LMS engineered for institutions demanding perfection. Seamlessly orchestrate courses, dynamic interactive lectures, live recitation check desks, and automated analytics from a single unified server-synchronized hub.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            {/* Interactive Search Bar: "What would you like to learn today?" */}
+            <div className="bg-white dark:bg-[#080C16] p-2 rounded-2xl border border-slate-200 dark:border-indigo-500/25 shadow-xl shadow-slate-200/10 dark:shadow-indigo-950/10 max-w-xl">
+              <div className="flex items-center gap-2">
+                <div className="pl-3 text-slate-400 dark:text-slate-500">
+                  <Search className="h-5 w-5 animate-pulse" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="What would you like to learn today?"
+                  value={heroSearchQuery}
+                  onChange={(e) => setHeroSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none focus:ring-0 text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (heroSearchQuery) {
+                      setError(null);
+                      setLoading(true);
+                      setTimeout(() => {
+                        setLoading(false);
+                        setIsLogin(true);
+                        setShowAuthModal(true);
+                      }, 800);
+                    } else {
+                      setHeroSearchQuery('Introduction to Neural Networks');
+                    }
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold px-4 sm:px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
+                >
+                  Search
+                </button>
+              </div>
+              
+              {/* Category Pills below the Search bar */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/60 pl-2">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mr-1 font-mono">Suggested:</span>
+                {[
+                  { label: "Neural Networks", query: "Advanced Neural Networks" },
+                  { label: "Al-Quran Recitation", query: "Al-Quran: Nazra Recitation" },
+                  { label: "Syllabus Plan", query: "Clinical Syllabus Tracks" },
+                  { label: "Ethical Leadership", query: "Business Leadership" }
+                ].map((pill, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setHeroSearchQuery(pill.query)}
+                    className="text-[9px] font-extrabold text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 bg-slate-100 dark:bg-slate-900/60 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200/60 dark:border-slate-800/80 px-2.5 py-1 rounded-lg transition-all"
+                  >
+                    {pill.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Primary & Secondary Call to Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <button
-                id="hero_get_started"
+                id="hero_get_started_saas"
                 onClick={() => {
                   setIsLogin(false);
                   setShowAuthModal(true);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-7 py-4 rounded-2xl shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="group bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-black px-8 py-4.5 rounded-2xl shadow-lg shadow-indigo-500/25 dark:shadow-indigo-950/40 hover:shadow-xl hover:shadow-indigo-500/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center justify-center gap-3.5 text-sm cursor-pointer border border-indigo-400/25"
               >
-                <span>Get Started Now</span>
-                <ArrowRight className="h-4.5 w-4.5" />
+                <span>Start Free Trial</span>
+                <ArrowRight className="h-5 w-5 text-indigo-200 group-hover:translate-x-1 transition-transform" />
               </button>
               
               <button
-                id="hero_watch_demo"
+                id="hero_watch_demo_saas"
                 onClick={() => setDemoVideoOpen(true)}
-                className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold px-7 py-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                className="group bg-white/65 dark:bg-slate-900/40 hover:bg-slate-50 dark:hover:bg-slate-900/80 border border-slate-200 dark:border-indigo-500/30 text-slate-700 dark:text-slate-200 font-extrabold px-8 py-4.5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-3 text-sm cursor-pointer"
               >
-                <div className="bg-blue-50 p-1.5 rounded-lg text-blue-600">
-                  <Play className="h-4 w-4 fill-blue-600" />
+                <div className="bg-indigo-50 dark:bg-indigo-500/20 p-2 rounded-xl text-indigo-600 dark:text-indigo-300 group-hover:scale-110 transition-transform">
+                  <Play className="h-4.5 w-4.5 fill-current" />
                 </div>
-                <span>Request Demo</span>
+                <span>Watch Demo</span>
               </button>
             </div>
 
-            {/* Quick trust metrics */}
-            <div className="pt-8 border-t border-slate-200/60 max-w-lg">
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">50k+</p>
-                  <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Students</p>
+            {/* Overlapping Student Avatars with success stories */}
+            <div className="flex items-center gap-4 pt-4 text-left">
+              <div className="flex -space-x-3.5 overflow-hidden">
+                <img
+                  className="inline-block h-10 w-10 rounded-full ring-4 ring-white dark:ring-[#030712] object-cover"
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80"
+                  alt="Zayn"
+                />
+                <img
+                  className="inline-block h-10 w-10 rounded-full ring-4 ring-white dark:ring-[#030712] object-cover"
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80"
+                  alt="Aisha"
+                />
+                <img
+                  className="inline-block h-10 w-10 rounded-full ring-4 ring-white dark:ring-[#030712] object-cover"
+                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80"
+                  alt="Malik"
+                />
+                <div className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gradient-to-tr from-amber-500 to-amber-600 ring-4 ring-white dark:ring-[#030712] text-white text-xs font-black">
+                  +12k
                 </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-black text-slate-900">5,000+</p>
-                  <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Professors</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1">
+                  <Check className="h-4 w-4 text-emerald-500 font-black" />
+                  <span>50,000+ Verified Careers Launched</span>
+                </p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold italic">
+                  "Zayn saved 12h/week of syllabus tracking; Aisha ranked Top 1% nationally."
+                </p>
+              </div>
+            </div>
+
+            {/* Trust Indicators Stats cards Grid */}
+            <div className="pt-8 border-t border-slate-200/60 dark:border-slate-800/80 max-w-xl">
+              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] font-mono mb-4 text-left">
+                Trusted globally by elite institutions
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-white/40 dark:bg-slate-900/20 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/60">
+                  <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight font-mono">50k+</p>
+                  <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mt-1">Active Learners</p>
                 </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-black text-[#38B889]">99.9%</p>
-                  <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest mt-1">Uptime Sync</p>
+                <div className="bg-white/40 dark:bg-slate-900/20 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/60">
+                  <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tight font-mono">1,200+</p>
+                  <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mt-1">Institutions</p>
+                </div>
+                <div className="bg-white/40 dark:bg-slate-900/20 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/60">
+                  <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight font-mono">98%</p>
+                  <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mt-1">Complete Rate</p>
+                </div>
+                <div className="bg-white/40 dark:bg-slate-900/20 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/60">
+                  <p className="text-2xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight font-mono">99.9%</p>
+                  <p className="text-[9px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest mt-1">Ecosystem Sync</p>
                 </div>
               </div>
             </div>
+
+            {/* Certifications and standard security badge row */}
+            <div className="flex items-center gap-5 pt-1 text-slate-400 text-[10px] font-bold">
+              <span className="flex items-center gap-1.5">
+                <Shield className="h-4.5 w-4.5 text-emerald-500" /> Enterprise Shield Guarded
+              </span>
+              <span className="h-3 w-[1px] bg-slate-300 dark:bg-slate-800" />
+              <span className="flex items-center gap-1.5">
+                <Globe className="h-4.5 w-4.5 text-indigo-500" /> WCAG 2.2 Global Access
+              </span>
+            </div>
           </div>
 
-                  {/* Right Column: Interactive Ecosystem Hero Illustration */}
-          <div className="lg:col-span-6 relative mt-8 lg:mt-0 flex justify-center">
-            <div className="w-full max-w-[500px] bg-white p-6 sm:p-8 rounded-[24px] shadow-2xl border border-slate-200/40 relative overflow-hidden flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 rounded-full filter blur-xl" />
+          {/* Right Column: Immersive Floating 3D-inspired Dashboard Mockup */}
+          <div className="lg:col-span-6 relative mt-12 lg:mt-0 flex justify-center w-full">
+            
+            {/* Ambient Aura Background glow for the Mockup */}
+            <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-500/15 via-violet-500/10 to-cyan-500/10 rounded-[42px] blur-2xl opacity-80 pointer-events-none -z-10 animate-pulse" />
+            
+            {/* The Main Tilted Canvas Frame */}
+            <div className="w-full max-w-[560px] relative min-h-[500px] flex items-center justify-center">
               
-              <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-100">
-                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-                  Ecosystem State: Connected
-                </span>
-                <span className="bg-blue-50 text-blue-600 font-mono text-[9px] font-bold px-2.5 py-1 rounded-md">
-                  Active Sync
-                </span>
-              </div>
-
-              {/* Interactive Node Guide Banner */}
-              <div className="text-center mb-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                  ⚡ Click or hover any node below to simulate active logs
-                </span>
-              </div>
-
-              {/* Interconnected Nodes Visualizer Map */}
-              <div className="relative py-12 flex flex-col items-center justify-center min-h-[280px]">
-                
-                {/* Central Database Core Node */}
-                <button 
-                  type="button"
-                  onClick={() => setActiveHeroNode('core')}
-                  onMouseEnter={() => setActiveHeroNode('core')}
-                  className={`relative z-20 w-24 h-24 bg-gradient-to-tr from-slate-900 to-slate-800 rounded-3xl shadow-xl flex flex-col items-center justify-center border-4 text-white p-2 text-center transition-all duration-300 cursor-pointer ${
-                    activeHeroNode === 'core' ? 'border-sky-400 scale-105 shadow-sky-200/50' : 'border-white hover:border-slate-400'
-                  }`}
-                >
-                  <div className="absolute -inset-2 bg-blue-500/20 rounded-[28px] filter blur-md animate-pulse" />
-                  <Database className="h-7 w-7 text-blue-400 mb-1" />
-                  <span className="text-[9px] uppercase font-black tracking-widest text-slate-200">LMS CORE</span>
-                  <span className="text-[7px] font-mono text-blue-400">DB INGRESS</span>
-                </button>
-
-                {/* Satellite Portal Node 1: Student Portal (Left) */}
-                <button
-                  type="button"
-                  onClick={() => setActiveHeroNode('student')}
-                  onMouseEnter={() => setActiveHeroNode('student')}
-                  className={`absolute top-0 left-0 z-10 w-32 bg-white p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col gap-1 ${
-                    activeHeroNode === 'student' 
-                      ? 'border-blue-500 shadow-md scale-105 -translate-y-1 bg-blue-50/20' 
-                      : 'border-slate-200/80 hover:border-blue-300 hover:bg-slate-50/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <div className="bg-blue-50 p-1 rounded-lg text-blue-600">
-                      <GraduationCap className="h-3.5 w-3.5" />
-                    </div>
-                    <span className="text-[11px] font-bold text-slate-800">Student Portal</span>
+              {/* LAYER 1: Core Portal Interface (The Main Backdrop Glass Card) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30, rotateX: 12, rotateY: -10 }}
+                animate={{ opacity: 1, y: 0, rotateX: 10, rotateY: -8 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                style={{ transformStyle: 'preserve-3d' }}
+                className="w-full bg-white/70 dark:bg-[#090D1A]/75 backdrop-blur-2xl rounded-[36px] border border-slate-200 dark:border-indigo-500/20 p-6 shadow-2xl shadow-indigo-950/20 overflow-hidden flex flex-col justify-between"
+              >
+                {/* Header elements inside Mockup */}
+                <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-200/50 dark:border-slate-800/60">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+                    <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 ml-2">cognition_engine.ts</span>
                   </div>
-                  <p className="text-[8.5px] text-slate-400 leading-tight">Enrolls lectures, solves dynamic quizzes, and tracks study progress.</p>
-                </button>
+                  <span className="bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 font-mono text-[9px] font-black px-2.5 py-1 rounded-md border border-indigo-100 dark:border-indigo-500/20">
+                    94.8% COGNITIVE SYNC
+                  </span>
+                </div>
 
-                {/* Satellite Portal Node 2: Professor Portal (Right) */}
-                <button
-                  type="button"
-                  onClick={() => setActiveHeroNode('professor')}
-                  onMouseEnter={() => setActiveHeroNode('professor')}
-                  className={`absolute top-0 right-0 z-10 w-32 bg-white p-3 rounded-2xl border text-left transition-all duration-300 cursor-pointer flex flex-col gap-1 ${
-                    activeHeroNode === 'professor' 
-                      ? 'border-emerald-500 shadow-md scale-105 -translate-y-1 bg-emerald-50/20' 
-                      : 'border-slate-200/80 hover:border-emerald-300 hover:bg-slate-50/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <div className="bg-emerald-50 p-1 rounded-lg text-emerald-600">
-                      <BookOpen className="h-3.5 w-3.5" />
+                {/* Simulated Live Lesson Preview Card (Upper Left inside Mockup) */}
+                <div className="space-y-4">
+                  <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-900 border border-slate-800 group shadow-lg">
+                    {/* Unsplash beautiful high-tech abstract learning image */}
+                    <img 
+                      src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" 
+                      alt="AI Neural Lecture" 
+                      className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:opacity-85 transition-opacity"
+                    />
+                    
+                    {/* Glowing Accent Layer */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                    
+                    {/* Video Duration / live indicator */}
+                    <div className="absolute top-3 left-3 bg-red-500/90 text-white font-mono text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-wider animate-pulse flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white inline-block animate-ping" />
+                      Live Stream
                     </div>
-                    <span className="text-[11px] font-bold text-slate-800">Professor Portal</span>
-                  </div>
-                  <p className="text-[8.5px] text-slate-400 leading-tight">Publishes clinical syllabus tracks, records student registers.</p>
-                </button>
-
-                {/* Satellite Portal Node 3: Admin Portal (Bottom) */}
-                <button
-                  type="button"
-                  onClick={() => setActiveHeroNode('admin')}
-                  onMouseEnter={() => setActiveHeroNode('admin')}
-                  className={`absolute bottom-0 z-10 w-36 bg-white p-3 rounded-2xl border text-center transition-all duration-300 cursor-pointer flex flex-col items-center gap-1 ${
-                    activeHeroNode === 'admin' 
-                      ? 'border-indigo-500 shadow-md scale-105 translate-y-1 bg-indigo-50/20' 
-                      : 'border-slate-200/80 hover:border-indigo-300 hover:bg-slate-50/40'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 justify-center">
-                    <div className="bg-indigo-50 p-1 rounded-lg text-indigo-600">
-                      <Shield className="h-3.5 w-3.5" />
+                    
+                    <div className="absolute top-3 right-3 bg-black/65 backdrop-blur-md text-slate-300 font-mono text-[9px] font-bold px-2 py-0.5 rounded border border-slate-800">
+                      42:15 Remaining
                     </div>
-                    <span className="text-[11px] font-bold text-slate-800">Admin Portal</span>
+
+                    {/* Central Play Button Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <button type="button" className="h-12 w-12 rounded-full bg-indigo-600/95 text-white flex items-center justify-center shadow-lg shadow-indigo-500/40 hover:scale-110 active:scale-95 transition-all cursor-pointer">
+                        <Play className="h-5 w-5 fill-current ml-0.5" />
+                      </button>
+                    </div>
+
+                    {/* Bottom Title bar */}
+                    <div className="absolute bottom-3 left-3 right-3 text-left">
+                      <p className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest font-mono">Module 04: Advanced Transformers</p>
+                      <h4 className="text-xs font-black text-white leading-tight mt-0.5">Self-Attention Mechanics and Memory Weights</h4>
+                    </div>
                   </div>
-                  <p className="text-[8.5px] text-slate-400 leading-tight">Coordinates system files, manages users, optimizes server nodes.</p>
-                </button>
 
-                {/* Sync Connector SVG paths with flowing laser dots */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none -z-10" viewBox="0 0 400 300">
-                  {/* Student to Core */}
-                  <path d="M 120 70 L 200 150" stroke="#E2E8F0" strokeWidth="2.5" strokeDasharray="5,5" fill="none" />
-                  <circle r="4.5" fill="#3B82F6">
-                    <animateMotion dur="2s" repeatCount="indefinite" path="M 120 70 L 200 150" />
-                  </circle>
+                  {/* Sound visualizer wave bars inside mockup */}
+                  <div className="bg-slate-100 dark:bg-slate-950/60 p-2 px-3 rounded-xl border border-slate-200/40 dark:border-slate-800/60 flex items-center justify-between">
+                    <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono">Streaming Waveform</span>
+                    <div className="flex gap-0.5 h-4 items-end">
+                      {[6, 12, 16, 8, 14, 22, 10, 18, 6, 12, 15, 8, 14, 20, 12, 16, 6].map((h, i) => (
+                        <div 
+                          key={i} 
+                          className="w-[2.5px] bg-indigo-500 rounded-full animate-bounce" 
+                          style={{ 
+                            height: `${h}px`, 
+                            animationDuration: `${1 + (i % 3) * 0.4}s`,
+                            animationDelay: `${i * 0.05}s` 
+                          }} 
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
-                  {/* Professor to Core */}
-                  <path d="M 280 70 L 200 150" stroke="#E2E8F0" strokeWidth="2.5" strokeDasharray="5,5" fill="none" />
-                  <circle r="4.5" fill="#10B981">
-                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M 280 70 L 200 150" />
-                  </circle>
+                {/* Live collaboration docking indicator */}
+                <div className="mt-4 pt-3 border-t border-slate-200/40 dark:border-slate-800/60 flex items-center justify-between text-left">
+                  <div>
+                    <span className="text-[8.5px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block font-mono">Session Instructors</span>
+                    <span className="text-[11px] font-extrabold text-slate-800 dark:text-slate-200">Dr. Elias Vance &bull; Sarah Jenkins</span>
+                  </div>
+                  <div className="flex -space-x-2">
+                    <div className="w-6 h-6 rounded-full bg-purple-600 text-[8px] font-black text-white flex items-center justify-center border border-white dark:border-[#090D1A]">EV</div>
+                    <div className="w-6 h-6 rounded-full bg-emerald-600 text-[8px] font-black text-white flex items-center justify-center border border-white dark:border-[#090D1A]">SJ</div>
+                    <div className="w-6 h-6 rounded-full bg-cyan-600 text-[8px] font-black text-white flex items-center justify-center border border-white dark:border-[#090D1A]">ZM</div>
+                  </div>
+                </div>
+              </motion.div>
 
-                  {/* Core to Admin */}
-                  <path d="M 200 150 L 200 240" stroke="#E2E8F0" strokeWidth="2.5" strokeDasharray="5,5" fill="none" />
-                  <circle r="4.5" fill="#6366F1">
-                    <animateMotion dur="1.8s" repeatCount="indefinite" path="M 200 150 L 200 240" />
-                  </circle>
-                </svg>
-              </div>
-
-              {/* Dynamic Real-Time Terminal Activity Logs Inspector */}
-              <div className="mt-4 bg-slate-950 text-slate-200 rounded-2xl p-4 shadow-inner text-left font-mono text-[10.5px] space-y-1.5 relative overflow-hidden border border-slate-800">
-                <div className="absolute top-0 right-0 p-1.5 bg-slate-900 border-l border-b border-slate-800 text-[8px] font-black tracking-widest text-slate-500 uppercase flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
-                  <span>Terminal Inspector</span>
+              {/* LAYER 2: Floating Student Progress Analytics Card (Float Left Offset) */}
+              <motion.div
+                initial={{ opacity: 0, x: -60, y: 40 }}
+                animate={{ opacity: 1, x: -50, y: 30 }}
+                transition={{ duration: 1.2, delay: 0.2 }}
+                className="absolute left-[-40px] bottom-[30px] z-25 w-[210px] bg-white/90 dark:bg-[#0A0F1F]/90 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-cyan-500/20 p-4 shadow-xl text-left"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-500 border border-cyan-500/10">
+                    <Activity className="h-4 w-4" />
+                  </span>
+                  <span className="text-[8px] font-mono font-black text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">+24.8% COGNITION</span>
                 </div>
                 
-                {activeHeroNode === 'core' && (
-                  <>
-                    <p className="text-[#38B889] font-black flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-                      &gt; CORE STATE: STANDBY_OPTIMAL
-                    </p>
-                    <p className="text-slate-400">Database Engine: local_file_system (Drizzle SQLite/Memory)</p>
-                    <p className="text-slate-400">Platform Sync: Active (WebSocket proxying bypassed)</p>
-                    <p className="text-slate-400">Gemini LLM Channel: Connected (Model: gemini-2.5-flash)</p>
-                  </>
-                )}
+                <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">Student Analytics</p>
+                <h4 className="text-base font-black text-slate-800 dark:text-slate-100 mt-0.5">86h Focus Time</h4>
+                
+                {/* SVG Beautiful Line Graph representing learning trend */}
+                <div className="h-16 w-full mt-3">
+                  <svg className="w-full h-full" viewBox="0 0 100 40">
+                    <defs>
+                      <linearGradient id="cyanGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.45"/>
+                        <stop offset="100%" stopColor="#06B6D4" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <path 
+                      d="M 0 35 Q 15 25 30 28 T 60 12 T 80 18 T 100 4 L 100 40 L 0 40 Z" 
+                      fill="url(#cyanGrad)" 
+                    />
+                    <path 
+                      d="M 0 35 Q 15 25 30 28 T 60 12 T 80 18 T 100 4" 
+                      fill="none" 
+                      stroke="#06B6D4" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round"
+                    />
+                    {/* Glowing active nodes */}
+                    <circle cx="60" cy="12" r="2.5" fill="#FFF" stroke="#06B6D4" strokeWidth="1.5" />
+                    <circle cx="100" cy="4" r="2.5" fill="#FFF" stroke="#06B6D4" strokeWidth="1.5" />
+                  </svg>
+                </div>
 
-                {activeHeroNode === 'student' && (
-                  <>
-                    <p className="text-blue-400 font-black flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping inline-block" />
-                      &gt; NODE STIMULUS: STUDENT_PORTAL_ACTIVE
-                    </p>
-                    <p className="text-slate-400">User: Zayn Malik (student@university.edu)</p>
-                    <p className="text-slate-400">Recent: Passed quiz "Variables & Types" (Grade: 100%)</p>
-                    <p className="text-slate-400">Sync payload: &#123; attPercentage: 92%, certs: 1 &#125;</p>
-                  </>
-                )}
+                <div className="flex justify-between items-center text-[8.5px] text-slate-400 mt-2 font-mono">
+                  <span>WEEK 1</span>
+                  <span>WEEK 2</span>
+                  <span>WEEK 3</span>
+                </div>
+              </motion.div>
 
-                {activeHeroNode === 'professor' && (
-                  <>
-                    <p className="text-emerald-400 font-black flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping inline-block" />
-                      &gt; NODE STIMULUS: PROFESSOR_PORTAL_ACTIVE
-                    </p>
-                    <p className="text-slate-400">User: Dr. Sarah Jenkins (professor@university.edu)</p>
-                    <p className="text-[#38B889]">Broadcast: Sent answer to Zayn Malik query</p>
-                    <p className="text-slate-400">Sync payload: &#123; coursesCreated: 4, gradingIndex: 100% &#125;</p>
-                  </>
-                )}
+              {/* LAYER 3: Interactive AI Tutor Assistant Widget (Float Top Offset) */}
+              <motion.div
+                initial={{ opacity: 0, y: -50, x: 40 }}
+                animate={{ opacity: 1, y: -40, x: 30 }}
+                transition={{ duration: 1.2, delay: 0.4 }}
+                className="absolute right-[-30px] top-[10px] z-25 w-[240px] bg-gradient-to-b from-[#0B0F19] to-[#060810] rounded-2xl border border-indigo-500/35 p-4 shadow-xl text-left shadow-indigo-950/40 relative overflow-hidden"
+              >
+                {/* Visual grid backdrop inside card */}
+                <div className="absolute inset-0 bg-radial-gradient from-indigo-500/5 to-transparent pointer-events-none" />
+                
+                <div className="flex items-center gap-2 mb-3 relative z-10 pb-2 border-b border-slate-800/60">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-indigo-400">
+                    <Sparkles className="h-4 w-4 animate-pulse" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-extrabold text-indigo-300 font-mono flex items-center gap-1.5">
+                      AI Learning Mentor
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </h5>
+                    <p className="text-[7.5px] text-slate-500 uppercase tracking-widest font-mono">Active Cognition Instance</p>
+                  </div>
+                </div>
 
-                {activeHeroNode === 'admin' && (
-                  <>
-                    <p className="text-indigo-400 font-black flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-ping inline-block" />
-                      &gt; NODE STIMULUS: ADMIN_CONSOLE_ACTIVE
-                    </p>
-                    <p className="text-slate-400">System thread ID: node_main_ingress_0</p>
-                    <p className="text-slate-400">Database Sync: Storage allocation verified</p>
-                    <p className="text-slate-400">Diagnostics: Latency 12ms | Memory 94MB | Storage OK</p>
-                  </>
-                )}
-              </div>
+                {/* Conversation bubbles with Zayn */}
+                <div className="space-y-2.5 relative z-10 text-[10px]">
+                  <div className="bg-slate-900/60 p-2 rounded-xl border border-slate-800 text-slate-300 leading-snug">
+                    <span className="text-[8px] font-black text-indigo-400 block mb-0.5">ZAYN MALIK (STUDENT)</span>
+                    I'm having trouble with self-attention memory weight matrices.
+                  </div>
+                  <div className="bg-indigo-950/40 p-2.5 rounded-xl border border-indigo-500/20 text-slate-100 leading-snug">
+                    <span className="text-[8px] font-black text-amber-400 block mb-0.5 flex items-center gap-1">
+                      <Cpu className="h-3 w-3" /> COGNITION_AI
+                    </span>
+                    Based on your quiz score, review **Local Context Memories** next! Highlight video lesson now?
+                  </div>
+                </div>
 
+                {/* Interactive feedback indicators */}
+                <div className="mt-3 flex gap-2 justify-end relative z-10">
+                  <button type="button" className="text-[8.5px] font-black text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded hover:bg-indigo-500/20 transition">Yes, show</button>
+                  <button type="button" className="text-[8.5px] font-bold text-slate-500 px-1 py-1 hover:text-slate-400">Later</button>
+                </div>
+              </motion.div>
+
+              {/* LAYER 4: Course Completion Gauge with Neon Gold and Sapphire accents (Float Bottom Right Offset) */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, x: 60, y: 60 }}
+                animate={{ opacity: 1, scale: 1, x: 50, y: 50 }}
+                transition={{ duration: 1.2, delay: 0.6 }}
+                className="absolute right-[-45px] bottom-[20px] z-25 w-[190px] bg-white/95 dark:bg-[#0A0D18]/95 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-amber-500/25 p-4 shadow-xl text-left"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">Quran Recitation</span>
+                  <span className="text-[8.5px] font-black text-amber-500 dark:text-amber-400">86% SYLLABUS</span>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  {/* Gauge Arc representation */}
+                  <div className="relative h-11 w-11 flex items-center justify-center shrink-0">
+                    <svg className="h-full w-full rotate-[-90deg]" viewBox="0 0 36 36">
+                      <path
+                        className="text-slate-100 dark:text-slate-800"
+                        strokeWidth="3"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        className="text-amber-500 dark:text-amber-400"
+                        strokeDasharray="86, 100"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                    </svg>
+                    <span className="absolute text-[9px] font-mono font-black text-slate-800 dark:text-white">86%</span>
+                  </div>
+                  <div>
+                    <h5 className="text-[11px] font-black text-slate-800 dark:text-white leading-tight">Al-Quran Recitation</h5>
+                    <p className="text-[8px] text-slate-400 dark:text-slate-500 font-semibold leading-snug mt-0.5">Surah Al-Kahf complete</p>
+                    <p className="text-[8px] text-cyan-500 font-extrabold flex items-center gap-0.5 mt-0.5">
+                      <span className="h-1 w-1 rounded-full bg-cyan-400 animate-ping" /> Live Desk Connected
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* LAYER 5: Hoverable Achievement Badge Medallion (Offset Middle Left float) */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.1, rotateY: 10 }}
+                transition={{ duration: 0.6 }}
+                className="absolute left-[-55px] top-[140px] z-30 bg-gradient-to-br from-amber-400 via-yellow-300 to-amber-500 rounded-2xl p-3 shadow-lg shadow-amber-500/25 border border-amber-300 flex flex-col items-center justify-center w-16 h-16 cursor-pointer"
+              >
+                <Award className="h-7 w-7 text-amber-900 animate-pulse" />
+                <span className="text-[7.5px] font-black text-amber-950 uppercase tracking-widest mt-1 font-mono">Deans Scholar</span>
+              </motion.div>
             </div>
           </div>
         </div>
