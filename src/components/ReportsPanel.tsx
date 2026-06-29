@@ -751,10 +751,10 @@ export default function ReportsPanel({ user, courses = [] }: ReportsPanelProps) 
 
   // Safe fallback if courses are empty
   const finalBarChartData = barChartData.length > 0 ? barChartData : [
-    { name: 'QUR-101', "Completion Rate": 85, "TotalItems": 4, "Type": 'Quizzes', fullName: 'Quran Studies Intro' },
-    { name: 'ARB-201', "Completion Rate": 70, "TotalItems": 5, "Type": 'Quizzes', fullName: 'Arabic Language II' },
-    { name: 'HIS-301', "Completion Rate": 90, "TotalItems": 3, "Type": 'Quizzes', fullName: 'Islamic History' },
-    { name: 'FIQ-401', "Completion Rate": 60, "TotalItems": 2, "Type": 'Quizzes', fullName: 'Islamic Jurisprudence' }
+    { name: 'CS-101', "Completion Rate": 85, "TotalItems": 4, "Type": 'Quizzes', fullName: 'Computer Science Intro' },
+    { name: 'MKT-201', "Completion Rate": 70, "TotalItems": 5, "Type": 'Quizzes', fullName: 'Marketing Management' },
+    { name: 'BUS-301', "Completion Rate": 90, "TotalItems": 3, "Type": 'Quizzes', fullName: 'Business Leadership' },
+    { name: 'ENG-401', "Completion Rate": 60, "TotalItems": 2, "Type": 'Quizzes', fullName: 'Engineering Principles' }
   ];
 
   // Data for Line Chart: Attendance Trends over Time

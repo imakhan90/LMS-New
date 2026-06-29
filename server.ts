@@ -1023,168 +1023,6 @@ const initialCourses: Course[] = [
         ]
       }
     ]
-  },
-  {
-    id: 'course_quran',
-    title: 'Fehm-ul-Quran (Understanding Quran)',
-    code: 'ISL101',
-    description: 'A study course dedicated to the complete Translation, Tafseer, Context, and Application of Quranic verses for ethical leadership.',
-    department: 'Islamic Studies',
-    instructor: 'Dr. Tariq Mahmood',
-    isPublished: true,
-    isQuran: true,
-    modules: [
-      {
-        id: 'cq_m1',
-        title: 'Module 1: Introduction & Structural Context',
-        lessons: [
-          {
-            id: 'cq_l1',
-            title: 'Quran Lesson 1.1: Revelation History & Makki/Madani Distinctions',
-            type: 'video',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-            duration: '08:34',
-            completed: false,
-            progressPercent: 0
-          },
-          {
-            id: 'cq_l1_sub',
-            title: 'Quran Lesson 1.2: Reading Material - Comprehensive History of Preservation',
-            type: 'pdf',
-            pdfUrl: '/documents/isl101_preservation_history.pdf',
-            duration: '15 min read',
-            completed: false
-          },
-          {
-            id: 'cq_l1_q',
-            title: 'Quiz 1.1: Foundations of Quranic Revelation',
-            type: 'quiz',
-            quiz: {
-              id: 'quiz_quran_m1',
-              title: 'Preservation & Context Evaluation',
-              questions: [
-                {
-                  id: 'q_m1_q1',
-                  text: 'What is the key distinguishing thematic characteristic of Makki (revealed in Makkah) Surahs?',
-                  options: [
-                    'Focus on detail-oriented civil laws and transaction rules',
-                    'Focus on basic beliefs, oneness of God (Tawheed), and the Hereafter',
-                    'Emphasis on international treaty declarations',
-                    'Explicit layouts of modern scientific calculations'
-                  ],
-                  correctOptionIndex: 1
-                }
-              ],
-              timeLimit: 120
-            }
-          }
-        ]
-      },
-      {
-        id: 'cq_m2',
-        title: 'Module 2: Translation Core Basics',
-        lessons: [
-          {
-            id: 'cq_l2',
-            title: 'Quran Lesson 2.1: Key Vocabulary and Word-to-Word Meaning',
-            type: 'video',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-            duration: '12:00',
-            completed: false,
-            progressPercent: 0
-          },
-          {
-            id: 'cq_l2_sub',
-            title: 'Quran Lesson 2.2: Standard Arabic Root Word Identification Rules',
-            type: 'pdf',
-            pdfUrl: '/documents/isl101_arabic_roots.pdf',
-            duration: '18 min read',
-            completed: false
-          }
-        ]
-      },
-      {
-        id: 'cq_m3',
-        title: 'Module 3: Tafseer & Historical Context (Asbab al-Nuzul)',
-        lessons: [
-          {
-            id: 'cq_l3',
-            title: 'Quran Lesson 3.1: Surah Al-Asr Detailed Exposition',
-            type: 'video',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-            duration: '09:12',
-            completed: false,
-            progressPercent: 0
-          },
-          {
-            id: 'cq_l4',
-            title: 'Tafseer Reading Handout: Foundations of Surah Al-Asr',
-            type: 'pdf',
-            pdfUrl: '/documents/surah_asr_tafseer.pdf',
-            duration: '20 min read',
-            completed: false
-          }
-        ]
-      },
-      {
-        id: 'cq_m4',
-        title: 'Module 4: Practical Understanding and Code of Conduct',
-        lessons: [
-          {
-            id: 'cq_l5',
-            title: 'Quran Lesson 4.1: Deriving Legal & Ethical Norms for Communities',
-            type: 'video',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            duration: '11:15',
-            completed: false,
-            progressPercent: 0
-          },
-          {
-            id: 'cq_l5_sub',
-            title: 'Quran Lesson 4.2: Guidelines for Self-Purification (Tazkiyah)',
-            type: 'pdf',
-            pdfUrl: '/documents/isl101_tazkiyah.pdf',
-            duration: '14 min read',
-            completed: false
-          }
-        ]
-      },
-      {
-        id: 'cq_m5',
-        title: 'Module 5: Global Assessment & Ethical Certification',
-        lessons: [
-          {
-            id: 'cq_l6',
-            title: 'Graded Assessment: Comprehension & Practical Application of Quranic Ethics',
-            type: 'quiz',
-            quiz: {
-              id: 'quiz_quran_m5',
-              title: 'Quranic Comprehension Final Evaluator',
-              questions: [
-                {
-                  id: 'q_q1',
-                  text: 'According to Surah Al-Asr, which four traits guarantee humanity exemption from loss?',
-                  options: [
-                    'Sincerity, Prayer, Zakat, and Good character',
-                    'Belief, Righteous action, Advising truthful conduct, and Mutual patience',
-                    'Knowledge, Wealth, Kinship, and Fortitude',
-                    'Migration, Supporting distress assistance, Fasting, and Contemplation'
-                  ],
-                  correctOptionIndex: 1
-                },
-                {
-                  id: 'q_q2',
-                  text: 'What terminology designates the historical circumstances or contextual occurrences surrounding the revelation of verses?',
-                  options: ['Tadabbur', 'Asbab al-Nuzul', 'Qira\'at', 'I\'jaz al-Quran'],
-                  correctOptionIndex: 1
-                }
-              ],
-              timeLimit: 180
-            }
-          }
-        ]
-      }
-    ]
   }
 ];
 
@@ -1207,9 +1045,9 @@ const initialLibraryItems: LibraryItem[] = [
   },
   {
     id: 'lib_3',
-    title: 'Surah Al-Asr Tafseer: Comprehensive Exposition',
-    author: 'Prof. Muhammad Abu-Nasr',
-    category: 'Quranic Studies',
+    title: 'Executive Communication & Barbara Minto Principles',
+    author: 'Prof. Marcus Aurelius',
+    category: 'Marketing',
     fileSize: '2.5 MB',
     isBookmarked: true,
     downloadsCount: 220
@@ -1318,14 +1156,6 @@ const defaultDb: DatabaseSchema = {
       watchPercentage: 85,
       lastPosition: 620,
       completed: true
-    },
-    {
-      userId: 'user_student_1',
-      courseId: 'course_quran',
-      lessonId: 'cq_l1',
-      watchPercentage: 95,
-      lastPosition: 480,
-      completed: true
     }
   ],
   attendance: [
@@ -1351,18 +1181,6 @@ const defaultDb: DatabaseSchema = {
       lessonTitle: 'Lesson 2.1: Variables, Types, and Basic Arithmetic',
       date: '2026-06-23',
       watchPercentage: 85,
-      status: 'Present'
-    },
-    {
-      userId: 'user_student_1',
-      userName: 'Zayn Malik',
-      studentId: 'ST-904123',
-      courseId: 'course_quran',
-      courseTitle: 'Fehm-ul-Quran (Understanding Quran)',
-      lessonId: 'cq_l1',
-      lessonTitle: 'Quran Lesson 1.1: Revelation History & Makki/Madani Distinctions',
-      date: '2026-06-24',
-      watchPercentage: 95,
       status: 'Present'
     }
   ],
@@ -2165,13 +1983,13 @@ app.post('/api/ai/chat', async (req, res) => {
 
     if (lower.includes('hardware') || lower.includes('computer science') || lower.includes('cpu')) {
       reply += `Let me explain computer architecture for CS101. The instruction cycle runs in the standard **Fetch-Decode-Execute** cycle:\n1. **Fetch**: The Control Unit gets instructions from the RAM based on the Program Counter.\n2. **Decode**: Instructions are converted into signal codes.\n3. **Execute**: The **ALU** registers carry out calculations.\n\nWhat specific part of hardware registers would you like to explore next?`;
-    } else if (lower.includes('quran') || lower.includes('surah') || lower.includes('asr') || lower.includes('tafseer')) {
-      reply += `In Islamic Studies (ISL101), **Surah Al-Asr** is highly valued for outlining a comprehensive code of ethics in three short verses. \n` +
-               `* **Exposition**: It establishes that Human Time is a depleting resource leading to loss, except for individuals possessing four attributes:\n` +
-               `  1. *Iman* (Unwavering belief)\n` +
-               `  2. *Amal al-Salihat* (Constructive righteous deeds)\n` +
-               `  3. *Tawasaw bi al-Haqq* (Mutual counsel of truth)\n` +
-               `  4. *Tawasaw bi al-Sabr* (Mutual counsel of steadfast patience)\n\nCould I help prepare a practice evaluation on these Tafseer details?`;
+    } else if (lower.includes('marketing') || lower.includes('brand') || lower.includes('minto') || lower.includes('communication')) {
+      reply += `In Marketing and Executive Communication (MKT101), the **Minto Pyramid Principle** is a structured thinking and writing framework. \n` +
+               `* **Exposition**: It establishes that arguments should be presented in a top-down hierarchy:\n` +
+               `  1. *Conclusion*: State your main point or recommendation first.\n` +
+               `  2. *Supporting Pillars*: Group your supporting ideas or arguments logically.\n` +
+               `  3. *Mece*: Ensure information is Mutually Exclusive and Collectively Exhaustive (MECE).\n` +
+               `  4. *Evidence*: Provide quantitative or qualitative facts at the base.\n\nCould I help prepare a practice evaluation on these communication details?`;
     } else if (lower.includes('solid') || lower.includes('software') || lower.includes('design patterns')) {
       reply += `Inside Software Engineering (CS301), **SOLID design principles** represent 5 rules for object-oriented systems:\n` +
                `* **S**ingle Responsibility: A class should have one reason to change.\n` +

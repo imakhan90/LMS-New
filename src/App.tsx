@@ -15,7 +15,6 @@ import AuthPage from './components/AuthPage';
 import Navigation from './components/Navigation';
 import Dashboard from './components/Dashboard';
 import CourseViewer from './components/CourseViewer';
-import QuranSection from './components/QuranSection';
 import DigitalLibrary from './components/DigitalLibrary';
 import ReportsPanel from './components/ReportsPanel';
 import AITutor from './components/AITutor';
@@ -216,22 +215,6 @@ export default function App() {
               transition={{ duration: 0.3, ease: 'easeOut' }}
             >
               <VisaAdmissions user={user} />
-            </motion.div>
-          )}
-
-          {activeTab === 'quran' && (
-            <motion.div
-              key="quran"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-            >
-              <QuranSection 
-                user={user} 
-                courses={courses} 
-                onLaunchCourse={handleLaunchCourse}
-                onLaunchQuiz={handleLaunchQuiz}
-              />
             </motion.div>
           )}
 

@@ -108,7 +108,7 @@ export default function AdminPanel({ user, courses, onRefreshCourses }: AdminPan
   const depts = [
     'Computer Science',
     'Business Administration',
-    'Islamic Studies',
+    'Social Sciences',
     'Electrical Engineering',
     'General Education'
   ];
@@ -280,18 +280,7 @@ export default function AdminPanel({ user, courses, onRefreshCourses }: AdminPan
                   </select>
                 </div>
 
-                <div className="flex items-center gap-2 pt-4">
-                  <input
-                    type="checkbox"
-                    id="isQuranCheck"
-                    checked={isQuran}
-                    onChange={(e) => setIsQuran(e.target.checked)}
-                    className="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500"
-                  />
-                  <label htmlFor="isQuranCheck" className="text-xs font-bold text-slate-600">
-                    Flag as Quran studies module (geometric borders)
-                  </label>
-                </div>
+
               </div>
 
               <button
@@ -310,7 +299,6 @@ export default function AdminPanel({ user, courses, onRefreshCourses }: AdminPan
               <h4 className="text-xs font-extrabold text-slate-500 uppercase tracking-widest">Active Curriculum counts</h4>
               <div className="space-y-1 text-xs text-slate-600">
                 <p>Total Registered Subjects: <span className="font-bold text-slate-800">{courses.length}</span></p>
-                <p>Quran Studies Specializations: <span className="font-bold text-slate-800">{courses.filter(c => c.isQuran).length}</span></p>
               </div>
             </div>
             <div className="bg-sky-50/50 p-4 rounded-2xl flex items-center gap-2 text-xxs text-slate-500">

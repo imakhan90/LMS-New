@@ -208,8 +208,9 @@ export default function InteractiveCalendar({ courses = [], user, onLaunchCourse
       }
 
       // Quiz and Assignment deadlines
-      course.modules.forEach((module, mIdx) => {
-        module.lessons.forEach((lesson, lIdx) => {
+      (course.modules || []).forEach((module, mIdx) => {
+        if (!module) return;
+        (module.lessons || []).forEach((lesson, lIdx) => {
           if (lesson.type === 'quiz' && lesson.quiz) {
             // Assign a stable date based on IDs in current month e.g. day 12, 19, 26 depending on modules
             const designatedDay = Math.min(28, 5 + (idx * 4) + (mIdx * 5) + (lIdx * 2));

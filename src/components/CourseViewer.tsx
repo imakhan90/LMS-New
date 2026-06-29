@@ -327,8 +327,10 @@ export default function CourseViewer({
     if (activeCourseFromDashboard) {
       setSelectedCourse(activeCourseFromDashboard);
       setSelectedLesson(null);
+    } else if (!selectedCourse && courses && courses.length > 0) {
+      setSelectedCourse(courses[0]);
     }
-  }, [activeCourseFromDashboard]);
+  }, [activeCourseFromDashboard, courses, selectedCourse]);
 
   // Load resume/continue watching playback position if present
   useEffect(() => {
@@ -571,6 +573,14 @@ export default function CourseViewer({
     }, 400);
   };
 
+  if (!selectedCourse) {
+    return (
+      <div className="flex justify-center items-center h-48 animate-pulse text-[#38B889] font-bold">
+        Studying academic syllabus catalog tracks...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Subject and modules browser selection */}
@@ -690,7 +700,7 @@ export default function CourseViewer({
                         className="mt-1 block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 bg-white"
                       >
                         <option value="">Select Module...</option>
-                        {selectedCourse.modules.map(m => (
+                        {(selectedCourse.modules || []).map(m => (
                           <option key={m.id} value={m.id}>{m.title}</option>
                         ))}
                       </select>
@@ -1132,7 +1142,7 @@ export default function CourseViewer({
                             <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: '12%' }} />
                           </div>
                           <p className="text-[10px] text-slate-400">
-                            1 of {selectedCourse.modules.reduce((acc, m) => acc + (m.lessons || []).length, 0)} lectures completed. Select a lesson from the syllabus accordion to start studying.
+                            1 of {(selectedCourse.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0)} lectures completed. Select a lesson from the syllabus accordion to start studying.
                           </p>
                         </div>
 
@@ -1236,7 +1246,7 @@ export default function CourseViewer({
                           className="bg-white border border-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-sky-500 text-slate-600 font-semibold"
                         >
                           <option value="General">General Inquiries</option>
-                          {selectedCourse.modules.map(m => (
+                          {(selectedCourse.modules || []).map(m => (
                             <option key={m.id} value={m.title.substring(0, 15) + '...'}>{m.title.substring(0, 25)}</option>
                           ))}
                         </select>
@@ -1816,7 +1826,7 @@ export default function CourseViewer({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <h4 className="text-base font-bold text-slate-800">Curriculum Syllabus</h4>
               <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full text-center">
-                Total: {selectedCourse.modules.reduce((acc, m) => acc + (m.lessons || []).length, 0)} Lectures
+                Total: {(selectedCourse.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0)} Lectures
               </span>
             </div>
 
@@ -1849,8 +1859,8 @@ export default function CourseViewer({
 
             <div className="space-y-4">
               {/* Check if any modules matched the search query */}
-              {selectedCourse.modules.filter(mod => 
-                mod.lessons.some(les => {
+              {(selectedCourse.modules || []).filter(mod => 
+                (mod.lessons || []).some(les => {
                   const matchesSearch = les.title.toLowerCase().includes(syllabusSearch.toLowerCase());
                   const matchesType = syllabusTypeFilter === 'all' || les.type === syllabusTypeFilter;
                   return matchesSearch && matchesType;
@@ -1866,8 +1876,8 @@ export default function CourseViewer({
                   </button>
                 </div>
               ) : (
-                selectedCourse.modules.map(mod => {
-                  const filteredLessons = mod.lessons.filter(les => {
+                (selectedCourse.modules || []).map(mod => {
+                  const filteredLessons = (mod.lessons || []).filter(les => {
                     const matchesSearch = les.title.toLowerCase().includes(syllabusSearch.toLowerCase());
                     const matchesType = syllabusTypeFilter === 'all' || les.type === syllabusTypeFilter;
                     return matchesSearch && matchesType;

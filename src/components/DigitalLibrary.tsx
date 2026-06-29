@@ -94,12 +94,7 @@ export default function DigitalLibrary({ user, initialSearchTerm, onClearInitial
     setActivePreviewPage(0);
     
     // Dynamically generate simulated book chapters based on Category
-    if (item.category === 'Quranic Studies') {
-      setPreviewPages([
-        'SURAH AL-ASR CLASSICAL COMMENTARIES\n\nChapter 1: History and Revelation\nSurah Al-Asr was revealed in Makkah. It outlines the code of success. Life represents a trading commodity where Time itself is the capital.',
-        'Chapter 2: Mutual Counsel of Truth\nBelief must translate directly into constructive righteousness. This manifests as advising others to adhere to the core TRUTH under all conditions.'
-      ]);
-    } else if (item.category === 'Software Engineering' || item.category === 'Computer Science') {
+    if (item.category === 'Software Engineering' || item.category === 'Computer Science') {
       setPreviewPages([
         'DEVELOPER PARADIGMS MANUAL\n\nChapter 1: The Principle of Least Astonishment\nDesigning software modules implies high cohesiveness. A class should encapsulate one cohesive domain behavior.',
         'Chapter 2: Decoupled Architectural Boundaries\nInject interfaces at logical borders. High-level orchestrators must remain decoupled from specific infrastructure database configurations.'
@@ -147,7 +142,7 @@ export default function DigitalLibrary({ user, initialSearchTerm, onClearInitial
     }));
   };
 
-  const categories = ['All', 'Computer Science', 'Software Engineering', 'Quranic Studies', 'Marketing', 'Educational Technology'];
+  const categories = ['All', 'Computer Science', 'Software Engineering', 'Marketing', 'Educational Technology'];
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) || 

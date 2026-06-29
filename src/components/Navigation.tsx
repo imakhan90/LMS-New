@@ -97,7 +97,6 @@ export default function Navigation({
     { id: 'courses', label: 'Academic Courses', icon: BookOpen, roles: ['student', 'professor', 'admin'] },
     { id: 'visa-admissions', label: 'Visa & Admissions', icon: Globe, roles: ['student', 'professor', 'admin'] },
     { id: 'calendar', label: 'Academic Calendar', icon: Calendar, roles: ['student', 'professor', 'admin'] },
-    { id: 'quran', label: 'Fehm-ul-Quran', icon: Compass, roles: ['student', 'professor', 'admin'] },
     { id: 'library', label: 'Digital Library', icon: Library, roles: ['student', 'professor', 'admin'] },
     { id: 'reports', label: 'Reports & Grades', icon: FileText, roles: ['student', 'professor', 'admin'] },
     { id: 'ai-tutor', label: 'AI Study Assistant', icon: Bot, roles: ['student', 'professor', 'admin'] },
@@ -173,8 +172,10 @@ export default function Navigation({
 
     // 2. Dynamic lessons of type "quiz" in courses
     (courses || []).forEach(course => {
-      course.modules.forEach(m => {
-        m.lessons.forEach(l => {
+      if (!course) return;
+      (course.modules || []).forEach(m => {
+        if (!m) return;
+        (m.lessons || []).forEach(l => {
           if (l.type === 'quiz' && l.quiz) {
             list.push({
               id: `asg_quiz_${l.quiz.id}`,
@@ -391,12 +392,8 @@ export default function Navigation({
             {visibleMenuItems.map((item) => {
                const IconComponent = item.icon;
                const isTabActive = activeTab === item.id;
-               const isQuran = item.id === 'quran';
                
                let activeClasses = 'bg-blue-50 text-blue-700 shadow-sm border border-blue-100/20 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
-               if (isQuran) {
-                 activeClasses = 'bg-amber-50 text-amber-700 shadow-sm border border-amber-100/20 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20';
-               }
 
                return (
                  <button
@@ -409,7 +406,7 @@ export default function Navigation({
                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
                    }`}
                  >
-                   <IconComponent className={`h-4 w-4 md:h-5 md:w-5 ${isTabActive ? (isQuran ? 'text-amber-600' : 'text-blue-600') : 'text-slate-400 dark:text-slate-500'}`} />
+                   <IconComponent className={`h-4 w-4 md:h-5 md:w-5 ${isTabActive ? 'text-blue-600' : 'text-slate-400 dark:text-slate-500'}`} />
                    <span className="truncate">{item.label}</span>
                  </button>
                );

@@ -102,7 +102,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
   const categories = [
     { name: "Computer Science", courses: 14, icon: Laptop, color: "bg-blue-50 text-blue-600 border-blue-100", desc: "Algorithms, Python programming, and systems design." },
     { name: "Business Administration", courses: 8, icon: TrendingUp, color: "bg-emerald-50 text-emerald-600 border-emerald-100", desc: "Corporate communications, management, and marketing." },
-    { name: "Islamic Studies", courses: 6, icon: BookMarked, color: "bg-amber-50 text-amber-600 border-amber-100", desc: "Translation, Tafseer, and ethics of Quranic studies." },
+    { name: "Social Sciences", courses: 6, icon: BookMarked, color: "bg-amber-50 text-amber-600 border-amber-100", desc: "Sociology, global ethics, and community leadership models." },
     { name: "Electrical Engineering", courses: 11, icon: Cpu, color: "bg-indigo-50 text-indigo-600 border-indigo-100", desc: "Microprocessors, circuit boards, and logical gates." },
     { name: "General Education", courses: 19, icon: School, color: "bg-purple-50 text-purple-600 border-purple-100", desc: "Academic writing, logic, and global history studies." }
   ];
@@ -133,19 +133,6 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
       reviews: 840,
       badge: "Professional Elective",
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=90&w=1000"
-    },
-    {
-      id: "course_quran",
-      title: "Fehm-ul-Quran (Understanding Quran)",
-      code: "ISL101",
-      desc: "A beautifully structured course dedicated to Translation, Tafseer, semantic Arabic root words, and ethical community leadership.",
-      instructor: "Dr. Tariq Mahmood",
-      creditHours: 2,
-      durationWeeks: 16,
-      rating: 4.9,
-      reviews: 2150,
-      badge: "Ethics Specialization",
-      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=90&w=1000"
     }
   ];
 
@@ -197,12 +184,12 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
       image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=90&w=1000"
     },
     {
-      title: "Semantic Arabic Roots: Preserving Sacred Texts in the Cloud",
-      category: "Theology & Tech",
+      title: "Clean Architecture: Scaling Modern Web Platforms",
+      category: "Software Tech",
       date: "June 12, 2026",
       readTime: "6 min read",
-      desc: "How digitized translation tools utilize root verb groupings to maintain accuracy and context in modern Quranic tafseer engines.",
-      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=90&w=1000"
+      desc: "How modular design and micro-frontends enable teams to scale web applications seamlessly without tight component coupling.",
+      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=90&w=1000"
     }
   ];
 
@@ -673,7 +660,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
                     </div>
                     <span className="text-[11px] font-bold text-slate-800">Student Portal</span>
                   </div>
-                  <p className="text-[8.5px] text-slate-400 leading-tight">Enrolls lectures, solves dynamic quizzes, logs Quran readings.</p>
+                  <p className="text-[8.5px] text-slate-400 leading-tight">Enrolls lectures, solves dynamic quizzes, and tracks study progress.</p>
                 </button>
 
                 {/* Satellite Portal Node 2: Professor Portal (Right) */}
@@ -2071,7 +2058,7 @@ export default function AuthPage({ onLoginSuccess }: AuthPageProps) {
               <ul className="space-y-2.5 text-xs text-slate-500">
                 <li><a href="#" className="hover:text-white transition-colors">Computer Science CS101</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Business Administration BUS102</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Theological Studies QURAN101</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Digital Marketing MKT101</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">General Curricula</a></li>
               </ul>
             </div>

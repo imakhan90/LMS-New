@@ -548,11 +548,11 @@ export default function AITutor({ user, courses, initialPrompt, onClearInitialPr
               </button>
 
               <button
-                onClick={() => handleTriggerQuizGeneration('Surah Al-Asr Commentary')}
+                onClick={() => handleTriggerQuizGeneration('Minto Pyramid Principle')}
                 className="w-full text-left p-3 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs font-semibold flex items-start gap-2.5 transition"
               >
                 <BookOpen className="h-4 w-4 text-emerald-500 mt-0.5" />
-                <span>Quiz on Quran Ethics</span>
+                <span>Quiz on Business Communication</span>
               </button>
             </div>
 

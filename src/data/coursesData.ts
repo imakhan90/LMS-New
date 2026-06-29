@@ -911,67 +911,6 @@ export function getInitialCourses(): Course[] {
           ]
         }
       ]
-    },
-    {
-      id: 'course_quran',
-      title: 'Fehm-ul-Quran (Understanding Quran)',
-      code: 'ISL101',
-      description: 'A study course dedicated to the complete Translation, Tafseer, Context, and Application of Quranic verses for ethical leadership.',
-      department: 'Islamic Studies',
-      instructor: 'Dr. Tariq Mahmood',
-      isPublished: true,
-      isQuran: true,
-      creditHours: 2,
-      prerequisites: ['None'],
-      learningOutcomes: [
-        'Understand historical preservation of Quranic scriptures.',
-        'Extract root Arabic vocabulary meanings for core directives.',
-        'Expose lessons from Surah Al-Asr on community preservation.',
-        'Adopt tazkiyah (self-purification) and character standards.'
-      ],
-      durationWeeks: 16,
-      modules: [
-        {
-          id: 'cq_m1',
-          title: 'Module 1: Preservation & History of Revelation',
-          lessons: [
-            { id: 'cq_l1', title: 'Quran Lesson 1.1: Context of Revelation, Makki vs Madani classifications', type: 'video', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', duration: '08:34', completed: false, progressPercent: 0 },
-            { id: 'cq_l1_sub', title: 'Quran Lesson 1.2: Reading Material - Comprehensive History of Preservation', type: 'pdf', pdfUrl: '/documents/isl101_preservation_history.pdf', duration: '15 min read', completed: false },
-            { id: 'cq_l1_q', title: 'Quiz 1.1: Foundations of Quranic Revelation', type: 'quiz', quiz: { id: 'quiz_quran_m1', title: 'Preservation & Context Evaluation', questions: [{ id: 'q_m1_q1', text: "What is the key distinguishing thematic characteristic of Makki (revealed in Makkah) Surahs?", options: ["Focus on detail-oriented civil laws and transaction rules", "Focus on basic beliefs, oneness of God (Tawheed), and the Hereafter", "Emphasis on international treaty declarations", "Explicit layouts of modern scientific calculations"], correctOptionIndex: 1 }], timeLimit: 120 } }
-          ]
-        },
-        {
-          id: 'cq_m2',
-          title: 'Module 2: Arabic Vocabulary & Syntax',
-          lessons: [
-            { id: 'cq_l2', title: 'Quran Lesson 2.1: Semantic root analysis of critical keywords in Surahs', type: 'video', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', duration: '12:00', completed: false, progressPercent: 0 },
-            { id: 'cq_l2_sub', title: 'Quran Lesson 2.2: Standard Arabic Root Word Identification Rules', type: 'pdf', pdfUrl: '/documents/isl101_arabic_roots.pdf', duration: '18 min read', completed: false }
-          ]
-        },
-        {
-          id: 'cq_m3',
-          title: 'Module 3: Analytical Study of Surah Al-Asr',
-          lessons: [
-            { id: 'cq_l3', title: 'Quran Lesson 3.1: Surah Al-Asr Detailed Exposition', type: 'video', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4', duration: '09:12', completed: false, progressPercent: 0 },
-            { id: 'cq_l4', title: 'Quran Lesson 3.2: Reading Material - Tafseer Al-Asr: The Code of Human Success', type: 'pdf', pdfUrl: '/documents/surah_asr_tafseer.pdf', duration: '20 min read', completed: false }
-          ]
-        },
-        {
-          id: 'cq_m4',
-          title: 'Module 4: Practical Understanding and Code of Conduct',
-          lessons: [
-            { id: 'cq_l5', title: 'Quran Lesson 4.1: Deriving Legal & Ethical Norms for Communities', type: 'video', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', duration: '11:15', completed: false, progressPercent: 0 },
-            { id: 'cq_l5_sub', title: 'Quran Lesson 4.2: Guidelines for Self-Purification (Tazkiyah)', type: 'pdf', pdfUrl: '/documents/isl101_tazkiyah.pdf', duration: '14 min read', completed: false }
-          ]
-        },
-        {
-          id: 'cq_m5',
-          title: 'Module 5: Global Assessment & Ethical Certification',
-          lessons: [
-            { id: 'cq_l6', title: 'Graded Assessment: Comprehension & Practical Application of Quranic Ethics', type: 'quiz', quiz: { id: 'quiz_quran_m5', title: 'Quranic Comprehension Final Evaluator', questions: [{ id: 'q_q1', text: "According to Surah Al-Asr, which four traits guarantee humanity exemption from loss?", options: ["Sincerity, Prayer, Zakat, and Good character", "Belief, Righteous action, Advising truthful conduct, and Mutual patience", "Knowledge, Wealth, Kinship, and Fortitude", "Migration, Supporting distress assistance, Fasting, and Contemplation"], correctOptionIndex: 1 }, { id: 'q_q2', text: "What terminology designates the historical circumstances or contextual occurrences surrounding the revelation of verses?", options: ["Tadabbur", "Asbab al-Nuzul", "Qira'at", "I'jaz al-Quran"], correctOptionIndex: 1 }], timeLimit: 180 } }
-          ]
-        }
-      ]
     }
   ];
 }
