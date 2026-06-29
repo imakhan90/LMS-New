@@ -41,6 +41,7 @@ import {
 } from 'recharts';
 import { User, Course, AttendanceRecord, QuizAttempt, Certificate } from '../../types';
 import SacredAcademy from '../SacredAcademy';
+import VideoLectureModule from '../VideoLectureModule';
 
 interface StudentDashboardProps {
   user: User;
@@ -594,10 +595,26 @@ export default function StudentDashboard({
             Religious Studies & Sacred Academy
           </h2>
           <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
-            Track Surahs mastered, request Live Recitation checks with certified instructors, and complete categorized Hadees paths.
+            Track Surahs mastered, request Live Recitation checks with certified instructors, and complete categorized Hadees paths with sapphire and gold accents.
           </p>
         </div>
         <SacredAcademy />
+      </div>
+
+      {/* 6. SYLLABUS VIDEO LECTURE BROADCAST ROOM */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
+        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 text-left">
+          <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xxs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider font-mono border border-indigo-500/20">
+            Syllabus Video Broadcast Room
+          </span>
+          <h2 className="text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-2">
+            Video Lectures & AI Subtitle Search
+          </h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
+            Stream high-fidelity recorded syllabus lectures, write time-locked bookmarks, and search spoken words with real-time AI transcripts.
+          </p>
+        </div>
+        <VideoLectureModule role="student" />
       </div>
 
     </div>

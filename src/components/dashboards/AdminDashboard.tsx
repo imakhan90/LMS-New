@@ -38,6 +38,8 @@ import {
   CartesianGrid
 } from 'recharts';
 import { User, Course, AttendanceRecord, QuizAttempt } from '../../types';
+import SacredAcademy from '../SacredAcademy';
+import VideoLectureModule from '../VideoLectureModule';
 
 interface AdminDashboardProps {
   user: User;
@@ -473,6 +475,38 @@ export default function AdminDashboard({
           </div>
         </div>
 
+      </div>
+
+      {/* SACRED ACADEMY / RELIGIOUS STUDIES EXECUTIVE MONITOR */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
+        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 text-left">
+          <span className="bg-amber-500/10 text-amber-500 dark:text-amber-400 text-xxs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider font-mono border border-amber-500/20">
+            Sacred Al-Quran & Hadees (Institutional Monitor)
+          </span>
+          <h2 className="text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-2">
+            Religious Studies & Sacred Academy
+          </h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
+            Global metrics for recitation mastery progress, Qari consultation desks, and ethical Hadees path participation.
+          </p>
+        </div>
+        <SacredAcademy />
+      </div>
+
+      {/* SYLLABUS VIDEO LECTURE CDN & BANDWIDTH MONITOR */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
+        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 text-left">
+          <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xxs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider font-mono border border-indigo-500/20">
+            Syllabus Video Broadcast Room
+          </span>
+          <h2 className="text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-2">
+            Video Lectures & CDN Infrastructure Control
+          </h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
+            Institutional control of active video feeds, CDN bandwidth delivery metrics, and real-time transcribing services.
+          </p>
+        </div>
+        <VideoLectureModule role="admin" />
       </div>
 
     </div>

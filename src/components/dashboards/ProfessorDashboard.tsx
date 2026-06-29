@@ -35,6 +35,8 @@ import {
   CartesianGrid
 } from 'recharts';
 import { User, Course, AttendanceRecord, QuizAttempt, OfficeHourSlot } from '../../types';
+import SacredAcademy from '../SacredAcademy';
+import VideoLectureModule from '../VideoLectureModule';
 
 interface ProfessorDashboardProps {
   user: User;
@@ -602,6 +604,38 @@ export default function ProfessorDashboard({
           </div>
         </div>
 
+      </div>
+
+      {/* SACRED ACADEMY / RELIGIOUS STUDIES INSTRUCTOR VIEW */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
+        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 text-left">
+          <span className="bg-amber-500/10 text-amber-500 dark:text-amber-400 text-xxs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider font-mono border border-amber-500/20">
+            Sacred Al-Quran & Hadees (Instructor View)
+          </span>
+          <h2 className="text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-2">
+            Religious Studies & Sacred Academy
+          </h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
+            Review student Nazra Recitations, manage makhraj pronunciation guides, and review authentic Hadees pathways.
+          </p>
+        </div>
+        <SacredAcademy />
+      </div>
+
+      {/* SYLLABUS VIDEO LECTURE PUBLISHER & BROADCASTER */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-[32px] p-6 shadow-sm">
+        <div className="border-b border-slate-100 dark:border-slate-800/80 pb-4 mb-6 text-left">
+          <span className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xxs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider font-mono border border-indigo-500/20">
+            Syllabus Video Broadcast Room
+          </span>
+          <h2 className="text-2xl font-black font-poppins text-slate-900 dark:text-white tracking-tight mt-2">
+            Video Lectures & AI Subtitle Publisher
+          </h2>
+          <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">
+            Upload course video content to CDN, review video streams, and configure transcripts.
+          </p>
+        </div>
+        <VideoLectureModule role="professor" />
       </div>
 
     </div>
