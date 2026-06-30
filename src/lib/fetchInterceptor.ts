@@ -283,7 +283,34 @@ const customFetch = async function (input: RequestInfo | URL, init?: RequestInit
   }
 };
 
-// Attempt to overwrite via standard property definition to bypass getter-only constraints
+// Attempt to overwrite fetch on the Window prototype to cleanly shadow/bypass the getter-only constraint.
+// In modern browsers and Proxy wrappers, fetch is a getter-only property on the window instance or its prototype.
+// Redefining it on Window.prototype or window.constructor.prototype allows all fetch calls to cleanly resolve to our custom interceptor.
+try {
+  if (typeof Window !== 'undefined' && Window.prototype) {
+    Object.defineProperty(Window.prototype, 'fetch', {
+      value: customFetch,
+      writable: true,
+      configurable: true
+    });
+  }
+} catch (e) {
+  console.warn('[LMS Gateway] Object.defineProperty on Window.prototype.fetch failed:', e);
+}
+
+try {
+  if (typeof window !== 'undefined' && window.constructor && window.constructor.prototype) {
+    Object.defineProperty(window.constructor.prototype, 'fetch', {
+      value: customFetch,
+      writable: true,
+      configurable: true
+    });
+  }
+} catch (e) {
+  console.warn('[LMS Gateway] Object.defineProperty on window.constructor.prototype.fetch failed:', e);
+}
+
+// As an additional backup, attempt to define on the window instance itself (wrapped safely, NEVER using direct assignment)
 try {
   Object.defineProperty(window, 'fetch', {
     value: customFetch,
@@ -291,12 +318,7 @@ try {
     configurable: true
   });
 } catch (e) {
-  console.warn('[LMS Gateway] Object.defineProperty on window.fetch failed, trying direct assignment:', e);
-  try {
-    window.fetch = customFetch;
-  } catch (err2) {
-    console.error('[LMS Gateway] Unable to intercept window.fetch directly:', err2);
-  }
+  console.warn('[LMS Gateway] Object.defineProperty on window.fetch failed:', e);
 }
 
 try {
