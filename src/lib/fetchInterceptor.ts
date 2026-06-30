@@ -257,15 +257,40 @@ async function isBackendUnreachable(): Promise<boolean> {
   return backendCheckResult;
 }
 
+// Helper to check if a URL is an API route (handles relative and absolute URLs across domains)
+function isApiUrl(urlStr: string): boolean {
+  if (urlStr.startsWith('/api/')) {
+    return true;
+  }
+  try {
+    const url = new URL(urlStr, window.location.href);
+    return url.pathname.startsWith('/api/');
+  } catch (e) {
+    return urlStr.includes('/api/');
+  }
+}
+
 // Override window.fetch with self-healing routing using a robust definition method
 const customFetch = async function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   const urlStr = typeof input === 'string' ? input : (input instanceof URL ? input.toString() : input.url);
+  const isApi = isApiUrl(urlStr);
   
+  // Extract pathname for consistent mapping in handleMockRequest (e.g. '/api/auth/login')
+  let cleanPath = urlStr;
+  if (isApi) {
+    try {
+      const parsed = new URL(urlStr, window.location.href);
+      cleanPath = parsed.pathname;
+    } catch (e) {
+      // Keep original as fallback
+    }
+  }
+
   // Only intercept requests directed to our Express /api endpoints
-  if (urlStr.startsWith('/api/')) {
+  if (isApi) {
     const unreachable = await isBackendUnreachable();
     if (unreachable) {
-      return handleMockRequest(urlStr, init);
+      return handleMockRequest(cleanPath, init);
     }
   }
   
@@ -275,9 +300,9 @@ const customFetch = async function (input: RequestInfo | URL, init?: RequestInit
     return response;
   } catch (err) {
     // Self-healing fallback if the call throws a network error at runtime
-    if (urlStr.startsWith('/api/')) {
+    if (isApi) {
       console.warn(`[LMS Gateway] Connection failed. Initiating instant in-browser fallback for: ${urlStr}`);
-      return handleMockRequest(urlStr, init);
+      return handleMockRequest(cleanPath, init);
     }
     throw err;
   }
