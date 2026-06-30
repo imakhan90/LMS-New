@@ -261,37 +261,45 @@ const jsonResponse = (data: any, status: number = 200) => {
 // Interceptor logic
 let originalFetch = (typeof window !== 'undefined' ? window.fetch : null) || (typeof globalThis !== 'undefined' ? globalThis.fetch : null) || (() => { throw new Error('No native fetch found'); });
 let backendCheckResult: boolean | null = null;
+let backendCheckPromise: Promise<boolean> | null = null;
 
 // Probe to check if Express backend is running and healthy
 async function isBackendUnreachable(): Promise<boolean> {
   if (backendCheckResult !== null) {
     return backendCheckResult;
   }
+  if (backendCheckPromise) {
+    return backendCheckPromise;
+  }
   
-  // Fast check: If we are on a known static hosting domain like vercel.app, netlify.app, github.io, we are always offline.
-  if (typeof window !== 'undefined') {
-    const hn = window.location.hostname;
-    if (hn.endsWith('.vercel.app') || hn.endsWith('.netlify.app') || hn.endsWith('.github.io') || hn.endsWith('.amplifyapp.com')) {
-      backendCheckResult = true;
-      console.log(`[LMS Gateway] Detected static hosting domain (${hn}). Instantly enabling In-Browser Database Fallback.`);
-      return true;
+  backendCheckPromise = (async () => {
+    // Fast check: If we are on a known static hosting domain like vercel.app, netlify.app, github.io, we are always offline.
+    if (typeof window !== 'undefined') {
+      const hn = window.location.hostname;
+      if (hn.endsWith('.vercel.app') || hn.endsWith('.netlify.app') || hn.endsWith('.github.io') || hn.endsWith('.amplifyapp.com')) {
+        backendCheckResult = true;
+        console.log(`[LMS Gateway] Detected static hosting domain (${hn}). Instantly enabling In-Browser Database Fallback.`);
+        return true;
+      }
     }
-  }
 
-  try {
-    const response = await originalFetch('/api/courses');
-    const contentType = response.headers.get('content-type');
-    // If we get an active JSON response, backend is healthy!
-    if (response.ok && contentType && contentType.includes('application/json')) {
-      backendCheckResult = false;
-    } else {
+    try {
+      const response = await originalFetch('/api/courses');
+      const contentType = response.headers.get('content-type');
+      // If we get an active JSON response, backend is healthy!
+      if (response.ok && contentType && contentType.includes('application/json')) {
+        backendCheckResult = false;
+      } else {
+        backendCheckResult = true;
+      }
+    } catch (err) {
       backendCheckResult = true;
     }
-  } catch (err) {
-    backendCheckResult = true;
-  }
-  console.log(`[LMS Gateway] Auto-detected environment: ${backendCheckResult ? 'OFFLINE (Activating In-Browser DB Fallback)' : 'ONLINE (Connecting to Express Server)'}`);
-  return backendCheckResult;
+    console.log(`[LMS Gateway] Auto-detected environment: ${backendCheckResult ? 'OFFLINE (Activating In-Browser DB Fallback)' : 'ONLINE (Connecting to Express Server)'}`);
+    return backendCheckResult;
+  })();
+
+  return backendCheckPromise;
 }
 
 // Helper to check if a URL is an API route (handles relative and absolute URLs across domains)
@@ -334,11 +342,23 @@ const customFetch = async function (input: RequestInfo | URL, init?: RequestInit
   // Normal routing to native originalFetch for active containers
   try {
     const response = await originalFetch(input, init);
+    
+    // Self-healing fallback if the live server returns an HTML error page (like 502, 503, 504, 404 HTML) instead of JSON
+    if (isApi) {
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn(`[LMS Gateway] Live API returned non-JSON response (${contentType || 'none'}). Falling back to In-Browser Database for: ${urlStr}`);
+        backendCheckResult = true;
+        return handleMockRequest(cleanPath, init);
+      }
+    }
+    
     return response;
   } catch (err) {
     // Self-healing fallback if the call throws a network error at runtime
     if (isApi) {
       console.warn(`[LMS Gateway] Connection failed. Initiating instant in-browser fallback for: ${urlStr}`);
+      backendCheckResult = true;
       return handleMockRequest(cleanPath, init);
     }
     throw err;
