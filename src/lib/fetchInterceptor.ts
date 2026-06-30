@@ -200,26 +200,52 @@ const getInitialDbState = (): MockDatabase => {
   };
 };
 
-// Retrieve db from localStorage
+// Safe storage getters and setters
+const getSavedDbString = (): string | null => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      return localStorage.getItem(DB_KEY);
+    }
+  } catch (e) {
+    console.warn('[LMS Gateway] localStorage is not accessible. Using in-memory store instead.', e);
+  }
+  return (typeof window !== 'undefined' ? (window as any).__lmsInMemoryDbStr : null) || null;
+};
+
+const setSavedDbString = (val: string) => {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(DB_KEY, val);
+      return;
+    }
+  } catch (e) {
+    // Fall back to in-memory below
+  }
+  if (typeof window !== 'undefined') {
+    (window as any).__lmsInMemoryDbStr = val;
+  }
+};
+
+// Retrieve db from localStorage or in-memory fallback
 const getMockDb = (): MockDatabase => {
-  const dbStr = localStorage.getItem(DB_KEY);
+  const dbStr = getSavedDbString();
   if (!dbStr) {
     const defaultDb = getInitialDbState();
-    localStorage.setItem(DB_KEY, JSON.stringify(defaultDb));
+    setSavedDbString(JSON.stringify(defaultDb));
     return defaultDb;
   }
   try {
     return JSON.parse(dbStr);
   } catch (e) {
     const defaultDb = getInitialDbState();
-    localStorage.setItem(DB_KEY, JSON.stringify(defaultDb));
+    setSavedDbString(JSON.stringify(defaultDb));
     return defaultDb;
   }
 };
 
-// Save back to localStorage
+// Save back to localStorage or in-memory fallback
 const saveMockDb = (db: MockDatabase) => {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  setSavedDbString(JSON.stringify(db));
 };
 
 // Helper to construct a standard mock response
@@ -233,7 +259,7 @@ const jsonResponse = (data: any, status: number = 200) => {
 };
 
 // Interceptor logic
-const originalFetch = window.fetch;
+let originalFetch = (typeof window !== 'undefined' ? window.fetch : null) || (typeof globalThis !== 'undefined' ? globalThis.fetch : null) || (() => { throw new Error('No native fetch found'); });
 let backendCheckResult: boolean | null = null;
 
 // Probe to check if Express backend is running and healthy
@@ -241,6 +267,17 @@ async function isBackendUnreachable(): Promise<boolean> {
   if (backendCheckResult !== null) {
     return backendCheckResult;
   }
+  
+  // Fast check: If we are on a known static hosting domain like vercel.app, netlify.app, github.io, we are always offline.
+  if (typeof window !== 'undefined') {
+    const hn = window.location.hostname;
+    if (hn.endsWith('.vercel.app') || hn.endsWith('.netlify.app') || hn.endsWith('.github.io') || hn.endsWith('.amplifyapp.com')) {
+      backendCheckResult = true;
+      console.log(`[LMS Gateway] Detected static hosting domain (${hn}). Instantly enabling In-Browser Database Fallback.`);
+      return true;
+    }
+  }
+
   try {
     const response = await originalFetch('/api/courses');
     const contentType = response.headers.get('content-type');
@@ -308,54 +345,47 @@ const customFetch = async function (input: RequestInfo | URL, init?: RequestInit
   }
 };
 
-// Attempt to overwrite fetch on the Window prototype to cleanly shadow/bypass the getter-only constraint.
-// In modern browsers and Proxy wrappers, fetch is a getter-only property on the window instance or its prototype.
-// Redefining it on Window.prototype or window.constructor.prototype allows all fetch calls to cleanly resolve to our custom interceptor.
-try {
-  if (typeof Window !== 'undefined' && Window.prototype) {
-    Object.defineProperty(Window.prototype, 'fetch', {
-      value: customFetch,
-      writable: true,
-      configurable: true
-    });
-  }
-} catch (e) {
-  console.warn('[LMS Gateway] Object.defineProperty on Window.prototype.fetch failed:', e);
-}
+// Attempt to overwrite fetch via a safe getter/setter model.
+// This ensures that any subsequent script doing `window.fetch = ...` triggers our setter instead of crashing with a "getter-only" TypeError.
+const currentFetch = customFetch;
 
-try {
-  if (typeof window !== 'undefined' && window.constructor && window.constructor.prototype) {
-    Object.defineProperty(window.constructor.prototype, 'fetch', {
-      value: customFetch,
-      writable: true,
-      configurable: true
+const defineFetchInterceptor = (target: any) => {
+  if (!target) return;
+  try {
+    Object.defineProperty(target, 'fetch', {
+      get() {
+        return currentFetch;
+      },
+      set(newFetch) {
+        if (newFetch && newFetch !== customFetch) {
+          console.log('[LMS Gateway] Intercepted external fetch assignment, updating delegation target.');
+          originalFetch = newFetch;
+        }
+      },
+      configurable: true,
+      enumerable: true
     });
+  } catch (e) {
+    console.warn('[LMS Gateway] Object.defineProperty on target failed, trying direct assign fallback:', e);
+    try {
+      target.fetch = customFetch;
+    } catch (errFallback) {
+      // Suppress any secondary errors
+    }
   }
-} catch (e) {
-  console.warn('[LMS Gateway] Object.defineProperty on window.constructor.prototype.fetch failed:', e);
-}
+};
 
-// As an additional backup, attempt to define on the window instance itself (wrapped safely, NEVER using direct assignment)
-try {
-  Object.defineProperty(window, 'fetch', {
-    value: customFetch,
-    writable: true,
-    configurable: true
-  });
-} catch (e) {
-  console.warn('[LMS Gateway] Object.defineProperty on window.fetch failed:', e);
-}
-
-try {
-  if (typeof globalThis !== 'undefined') {
-    Object.defineProperty(globalThis, 'fetch', {
-      value: customFetch,
-      writable: true,
-      configurable: true
-    });
+if (typeof window !== 'undefined') {
+  defineFetchInterceptor(window);
+  if (window.constructor && window.constructor.prototype) {
+    defineFetchInterceptor(window.constructor.prototype);
   }
-} catch (e) {
-  // Suppress secondary global fallback errors
+}
+if (typeof Window !== 'undefined' && Window.prototype) {
+  defineFetchInterceptor(Window.prototype);
+}
+if (typeof globalThis !== 'undefined') {
+  defineFetchInterceptor(globalThis);
 }
 
 // Simulated mock backend implementation
@@ -795,4 +825,8 @@ function handleMockRequest(url: string, init?: RequestInit): Response {
 
   // Catch all return empty JSON
   return jsonResponse({ error: 'Endpoint mock not mapped.' }, 404);
+}
+
+export function initFetchInterceptor() {
+  console.log('[LMS Gateway] Active: Self-Healing Gateway Interceptors loaded.');
 }
